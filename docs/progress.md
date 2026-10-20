@@ -247,3 +247,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Replaced accumulated gradient/bevel overrides with shared, resolution-independent SVG artwork for all browser knob styles and a dedicated knobs.css. Removed simulated chrome, radial highlights, glow clouds and deep shadows. Raised black now uses a flat charcoal cap, shallow rim and fine index.
 - Canvas controls and gallery thumbnails use exactly the same geometry and center of rotation. Controls resize proportionally; fixed-decimal readouts and detent/keyboard/pointer behavior are retained. Reference photos remain outside the repository.
 - All sixty existing automated tests pass after the artwork/DOM refactor. Browser material appearance still needs user review; automated state tests do not judge aesthetics. Native Max styling remains approximate and has not been redesigned in this browser-only pass.
+
+## Exported renderer host checks
+
+- User tested a fresh nine-file Morph export in Live with Augmented Strings, copied into a new stock Max Audio Effect and saved as Morph Knob Test.amxd.
+- User confirmed two-way Morph control, automation playback in the exported knob, and automation following after saving/reopening the Set and explicitly rebinding.
+- These reports cover one plugin and parameter. Disconnect, target deletion, capture export, panel sizing and native/browser visual parity remain unverified for this runtime. Earlier probe results do not substitute for these checks.

@@ -141,6 +141,12 @@
       "source": "user report in working session",
       "result": "Copied device loads from separate Desktop folder and follows second synth Morph after binding",
       "limits": "Same machine with original dependencies still available; clean-machine packaging unverified"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Fresh exported Morph knob runtime in a new Max Audio Effect supports two-way control, follows automation, and follows again after Set reopening and explicit rebinding",
+      "limits": "Augmented Strings Morph only; exported runtime disconnect, target deletion, capture writing and visual parity remain unverified"
     }
   ]
 }
