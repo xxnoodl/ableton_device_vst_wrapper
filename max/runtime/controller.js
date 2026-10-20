@@ -68,7 +68,7 @@ function captureselected(){
   }
   if(!parameters.length)throw new Error('No controllable ranges found');
   var capture={captureVersion:1,source:'live-exposed-parameters',pluginName:String(scalar(device,'name')),parameters:parameters};
-  lastCapture=JSON.stringify(capture);report('Captured '+parameters.length+' exposed parameters. Choose a NEW JSON filename with Save capture. No SDK IDs or factory defaults captured.');
+  lastCapture=JSON.stringify(capture);report('Captured '+parameters.length+' exposed parameters. File saving is paused after a host crash. No SDK IDs or factory defaults captured.');
  }catch(e){lastCapture=null;report('Capture error: '+e.message);}
 }
 function exportcapture(path){

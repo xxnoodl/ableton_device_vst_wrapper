@@ -1,5 +1,7 @@
 # Live-exposed parameter capture prototype
 
+Capture saving is currently paused: the user reported Max crashing when querying the Node writer with script running, after save requests produced no acknowledgement or file. Two Windows Max crash dumps were found; root cause is unresolved. New generated patches omit the Node writer and save controls. Existing saved devices retain their old objects and must not be used to repeat this test. Parameter capture itself reported two exposed parameters successfully. The writer instructions below describe the suspended prototype.
+
 This is a host-side alternative to direct SDK inspection, not a native VST scanner. It reads the selected PluginDevice's exposed parameters through LiveAPI. Only the earlier Morph probe has real-host verification; this new capture path has simulated-host tests and awaits actual execution.
 
 The generated controller.maxpat includes captureselected and a Save capture dialog path. In a licensed M4L device, select the intended plugin in Live, click captureselected, then use the bang beside Save capture to choose a NEW .json filename. A small Node-for-Max helper writes UTF-8 with the exclusive wx flag; existing files and symlinks are refused atomically. Nothing is saved automatically. Keep capture-file.cjs and capture-writer.cjs with the patch. The max-api module is supplied by Node for Max rather than installed from npm. Capture does not modify the current parameter binding.

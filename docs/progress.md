@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- Capture read reported two exposed parameters in Live. Saving produced no acknowledgement or Desktop JSON file. User reported Max crashing on script running; two Max crash dumps from this session exist. Root cause is unresolved. Removed Node writer and save controls from new generated patches pending investigation; existing .amxd devices are unchanged.
+
 - User tested a fresh nine-file Morph export in Live with Augmented Strings, copied into a new stock Max Audio Effect and saved as Morph Knob Test.amxd.
 - User confirmed two-way Morph control, automation playback in the exported knob, and automation following after saving/reopening the Set and explicitly rebinding.
 - These reports cover one plugin and parameter. Disconnect, target deletion, capture export, panel sizing and native/browser visual parity remain unverified for this runtime. Earlier probe results do not substitute for these checks.

@@ -19,13 +19,11 @@ export function runtimePatch(project: Project) {
  box('ready','newobj',[140,65,95,22],'live.thisdevice');box('read','message',[140,110,170,22],'read project.runtime.json');line('ready',0,'read',0);
  box('bind','message',[330,65,85,22],'bindselected',{presentation:1,presentation_rect:[8,8,85,22]});
  box('capture','message',[560,65,110,22],'captureselected',{presentation:1,presentation_rect:[205,8,110,22]});
- box('save-capture','message',[680,65,85,22],'bang',{presentation:1,presentation_rect:[330,8,45,22]});box('dialog','newobj',[680,110,110,22],'savedialog');box('capture-path','newobj',[680,155,145,22],'prepend exportcapture');line('save-capture',0,'dialog',0);line('dialog',0,'capture-path',0);line('capture-path',0,'defer',0);
- box('capture-label','comment',[670,35,110,22],'Save capture to JSON',{presentation:1,presentation_rect:[382,8,145,22]});
+ box('capture-label','comment',[560,110,230,44],'Capture saving paused after a host crash. No Node writer is started.',{presentation:1,presentation_rect:[330,8,280,30]});
  box('disconnect','message',[430,65,85,22],'disconnect',{presentation:1,presentation_rect:[105,8,85,22]});
  box('defer','newobj',[330,160,70,22],'deferlow');
  box('controller','newobj',[330,205,125,22],'js controller.js');
  box('ui','jsui',[20,280,project.panel.width,project.panel.height+36],undefined,{filename:'renderer.js',numinlets:1,numoutlets:1,presentation:1,presentation_rect:[0,42,project.panel.width,project.panel.height+36]});
- box('capture-writer','newobj',[480,245,315,22],'node.script capture-writer.cjs @autostart 1 @defer 1');line('controller',2,'capture-writer',0);line('capture-writer',0,'ui',0);line('capture-writer',0,'console',0);
  box('console','newobj',[500,205,130,22],'print Studio-runtime');
  for(const id of ['read','bind','disconnect','capture'])line(id,0,'defer',0);
  line('defer',0,'controller',0);line('controller',0,'ui',0);line('controller',1,'console',0);line('ui',0,'defer',0);
