@@ -27,7 +27,8 @@
     "automationWriteOverride": "pending",
     "explicitRebind": "passed-user-reported",
     "automaticRestoration": "unsupported",
-    "trackSelectionChange": "passed-user-reported"
+    "trackSelectionChange": "passed-user-reported",
+    "trackMove": "passed-user-reported"
   },
   "evidence": [
     {
@@ -53,6 +54,12 @@
       "source": "user report in working session",
       "result": "Morph observation continues after selecting another track without rebinding",
       "limits": "Structural moves, duplicates and target deletion untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Morph observation survives reordering its track without rebinding",
+      "limits": "Device moves, duplication and deletion untested; no automatic restoration after reload"
     }
   ]
 }

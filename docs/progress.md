@@ -45,3 +45,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 - User confirmed the connected Max number box continues following Morph automation after selecting a different track, without rebinding.
 - This checks selection changes only. Moving, duplicating or deleting tracks/devices remains untested.
+
+## Track move check
+
+- User moved the Augmented Strings track above or below another track and confirmed Max still follows Morph during playback without rebinding.
+- This verifies the existing connection survives track reorder in this session. Device moves, duplication and deletion remain untested.
