@@ -1,0 +1,34 @@
+{
+  "features": [
+    {
+      "name": "Live parameter probe",
+      "status": "prototype",
+      "evidence": "max/renderer/parameter-probe.js; tests/probe.test.cjs"
+    },
+    {
+      "name": "Real VST3 bidirectional control",
+      "status": "partially verified",
+      "evidence": "User confirmed two-way Augmented Strings Morph control, 2026-10-20; docs/progress.md. Automation and reload pending."
+    },
+    {
+      "name": "Automatic target restoration",
+      "status": "unsupported",
+      "evidence": "explicit bind required"
+    },
+    {
+      "name": "Desktop editor",
+      "status": "unsupported",
+      "evidence": "not implemented; M0 gate"
+    },
+    {
+      "name": "Native plugin inspection",
+      "status": "unsupported",
+      "evidence": "not implemented"
+    },
+    {
+      "name": "Plugin telemetry",
+      "status": "unsupported",
+      "evidence": "no telemetry source"
+    }
+  ]
+}

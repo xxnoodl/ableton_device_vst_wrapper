@@ -1,0 +1,12 @@
+node_modules/
+dist/
+target/
+.env
+.env.*
+!.env.example
+*.log
+*.amxd
+*.als
+*.bak
+.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+﻿
+> vst-m4l-studio@0.0.1 test
+> node --test tests/*.test.cjs
+
+✔ explicit path, initial read, bounded write and observer update (3.7539ms)
+✔ invalid paths and nonfinite values cannot write (1.1582ms)
+✔ missing and disabled targets fail visibly (4.4956ms)
+✔ rebind detaches observer and ignores late callbacks (1.5486ms)
+✔ quantized values round and deleted targets reject writes (1.138ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.8836

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "host": {
+    "live": "12.3.2",
+    "max": "9.0.9",
+    "os": "Windows build 26200 x64",
+    "license": "unverified"
+  },
+  "plugin": {
+    "vendor": "Arturia",
+    "name": "Augmented Strings",
+    "format": "VST3",
+    "version": null,
+    "fingerprint": null,
+    "parameter": "Morph"
+  },
+  "checks": {
+    "read": "passed-user-reported",
+    "write": "passed-user-reported",
+    "observe": "passed-user-reported",
+    "automation": "pending",
+    "reload": "pending",
+    "targetSelection": "pending",
+    "deviceMove": "pending",
+    "export": "save-reported-reopen-pending"
+  },
+  "evidence": [
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Morph updates Max; editing Max value updates synth; device save reported successful",
+      "limits": "No automation or reopen test; exact plugin version and exported file location pending"
+    }
+  ]
+}
