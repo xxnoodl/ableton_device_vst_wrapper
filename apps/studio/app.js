@@ -1,3 +1,4 @@
+import {createKnob} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject,moveWidget,normalize} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
 const $=id=>document.getElementById(id);
@@ -26,6 +27,7 @@ function render(){
 }
 function renderWidgets(){
  $('widgets').replaceChildren();
+ const updates=new Map();
  for(const w of project.widgets){
   const p=project.parameters.find(p=>p.id===w.parameterId);
   if(values[p.id]===undefined)values[p.id]=p.defaultValue;
@@ -48,24 +50,23 @@ function renderWidgets(){
    header.onpointerup=finish;header.onpointercancel=()=>{header.onpointermove=null;renderWidgets();};
   };
   el.dataset.id=w.id;el.append(header);
-  let knob;
-  if(w.type==='knob'){knob=document.createElement('div');knob.className='knob';knob.setAttribute('aria-hidden','true');knob.append(document.createElement('span'));el.append(knob);}
-  const input=document.createElement('input');input.type='range';input.min=p.min;input.max=p.max;input.step=(p.max-p.min)/1000;input.value=values[p.id];input.setAttribute('aria-label',w.label+' demo value');
-  const output=document.createElement('output');
-  const draw=()=>{output.textContent=Number(values[p.id].toFixed(3))+' '+p.unit;if(knob)knob.style.setProperty('--angle',normalize(values[p.id],p)*270+'deg');};
-  input.oninput=()=>{values[p.id]=Number(input.value);draw();};draw();el.append(input,output);$('widgets').append(el);
+  const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,onSelect:select,onChange:value=>{
+   values[p.id]=value;for(const update of updates.get(p.id)||[])update(value);
+  }});
+  if(!updates.has(p.id))updates.set(p.id,[]);updates.get(p.id).push(control.update);
+  el.append(control.element);$('widgets').append(el);
  }
 }
 function renderProperties(){
  const w=project.widgets.find(w=>w.id===selected);$('properties').inert=!w;
  $('selection').textContent=w?w.label:'Select a control';
- for(const key of ['label','type','x','y','width','height'])$(key).value=w?w[key]:'';
+ for(const key of ['label','x','y','width','height'])$(key).value=w?w[key]:'';
  if(!w){$('binding').textContent='Select a widget to inspect its parameter.';return;}
  const p=project.parameters.find(p=>p.id===w.parameterId);
  $('binding').textContent=p.name+' ? '+p.min+' to '+p.max+' '+p.unit+' ? '+p.evidence+' metadata. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
 }
 $('properties').onsubmit=event=>{event.preventDefault();run(()=>{
- const patch={label:$('label').value,type:$('type').value};for(const key of ['x','y','width','height'])patch[key]=Number($(key).value);
+ const patch={label:$('label').value,type:'knob'};for(const key of ['x','y','width','height'])patch[key]=Number($(key).value);
  change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,...patch}:w)});status('Control updated.');
 });};
 $('undo').onclick=()=>run(()=>{if(!past.length)return;future.push(serializeProject(project));project=parseProject(past.pop());render();});

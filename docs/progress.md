@@ -136,3 +136,11 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Native inspection, persistent Live mappings, runtime schema export and full IR/migrations remain next milestones. Unsupported versions fail explicitly; no historical migration exists yet.
 
 - Local server smoke check passed: studio, JS, stripped schema/store modules and fixture return 200; /.git/config and /package.json return 404. Server listens on 127.0.0.1:5173. Browser interactions have not yet been visually inspected.
+
+## Interactive knobs
+
+- User confirmed the initial browser arrangement controls work and requested knobs instead of sliders.
+- Replaced range inputs with pointer-captured vertical knob dragging, incremental Shift fine adjustment, keyboard arrows/Page/Home/End, focused-wheel adjustments, double-click default reset and numeric value entry. Label dragging remains layout movement.
+- Removed the fader selector. Legacy slider project entries remain readable and render as knobs; saving edited properties changes that widget to knob. Duplicate widgets sharing a parameter update together.
+- Fourteen automated tests pass, including drag scaling/clamping and keyboard endpoint/fine steps. Pointer/keyboard DOM interactions still need user/browser verification.
+- Next vertical slice: render an exported knob layout with Max native drawing, initially using the proven Morph binding. General parameter discovery remains separate pending work.

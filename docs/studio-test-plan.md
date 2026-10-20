@@ -14,3 +14,5 @@ Browser manual checks (pending):
 6. Tab through controls, test focus contrast, zoom to 200%, resize the window and check overflow access. Verify reduced-motion setting creates no required animation.
 
 Do not mark browser checks complete without performing them. Clean-machine Max device packaging, native inspector isolation, runtime mapping and pixel parity have separate future test plans.
+
+Interactive knob checks (pending browser verification): drag vertically, toggle Shift mid-drag without value jumps, release outside the knob, verify touch/pointer cancellation, double-click reset, arrow/fine/Page/Home/End keys, focused-only wheel behavior, precise numeric entry and empty/invalid input recovery. Moving the header must affect layout only. Imported legacy faders should render as knobs.
