@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed independent reverse observation for Morph and Motion and simultaneous playback of separate automation curves in both Max knobs. Two-control panel visibility in Live remains to be checked.
+
 - User loaded the two-knob Morph/Motion export into Morph Motion Test.amxd and confirmed each Max knob changes only its intended synth parameter. Reverse observation and simultaneous automation for this layout remain to be checked.
 
 - Capture console readout confirmed Motion range 0..1, current 0, quantized false. Added a two-control Morph/Motion project and generated a compact export without Node for Max. Motion's reset baseline is the captured current value, not a claimed factory default. Two-control host binding and isolation await user verification.
