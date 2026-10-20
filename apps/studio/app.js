@@ -51,7 +51,7 @@ function renderWidgets(){
    header.onpointerup=finish;header.onpointercancel=()=>{header.onpointermove=null;renderWidgets();};
   };
   el.dataset.id=w.id;el.append(header);
-  const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,design:w.design,accent:w.accent,onSelect:select,onChange:value=>{
+  const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,design:w.design,accent:w.accent,stepCount:w.stepCount,stepValues:w.stepValues,onSelect:select,onChange:value=>{
    values[p.id]=value;for(const update of updates.get(p.id)||[])update(value);
   }});
   if(!updates.has(p.id))updates.set(p.id,[]);updates.get(p.id).push(control.update);
@@ -62,6 +62,7 @@ function renderProperties(){
  const w=project.widgets.find(w=>w.id===selected);$('properties').inert=!w;
  $('selection').textContent=w?w.label:'Select a control';
  for(const key of ['label','x','y','width','height'])$(key).value=w?w[key]:'';
+ $('step-mode').value=w?.stepValues.length?'custom':w?.stepCount?'equal':'continuous';$('step-count').value=w?.stepCount||8;$('step-values').value=w?.stepValues.join(', ')||'';updateStepFields();
  $('designs').replaceChildren();$('accent').value=w?w.accent:'mint';
  if(!w){$('binding').textContent='Select a widget to inspect its parameter.';return;}
  for(const design of designs){
@@ -75,8 +76,10 @@ function renderProperties(){
  $('binding').textContent=p.name+' ? '+p.min+' to '+p.max+' '+p.unit+' ? '+p.evidence+' metadata. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
 }
 $('accent').onchange=()=>run(()=>{change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,accent:$('accent').value}:w)});$('accent').focus();});
+function updateStepFields(){const mode=$('step-mode').value;$('step-count-row').hidden=mode!=='equal';$('step-values-row').hidden=mode!=='custom';$('step-count').disabled=mode!=='equal';$('step-values').disabled=mode!=='custom';}
+$('step-mode').onchange=updateStepFields;
 $('properties').onsubmit=event=>{event.preventDefault();run(()=>{
- const patch={label:$('label').value,type:'knob'};for(const key of ['x','y','width','height'])patch[key]=Number($(key).value);
+ const mode=$('step-mode').value;const patch={label:$('label').value,type:'knob',stepCount:mode==='equal'?Number($('step-count').value):0,stepValues:mode==='custom'?$('step-values').value.split(',').map(s=>s.trim()?Number(s):NaN):[]};for(const key of ['x','y','width','height'])patch[key]=Number($(key).value);
  change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,...patch}:w)});status('Control updated.');
 });};
 $('undo').onclick=()=>run(()=>{if(!past.length)return;future.push(serializeProject(project));project=parseProject(past.pop());render();});

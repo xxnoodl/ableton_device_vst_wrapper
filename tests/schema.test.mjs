@@ -24,6 +24,7 @@ test('local saves validate before mutation and preserve previous version as back
 
 test('design choices persist and older projects receive compatible defaults',()=>{
  const raw=JSON.parse(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
+ for(const field of ['design','accent','stepCount','stepValues'])delete raw.widgets[0][field];
  assert.equal(validateProject(raw).widgets[0].design,'studio');
  for(const design of knobDesigns){const project=sample();project.widgets[0].design=design;assert.equal(parseProject(serializeProject(project)).widgets[0].design,design);}
  const p=sample();p.widgets[0].design='selector';p.widgets[0].accent='amber';
@@ -31,4 +32,13 @@ test('design choices persist and older projects receive compatible defaults',()=
  assert.equal(parseProject(serializeProject(p)).widgets[0].accent,'amber');
  p.widgets[0].design='url(evil)';assert.throws(()=>validateProject(p));
  p.widgets[0].design='studio';p.widgets[0].accent='#arbitrary';assert.throws(()=>validateProject(p));
+});
+
+test('step configuration round trips and rejects contradictory or invalid stops',()=>{
+ const p=parseProject(readFileSync(new URL('../fixtures/compressor.project.json',import.meta.url),'utf8'));
+ const ratio=p.widgets.find(w=>w.parameterId==='ratio');ratio.stepValues=[4,8,10];
+ assert.deepEqual(parseProject(serializeProject(p)).widgets.find(w=>w.parameterId==='ratio').stepValues,[4,8,10]);
+ for(const mutate of [w=>w.stepValues=[8,4],w=>w.stepValues=[4,4],w=>w.stepValues=[-1,10],w=>w.stepCount=3,w=>{w.stepValues=[];w.stepCount=1},w=>{w.stepValues=[];w.stepCount=2.5}]){
+  const copy=structuredClone(p);mutate(copy.widgets.find(w=>w.parameterId==='ratio'));assert.throws(()=>validateProject(copy));
+ }
 });

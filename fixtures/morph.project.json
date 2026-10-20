@@ -34,7 +34,9 @@
       "x": 240,
       "y": 80,
       "width": 120,
-      "height": 160
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint"
     }
   ],
   "panel": {

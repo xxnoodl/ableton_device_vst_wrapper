@@ -70,7 +70,9 @@
       "x": 16,
       "y": 80,
       "width": 112,
-      "height": 160
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint"
     },
     {
       "id": "ratio-control",
@@ -80,7 +82,15 @@
       "x": 136,
       "y": 80,
       "width": 112,
-      "height": 160
+      "height": 160,
+      "design": "selector",
+      "accent": "amber",
+      "stepCount": 0,
+      "stepValues": [
+        4,
+        8,
+        10
+      ]
     },
     {
       "id": "attack-control",
@@ -90,7 +100,9 @@
       "x": 256,
       "y": 80,
       "width": 112,
-      "height": 160
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint"
     },
     {
       "id": "release-control",
@@ -100,7 +112,9 @@
       "x": 376,
       "y": 80,
       "width": 112,
-      "height": 160
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint"
     },
     {
       "id": "mix-control",
@@ -110,7 +124,9 @@
       "x": 496,
       "y": 80,
       "width": 112,
-      "height": 160
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint"
     }
   ],
   "panel": {

@@ -51,3 +51,22 @@
 .design-choice .design-monitor{padding:3px;background:linear-gradient(150deg,#a9b2b1,#17201f 55%,#070c0c);box-shadow:0 5px 6px #0007,-2px -3px 6px #c7dfd522}.design-choice .design-monitor .knob-face i{width:1px;height:7px;top:4px;transform-origin:50% 15px;background:var(--accent)}
 .design-gallery{max-height:335px;overflow-y:auto;padding:3px;scrollbar-width:thin;scrollbar-color:#58635b #17191d}.design-choice:has(.knob-endpoints){gap:16px;padding-bottom:11px;min-height:96px}
 #panel.light .design-pointer,#panel.light .design-recessed,#panel.light .design-gloss{--scale:#3b4841}
+
+/* Rotating chickenhead grip and a flat cap on an elevated, curved plinth. */
+.knob-control .design-selector,.design-choice .design-selector{padding:4px;background:radial-gradient(ellipse at 42% 30%,#313739 0,#080b0c 40%,#171c1e 64%,#090b0c 76%,#555b5d 86%,#101314 98%);box-shadow:0 4px 6px #0009,inset 0 1px 2px #8d96974d}
+.design-selector .knob-face{background:radial-gradient(ellipse at 40% 30%,#3d4345,#101314 60%,#030505 85%);box-shadow:inset 0 0 3px #000,0 0 0 1px #121719}
+.design-selector .knob-face i{width:22px;height:84px;top:calc(50% - 42px);transform-origin:50% 42px;background:linear-gradient(90deg,#090b0c,#34393a 12%,#171b1c 24%,#101314 80%,#020303);border:1px solid #42494b;border-radius:2px;clip-path:polygon(24% 0,76% 0,100% 100%,0 100%);filter:drop-shadow(3px 4px 2px #0009);box-shadow:inset 1px 0 1px #87909255}
+.design-selector .knob-face i:before{left:7px;right:7px;top:5px;height:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 55%,#000),var(--accent));box-shadow:inset 0 0 1px #000;border-radius:2px}
+.design-selector .knob-scale{inset:-24%;width:148%;height:148%;--scale:#9ba2a7}.design-selector .knob-scale line{stroke-width:1.8}
+.design-choice .design-selector .knob-face i{width:15px;height:56px;top:calc(50% - 28px);transform-origin:50% 28px}.design-choice .design-selector .knob-face i:before{left:5px;right:5px;top:4px;height:8px}
+.knob-control .design-monitor{position:relative;background:transparent;border:0;padding:0;box-shadow:none;isolation:isolate;margin-top:5px;margin-bottom:10px}
+.design-monitor:before{content:'';position:absolute;inset:-11%;z-index:-1;border-radius:50%;background:radial-gradient(ellipse at 45% 37%,#c5d1cd22 0,#d6e4de55 37%,#8a979344 51%,#11191877 65%,transparent 73%);box-shadow:none;transform:translateY(3px);pointer-events:none}
+.knob-control .design-monitor .knob-face{position:absolute;inset:2%;width:96%;height:96%;border-radius:50%;background:radial-gradient(ellipse at 50% 32%,#101313,#080b0b 80%);border:1px solid #3a4442;box-shadow:inset 0 1px 1px #75827b44,0 2px 0 #060909,0 5px 0 #151c1a,0 8px 4px #0009,0 12px 10px #0005}
+.knob-control .design-monitor .knob-face i{width:1px;height:calc(var(--monitor-size,72px)*.24);top:5%;transform-origin:50% calc(var(--monitor-size,72px)*.428 - 1px);background:color-mix(in srgb,var(--accent) 65%,#1c2a25);box-shadow:0 0 3px color-mix(in srgb,var(--accent) 32%,transparent);border-radius:1px}
+.design-choice .design-monitor{padding:0;background:transparent;box-shadow:none;isolation:isolate}.design-choice .design-monitor .knob-face{position:absolute;inset:2%;width:96%;height:96%;margin:0;background:#0b0f0e;border:1px solid #424d47;box-shadow:inset 0 1px 1px #64746755,0 3px 0 #111916,0 5px 3px #0009}
+.design-choice .design-monitor .knob-face i{width:1px;height:10px;top:5%;transform-origin:50% 18px;background:var(--accent);box-shadow:0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+#panel.light .design-monitor:before{background:radial-gradient(ellipse at 43% 35%,#f7fffddd 0,#f0f8f3aa 32%,#b7c3ba99 51%,#31403966 65%,transparent 75%)}
+#panel.light .design-selector .knob-scale{--scale:#35473d}
+#step-values-row small{display:block;color:#9fa9a2;line-height:1.5;margin-top:6px;font-size:10px}
+
+[hidden]{display:none!important}

@@ -165,3 +165,12 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Pointer/recessed/gloss include scale ticks and min/max markings; their default mint palette uses a warm pointer, with explicit accent overrides available. Monitor uses a matte black face, fine indicator and a dial diameter that grows with widget bounds.
 - The picker scrolls to accommodate all ten choices. Existing interaction, centered readout and save behavior retained.
 - All fifteen tests pass; appearance round-trip coverage now iterates every registered design. Visual browser verification remains pending.
+
+## Chickenhead and raised black revision
+
+- User clarified the preferred forms: a projecting chickenhead handle and a flat black cap elevated on a curved base with a fine neon indicator. Reworked Selector as Chickenhead and Monitor as Raised black.
+- Removed the three disliked recent designs from the picker; retained their identifiers for existing project compatibility. The original other styles remain available. New Morph/compressor samples emphasize the two revised designs.
+- Added per-widget continuous, equally spaced (2?128 positions), or custom increasing values. Custom values are restricted to the parameter range, validated and stored in exported JSON; conflicting settings fail validation.
+- All input methods snap to configured stops. Pointer motion accumulates before snapping; keyboard/wheel advance discrete positions. Custom values use equal angular spacing. Settings apply to preview only and do not establish actual plugin enum semantics.
+- Synthetic compressor Ratio demonstrates 4, 8, 10. No real host bindings or plugin files changed.
+- Eighteen automated tests pass, including allowed-value isolation, endpoint behavior, fine-motion accumulation, step validation and serialization. Revised visuals await user confirmation.
