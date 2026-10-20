@@ -46,7 +46,7 @@ function renderWidgets(){
   if(values[p.id]===undefined)values[p.id]=p.defaultValue;
   const el=document.createElement('section');el.className='widget'+(selectedIds.has(w.id)?' selected':'');
   Object.assign(el.style,{left:w.x+'px',top:w.y+'px',width:w.width+'px',height:w.height+'px'});
-  el.style.setProperty('--monitor-size',Math.max(48,Math.min(160,w.width-30,w.height-84))+'px');
+  el.style.setProperty('--dial-size',Math.max(36,Math.min(160,w.width-12,w.height-72))+'px');
   const header=document.createElement('button');header.className='widget-header';header.textContent=w.label;header.title='Drag to move; arrow keys move by one grid step';
   const select=(extend=false)=>{selected=w.id;if(extend){const ids=selection(project,[w.id]).map(w=>w.id);const remove=ids.every(id=>selectedIds.has(id));for(const id of ids)remove?selectedIds.delete(id):selectedIds.add(id);}else if(!selectedIds.has(w.id))selectedIds=new Set(selection(project,[w.id]).map(w=>w.id));
    if(!selectedIds.has(selected))selected=[...selectedIds][0]||null;for(const child of $('widgets').children)child.classList.toggle('selected',selectedIds.has(child.dataset.id));renderProperties();};
@@ -74,7 +74,7 @@ function renderWidgets(){
   const resize=document.createElement('button');resize.className='resize-handle';resize.type='button';resize.setAttribute('aria-label','Resize '+w.label);resize.title='Drag to resize; arrow keys resize by grid';resize.disabled=w.locked;
   resize.onkeydown=event=>{const delta={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[event.key];if(!delta)return;event.preventDefault();change(resizeWidget(project,w.id,w.width+delta[0]*project.panel.grid,w.height+delta[1]*project.panel.grid));};
   resize.onpointerdown=event=>{if(event.button!==0)return;event.preventDefault();event.stopPropagation();select();resize.setPointerCapture(event.pointerId);const x=event.clientX,y=event.clientY,start=project;let pending=start;
-   resize.onpointermove=move=>{pending=resizeWidget(start,w.id,w.width+(move.clientX-x)/zoom,w.height+(move.clientY-y)/zoom);const next=pending.widgets.find(i=>i.id===w.id);el.style.width=next.width+'px';el.style.height=next.height+'px';el.style.setProperty('--monitor-size',Math.max(48,Math.min(160,next.width-30,next.height-84))+'px');};
+   resize.onpointermove=move=>{pending=resizeWidget(start,w.id,w.width+(move.clientX-x)/zoom,w.height+(move.clientY-y)/zoom);const next=pending.widgets.find(i=>i.id===w.id);el.style.width=next.width+'px';el.style.height=next.height+'px';el.style.setProperty('--dial-size',Math.max(36,Math.min(160,next.width-12,next.height-72))+'px');};
    resize.onpointerup=()=>{resize.onpointermove=null;change(pending);};resize.onpointercancel=()=>{resize.onpointermove=null;renderWidgets();};
   };
   el.append(resize);$('widgets').append(el);

@@ -13,11 +13,11 @@ export function keyValue(value, key, min, max, fine = false) {
  return key in deltas ? clamp(value + deltas[key], min, max) : null;
 }
 export const designs=[
- {id:'selector',name:'Chickenhead',description:'Raised rotating grip with a colored tip'},
- {id:'monitor',name:'Raised black',description:'Flat black dial on a softly elevated base'},
+ {id:'selector',name:'Chickenhead',description:'Matte chickenhead grip with a fine index'},
+ {id:'monitor',name:'Raised black',description:'Flat charcoal cap with a shallow mounting rim'},
  {id:'studio',name:'Studio',description:'Soft face and continuous ring'},
  {id:'graphite',name:'Graphite',description:'Dark hardware face and fine scale'},
- {id:'silver',name:'Alloy',description:'Machined silver with a fine scale'},
+ {id:'silver',name:'Alloy',description:'Satin alloy face with a fine scale'},
  {id:'halo',name:'Halo',description:'Illuminated arc'},
  {id:'stepped',name:'LED scale',description:'Segmented light ring'}
 ];
@@ -42,25 +42,67 @@ export function steppedKey(value,key,min,max,stops=[],fine=false){
  if(key==='Home')return stops[0];if(key==='End')return stops.at(-1);
  return key in delta ? stops[Math.max(0,Math.min(stops.length-1,i+delta[key]))] : null;
 }
+// One vector geometry for both canvas controls and picker thumbnails.
+// Shapes use flat finishes and a single shallow base edge, not simulated chrome.
 export function createDial(design='studio',accent='mint',normalized=.5,stopCount=0){
  const dial=document.createElement('div');dial.className='knob design-'+design+' accent-'+accent;
- if(['pointer','recessed','gloss'].includes(design)){const endpoints=document.createElement('div');endpoints.className='knob-endpoints';endpoints.setAttribute('aria-hidden','true');const min=document.createElement('b');min.textContent='MIN';const max=document.createElement('b');max.textContent='MAX';endpoints.append(min,max);dial.append(endpoints);}
- const scale=document.createElementNS('http://www.w3.org/2000/svg','svg');scale.classList.add('knob-scale');scale.setAttribute('viewBox','0 0 100 100');scale.setAttribute('aria-hidden','true');
+ const ns='http://www.w3.org/2000/svg';
+ const element=(type,attrs={})=>{const node=document.createElementNS(ns,type);for(const [key,value]of Object.entries(attrs))node.setAttribute(key,value);return node;};
+ const art=element('svg',{viewBox:'0 0 100 100',class:'knob-art','aria-hidden':'true',focusable:'false'});
+ const colors={mint:'#bcc9bd',amber:'#c5a16c',cyan:'#7faeb9',red:'#b87870'};
+ const color=colors[accent]||colors.mint;
+ const mode=['pointer','recessed','gloss'].includes(design)?'graphite':design;
+ const point=(angle,r)=>{const a=angle*Math.PI/180;return [50+Math.sin(a)*r,50-Math.cos(a)*r];};
+ const circle=(parent,x,y,r,fill,stroke='none',width=1)=>parent.append(element('circle',{cx:x,cy:y,r,fill,stroke,'stroke-width':width}));
+ const line=(parent,x1,y1,x2,y2,stroke,width=1)=>parent.append(element('line',{x1,y1,x2,y2,stroke,'stroke-width':width,'stroke-linecap':'round'}));
+ const arc=(position,r)=>{if(position<=0)return '';const start=point(-135,r),end=point(-135+270*position,r);return 'M '+start.join(' ')+' A '+r+' '+r+' 0 '+(position>2/3?1:0)+' 1 '+end.join(' ');};
  const ticks=[];const divisions=stopCount>=2&&stopCount<=64?stopCount-1:24;
- for(let i=0;i<=divisions;i++){
-  const angle=(-135+i*270/divisions)*Math.PI/180;
-  const tick=document.createElementNS(scale.namespaceURI,'line');
-  const inner=i%6===0?39:42;
-  tick.setAttribute('x1',50+Math.sin(angle)*inner);tick.setAttribute('y1',50-Math.cos(angle)*inner);
-  tick.setAttribute('x2',50+Math.sin(angle)*47);tick.setAttribute('y2',50-Math.cos(angle)*47);
-  scale.append(tick);ticks.push(tick);
+ if(['selector','graphite','silver','stepped'].includes(mode)){
+  const scale=element('g',{class:'knob-scale'});
+  for(let i=0;i<=divisions;i++){
+   const major=stopCount>=2||i%6===0,start=point(-135+i*270/divisions,major?41:43),end=point(-135+i*270/divisions,46);
+   const tick=element('line',{x1:start[0],y1:start[1],x2:end[0],y2:end[1],stroke:'#677277','stroke-width':mode==='stepped'?2:major?1.2:.85,'stroke-linecap':'round'});
+   scale.append(tick);ticks.push(tick);
+  }
+  art.append(scale);
  }
- const face=document.createElement('span');face.className='knob-face';const indicator=document.createElement('i');face.append(indicator);dial.append(scale,face);
+ let progress=null;
+ if(mode==='studio'||mode==='halo'){
+  art.append(element('path',{d:arc(1,38),fill:'none',stroke:'#3a4448','stroke-width':mode==='halo'?2:1.5,'stroke-linecap':'round'}));
+  progress=element('path',{fill:'none',stroke:color,'stroke-width':mode==='halo'?2:1.5,'stroke-linecap':'round'});art.append(progress);
+ }
+ const rotor=element('g',{class:'knob-rotor'});
+ if(mode==='selector'){
+  // Top view: pointed nose, narrow waist, broad rounded rear grip.
+  circle(art,50,52,29,'#000000', 'none');
+  circle(art,50,50,28,'#1b2022','#0b0e0f',1);
+  circle(art,50,50,24.5,'#24292b','#343b3e',.6);
+  rotor.append(element('path',{d:'M50 9 C53 9 56 15 57 21 L59 30 L69 75 Q72 87 64 88 L36 88 Q28 87 31 75 L41 30 L43 21 C44 15 47 9 50 9Z',fill:'#252a2c',stroke:'#0d1112','stroke-width':1.2}));
+  rotor.append(element('path',{d:'M50 11 C47 14 46 19 45 24 L35 76 Q33 83 36 85',fill:'none',stroke:'#4a5255','stroke-width':.8,'stroke-linecap':'round'}));
+  line(rotor,50,16,50,35,color,1.6);
+  line(rotor,37,84,63,84,'#171c1e',1);
+ }else if(mode==='monitor'){
+  // A small base rim and offset contact shadow suggest elevation, without a glossy dome.
+  circle(art,50,53,32,'#000000');
+  circle(art,50,51.5,32,'#292f31','#161c1e',.8);
+  circle(art,50,49.5,30.5,'#151a1c','#515a5e',.65);
+  art.append(element('path',{d:'M24 34 A30.5 30.5 0 0 1 71 27',fill:'none',stroke:'#788184','stroke-width':.5,opacity:.45}));
+  line(rotor,50,23,50,37,color,.9);
+ }else if(mode==='silver'){
+  circle(art,50,52,29,'#101516');circle(art,50,50,29,'#666f72','#a5adae',.6);circle(art,50,49,26.5,'#b7bdbb','#c8cecb',.6);
+  line(rotor,50,27,50,40,'#303a3c',1.6);
+ }else{
+  circle(art,50,52,29,'#101516');circle(art,50,50,29,mode==='graphite'?'#242b2e':'#1e2528','#4b565b',.7);
+  if(mode==='halo')circle(rotor,50,27,1.7,color);
+  else line(rotor,50,27,50,39,color,mode==='graphite'?1.5:1.2);
+ }
+ art.append(rotor);dial.append(art);
  let previous=-1;
  const update=position=>{
-  dial.style.setProperty('--angle',position*270+'deg');indicator.style.transform='translateX(-50%) rotate('+(-135+position*270)+'deg)';
+  position=Math.max(0,Math.min(1,position));rotor.setAttribute('transform','rotate('+(-135+position*270)+' 50 50)');
+  if(progress)progress.setAttribute('d',arc(position,38));
   const active=Math.round(position*divisions);
-  if(active!==previous){ticks.forEach((tick,i)=>tick.classList.toggle('lit',i<=active));previous=active;}
+  if(mode==='stepped'&&active!==previous){ticks.forEach((tick,i)=>tick.setAttribute('stroke',i<=active?color:'#414d52'));previous=active;}
  };
  update(normalized);return {dial,update};
 }

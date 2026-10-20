@@ -240,3 +240,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Generated the current nine-file review source folder and ZIP under ignored artifacts/review-runtime. Independently checked ZIP CRCs with Python. Existing devices, presets and earlier exports were preserved.
 - Added compatibility, troubleshooting, extension, dependency/license and test-evidence notes. Status distinguishes the original user-tested probe from new simulated-host prototypes.
 - Remaining boundaries are in testing.md and roadmap.md. No GitHub push, external messages, SDK distribution, plugin binary loading or host-session changes were performed during unattended work.
+
+## Flat vector knob revision
+
+- Inspected four additional Desktop product photos supplied by the user. Corrected the chickenhead silhouette to a rounded beak, narrow waist and broad rear grip over a mounting disk.
+- Replaced accumulated gradient/bevel overrides with shared, resolution-independent SVG artwork for all browser knob styles and a dedicated knobs.css. Removed simulated chrome, radial highlights, glow clouds and deep shadows. Raised black now uses a flat charcoal cap, shallow rim and fine index.
+- Canvas controls and gallery thumbnails use exactly the same geometry and center of rotation. Controls resize proportionally; fixed-decimal readouts and detent/keyboard/pointer behavior are retained. Reference photos remain outside the repository.
+- All sixty existing automated tests pass after the artwork/DOM refactor. Browser material appearance still needs user review; automated state tests do not judge aesthetics. Native Max styling remains approximate and has not been redesigned in this browser-only pass.
