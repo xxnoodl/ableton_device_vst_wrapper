@@ -44,14 +44,42 @@ export function exportFiles(input:Project,sources:Record<string,string>):Record<
  for(const file of runtimeFiles){if(typeof sources[file]!=='string'||!sources[file].trim())throw new Error('Missing runtime source: '+file);files[file]=sources[file];}
  return files;
 }
+// Inspect a locally supplied, Max-saved shell. Never synthesize or rewrite its container.
+export function validateDeviceTemplate(bytes:Uint8Array){
+ if(bytes.byteLength<33||bytes.byteLength>1_000_000)throw new Error('Invalid device template size');
+ const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),decode=new TextDecoder('utf-8',{fatal:true});
+ if(decode.decode(bytes.subarray(0,4))!=='ampf'||decode.decode(bytes.subarray(8,12))!=='aaaa'||decode.decode(bytes.subarray(12,16))!=='meta'||decode.decode(bytes.subarray(24,28))!=='ptch'||view.getUint32(4,true)!==4||view.getUint32(16,true)!==4||view.getUint32(20,true)!==1||view.getUint32(28,true)!==bytes.byteLength-32||bytes[bytes.length-1]!==0)throw new Error('Expected an unfrozen Max-saved audio device template');
+ const patch=JSON.parse(decode.decode(bytes.subarray(32,bytes.length-1))).patcher;
+ if(!patch||patch.openinpresentation!==1||!Array.isArray(patch.boxes)||!Array.isArray(patch.lines))throw new Error('Device template must open in Presentation');
+ const boxes=patch.boxes.map((entry:any)=>entry.box),ui=boxes.filter((b:any)=>b.maxclass==='jsui'&&b.filename==='renderer.js');
+ const control=boxes.filter((b:any)=>b.text==='js controller.js'),read=boxes.find((b:any)=>b.text==='read project.runtime.json'),ready=boxes.find((b:any)=>b.text==='live.thisdevice');
+ if(ui.length!==1||control.length!==1||!read||!ready||boxes.some((b:any)=>/^node\.script\b/.test(b.text||'')))throw new Error('Device template has incompatible runtime objects');
+ for(const box of boxes.filter((b:any)=>b.presentation)){
+  const r=box.presentation_rect;
+  if(!Array.isArray(r)||r.length!==4||!r.every(Number.isFinite)||r[0]<0||r[1]<0||r[2]<=0||r[3]<=0||r[1]+r[3]>169.01)throw new Error('Device template presentation exceeds Live panel bounds');
+ }
+ const linked=(a:string,b:string)=>patch.lines.some((l:any)=>l.patchline?.source?.[0]===a&&l.patchline?.destination?.[0]===b);
+ if(!linked(ready.id,read.id)||!linked(control[0].id,ui[0].id))throw new Error('Device template is missing initialization or renderer wiring');
+ return bytes;
+}
+export function deviceFiles(input:Project,sources:Record<string,string>,template:Uint8Array):Record<string,string|Uint8Array>{
+ validateDeviceTemplate(template);
+ const files=exportFiles(input,sources);
+ return {
+  'Wrapper.amxd':template.slice(),
+  'controller.js':files['controller.js'],'renderer.js':files['renderer.js'],'runtime-core.js':files['runtime-core.js'],
+  'project.runtime.json':files['project.runtime.json'],'project.studio.json':files['project.studio.json'],
+  'README.txt':'Extract this entire folder, then drag Wrapper.amxd into Live after your plugin. Select the plugin device title, then click bindselected in the wrapper. Keep the files together. No Max editing or patch copying is needed.\n\nThis prototype controls an existing plugin instance; it does not host or distribute the plugin. Only exposed Live parameters are available. Rebind explicitly after reopening. Manual edits override automation; use Re-Enable Automation to resume.\n\nThe device shell is copied unchanged from a locally supplied Max-saved device. Generated bundle loading and clean-machine portability still require host verification. Capture saving is disabled.\n'
+ };
+}
 function crc32(bytes:Uint8Array):number {let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let i=0;i<8;i++)crc=(crc>>>1)^(0xedb88320&-(crc&1));}return (crc^0xffffffff)>>>0;}
 // Deterministic ZIP, stored entries. No compression dependency or executable archive content.
-export function zipFiles(files:Record<string,string>):Uint8Array {
+export function zipFiles(files:Record<string,string|Uint8Array>):Uint8Array {
  const encoder=new TextEncoder();const chunks:Uint8Array[]=[];const central:Uint8Array[]=[];let offset=0;
  const u16=(v:DataView,n:number,x:number)=>v.setUint16(n,x,true);const u32=(v:DataView,n:number,x:number)=>v.setUint32(n,x,true);
  for(const name of Object.keys(files).sort()){
   if(!/^[a-zA-Z0-9._-]+$/.test(name))throw new Error('Unsafe archive filename');
-  const path=encoder.encode(name),data=encoder.encode(files[name]),crc=crc32(data);
+  const path=encoder.encode(name),data=typeof files[name]==='string'?encoder.encode(files[name] as string):files[name] as Uint8Array,crc=crc32(data);
   const header=new Uint8Array(30+path.length),v=new DataView(header.buffer);u32(v,0,0x04034b50);u16(v,4,20);u16(v,10,0);u16(v,12,33);u32(v,14,crc);u32(v,18,data.length);u32(v,22,data.length);u16(v,26,path.length);header.set(path,30);
   chunks.push(header,data);
   const entry=new Uint8Array(46+path.length),c=new DataView(entry.buffer);u32(c,0,0x02014b50);u16(c,4,20);u16(c,6,20);u16(c,12,0);u16(c,14,33);u32(c,16,crc);u32(c,20,data.length);u32(c,24,data.length);u16(c,28,path.length);u32(c,42,offset);entry.set(path,46);central.push(entry);offset+=header.length+data.length;

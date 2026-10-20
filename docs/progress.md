@@ -250,6 +250,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- Product target clarified: choose plugin, check controls, generate a usable wrapper with automatic layout; customization is optional. Implemented template-backed device generation in browser and CLI. It copies the locally authored, Max-saved shell unchanged and bundles only selected-control metadata plus runtime dependencies. No manual patch assembly is required by this new path; generated-bundle host loading awaits verification. Public shell distribution, parameter discovery and automatic target connection remain pending.
+- Sixty-seven automated tests pass, including studio Generate-handler success/failure, shell validation, selected-only registry generation and binary-safe ZIP tests. Independently verified seven-entry ZIP CRCs and unchanged shell bytes. Repeated CLI build refused the existing directory. Local template and generated binaries stay ignored by Git.
+
 - User confirmed both Morph/Motion knobs and numeric readouts are fully visible inside Live after presentation placement. Two-control control/observation isolation, simultaneous automation and in-panel visibility now pass for this specific Augmented Strings configuration. Capture saving remains suspended; broader plugin compatibility and clean-machine packaging are unverified.
 
 - User confirmed independent reverse observation for Morph and Motion and simultaneous playback of separate automation curves in both Max knobs. Two-control panel visibility in Live remains to be checked.

@@ -4,7 +4,7 @@ import {parseHostCapture,projectFromCapture} from '/packages/host-capture/index.
 import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
 import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
 import {validateInventory} from '/packages/inventory/index.ts';
-import {exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
+import {deviceFiles,exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
 import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
@@ -110,6 +110,7 @@ $('redo').onclick=()=>run(()=>{if(!future.length)return;past.push(serializeProje
 $('theme').onclick=()=>change({...project,theme:project.theme==='dark'?'light':'dark'});
 async function fixture(name){try{const response=await fetch('/fixtures/'+name+'.project.json');if(!response.ok)throw new Error('Cannot load sample');activate(parseProject(await response.text()));status('Loaded '+project.name+'. Preview values are simulated.');}catch(error){status(error.message);}}
 $('morph').onclick=()=>{if(confirm('Open sample? Export or save any unsaved design first.'))fixture('morph');};
+$('morph-motion').onclick=()=>{if(confirm('Open sample? Export or save any unsaved design first.'))fixture('morph-motion');};
 $('compressor').onclick=()=>{if(confirm('Open sample? Export or save any unsaved design first.'))fixture('compressor');};
 $('export').onclick=()=>run(()=>{const blob=new Blob([serializeProject(project)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=project.id.replace(/[^a-zA-Z0-9_-]/g,'_')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Exported project JSON. This is not a Max device.');});
 $('import').onclick=()=>{$('file').value='';$('file').click();};
@@ -129,9 +130,10 @@ fixture('morph').then(refreshSaves);
 $('export-max').onclick=async()=>{
  const button=$('export-max');button.disabled=true;
  try{const sources={};for(const file of runtimeFiles){const response=await fetch('/max/runtime/'+file);if(!response.ok)throw new Error('Cannot load runtime source '+file);sources[file]=await response.text();}
- const files=exportFiles(project,sources);const archive=zipFiles(files);const url=URL.createObjectURL(new Blob([archive],{type:'application/zip'}));
- const a=document.createElement('a');a.href=url;a.download=project.id.replace(/[^a-zA-Z0-9_-]/g,'_')+'-max-source.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
- status('Exported Max patch source. Extract all files together. Save a real device in Max/Live; runtime integration is pending verification.');
+ const response=await fetch('/api/device-template');if(!response.ok)throw new Error('Device generation is unavailable: no compatible device shell is configured.');
+ const files=deviceFiles(project,sources,new Uint8Array(await response.arrayBuffer()));const archive=zipFiles(files);const url=URL.createObjectURL(new Blob([archive],{type:'application/zip'}));
+ const a=document.createElement('a');a.href=url;a.download=project.id.replace(/[^a-zA-Z0-9_-]/g,'_')+'-wrapper.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ status('Device bundle generated. Extract the folder and drag Wrapper.amxd into Live after your plugin.');
  }catch(error){status('Max export failed: '+error.message);}finally{renderDiagnostics();}
 };
 

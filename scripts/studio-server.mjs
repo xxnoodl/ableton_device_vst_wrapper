@@ -1,5 +1,6 @@
 import {scanPluginDirectories} from '../native/plugin-inspector/supervisor.mjs';
 import {validateInventory} from '../packages/inventory/index.ts';
+import {validateDeviceTemplate} from '../packages/export/index.ts';
 import http from 'node:http';
 import {readFile, realpath} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
@@ -13,6 +14,10 @@ const server=http.createServer(async(req,res)=>{
  try {
   if(req.method!=='GET') {res.writeHead(405);res.end();return;}
   if(!['127.0.0.1:5173','localhost:5173'].includes(req.headers.host)||req.headers['sec-fetch-site']==='cross-site'||(req.headers.origin&&!['http://127.0.0.1:5173','http://localhost:5173'].includes(req.headers.origin))){res.writeHead(403);res.end('Local requests only');return;}
+  if(req.url==='/api/device-template'){
+   try{const bytes=await readFile(resolve(root,'max/templates/wrapper.amxd'));validateDeviceTemplate(bytes);res.writeHead(200,{'Content-Type':'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(bytes);}
+   catch{res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'A compatible Max-saved device shell has not been configured for this installation.'}));}return;
+  }
   if(req.url==='/api/inventory'){
    if(process.platform!=='win32'){res.writeHead(501,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Default inventory is Windows-only; use the CLI with explicit roots.'}));return;}
    try{if(!inventoryPromise||Date.now()-inventoryTime>30000){inventoryTime=Date.now();inventoryPromise=scanPluginDirectories(['C:\\Program Files\\Common Files\\VST3']).then(validateInventory).catch(error=>{inventoryPromise=null;throw error;});}

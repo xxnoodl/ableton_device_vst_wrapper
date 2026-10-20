@@ -52,6 +52,30 @@ function harness(){
  return {c,document,ids,state,docListeners,localStorage};
 }
 const ready=()=>new Promise(resolve=>setImmediate(resolve));
+
+test('Generate device packages checked controls through the actual studio handler',async()=>{
+ const h=harness();await ready();h.ids.get('morph-motion').click();await ready();
+ assert.equal(h.state().parameters.length,2);
+ const checkbox=h.ids.get('parameters').children[0].children[0];checkbox.checked=false;checkbox.dispatch('change');
+ const patch=exporter.runtimePatch(h.state()),payload=new TextEncoder().encode(JSON.stringify(patch)+'\0');
+ const shell=new Uint8Array(32+payload.length),view=new DataView(shell.buffer);
+ for(const [offset,tag] of [[0,'ampf'],[8,'aaaa'],[12,'meta'],[24,'ptch']])shell.set(new TextEncoder().encode(tag),offset);
+ for(const [offset,n] of [[4,4],[16,4],[20,1],[28,payload.length]])view.setUint32(offset,n,true);shell.set(payload,32);
+ const original=h.c.fetch,downloads=[];
+ h.c.fetch=async path=>path==='/api/device-template'?{ok:true,arrayBuffer:async()=>shell.buffer}:original(path);
+ h.c.URL={createObjectURL:blob=>{downloads.push(blob);return 'blob:test';},revokeObjectURL(){}};
+ await h.ids.get('export-max').onclick();
+ assert.equal(downloads.length,1);assert.match(h.ids.get('status').textContent,/Device bundle generated/);
+ const zip=new Uint8Array(await downloads[0].arrayBuffer()),text=new TextDecoder().decode(zip);
+ assert.match(text,/Wrapper\.amxd/);assert.match(text,/"name": "Motion"/);assert.equal(h.ids.get('export-max').disabled,false);
+});
+
+test('Generate device reports unavailable shell without downloading source as a device',async()=>{
+ const h=harness();await ready();const original=h.c.fetch;
+ h.c.fetch=async path=>path==='/api/device-template'?{ok:false}:original(path);
+ await h.ids.get('export-max').onclick();assert.match(h.ids.get('status').textContent,/no compatible device shell/);
+ assert.equal(h.ids.get('export-max').disabled,false);
+});
 test('studio boot, function selection, properties and style changes are wired to validated state',async()=>{
  const h=harness();await ready();assert.equal(h.state().widgets.length,1);assert.equal(h.ids.get('widgets').children.length,1);
  const widget=h.ids.get('widgets').children[0];widget.querySelector('button').focus();assert.equal(h.ids.get('designs').children.length,7);
