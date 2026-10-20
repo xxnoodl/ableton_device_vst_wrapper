@@ -68,7 +68,9 @@ function captureselected(){
   }
   if(!parameters.length)throw new Error('No controllable ranges found');
   var capture={captureVersion:1,source:'live-exposed-parameters',pluginName:String(scalar(device,'name')),parameters:parameters};
-  lastCapture=JSON.stringify(capture);report('Captured '+parameters.length+' exposed parameters. File saving is paused after a host crash. No SDK IDs or factory defaults captured.');
+  lastCapture=JSON.stringify(capture);
+  for(var j=0;j<parameters.length;j++){var captured=parameters[j];outlet(1,'Parameter: '+captured.name+' | range '+captured.min+' to '+captured.max+' | current '+captured.currentValue+' | quantized '+captured.quantized);}
+  report('Captured '+parameters.length+' exposed parameters. File saving is paused after a host crash. No SDK IDs or factory defaults captured.');
  }catch(e){lastCapture=null;report('Capture error: '+e.message);}
 }
 function exportcapture(path){
