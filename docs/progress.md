@@ -93,3 +93,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User restored the deleted synth with Live undo, selected Augmented Strings and rebound. Morph changes again update the Max number.
 - Delete/restore recovery is confirmed with explicit rebinding. Automatic restoration is not supported.
 - Remaining M0 work includes automation recording, duplicate target selection, plugin version evidence and portable device dependency checks. Performance and device panel measurements are also pending.
+
+## Second synth isolation check
+
+- User added a second Augmented Strings instance on a new MIDI track, exposed Morph, and changed it without rebinding.
+- The new instance did not affect the Max number connected to the original synth.
+- Explicit retargeting to the second instance and reverse-direction isolation remain untested.

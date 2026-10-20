@@ -33,7 +33,8 @@
     "disconnectWriteIsolation": "passed-user-reported",
     "disconnectObservation": "passed-user-reported",
     "targetDeletion": "guard-recovery-passed-user-reported",
-    "targetRestore": "explicit-rebind-observation-passed-user-reported"
+    "targetRestore": "explicit-rebind-observation-passed-user-reported",
+    "secondInstanceIsolation": "observation-passed-user-reported"
   },
   "evidence": [
     {
@@ -107,6 +108,12 @@
       "source": "user report in working session",
       "result": "After undoing synth deletion and explicit rebinding, Morph updates Max again",
       "limits": "Automatic restoration unsupported; restored-target write direction not separately retested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Changing second synth Morph does not affect Max connected to original instance",
+      "limits": "Explicit retargeting and reverse-direction isolation pending"
     }
   ]
 }
