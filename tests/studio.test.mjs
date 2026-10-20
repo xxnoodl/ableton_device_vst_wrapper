@@ -1,3 +1,4 @@
+import * as presets from '../packages/presets/index.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -40,7 +41,7 @@ function harness(){
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
  const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const c=vm.createContext({...schema,...store,...layout,...presets,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
  const state=()=>schema.validateProject(JSON.parse(JSON.stringify(vm.runInContext('project',c))));
@@ -83,4 +84,13 @@ test('Shift selection toggles off and grouped header drags preserve spacing',asy
  second.dispatch('pointerdown',{shiftKey:true});h.ids.get('group').click();const handle=h.ids.get('widgets').children[0].querySelector('button');
  handle.dispatch('pointerdown',{clientX:20,clientY:100});handle.dispatch('pointermove',{clientX:36,clientY:116});handle.dispatch('pointerup');
  assert.equal(h.state().widgets[0].x,32);assert.equal(h.state().widgets[1].x,152);
+});
+
+test('function and layout presets stay separate in actual studio workflow',async()=>{
+ const h=harness();await ready();h.ids.get('function-preset-name').value='Morph only';h.ids.get('save-functions').click();assert.equal(h.state().functionalityPresets.length,1);
+ h.ids.get('layout-preset-name').value='Original layout';h.ids.get('save-layout').click();assert.equal(h.state().layoutPresets.length,1);
+ const functionId=h.state().functionalityPresets[0].id,layoutId=h.state().layoutPresets[0].id;
+ h.ids.get('functions-none').click();assert.equal(h.state().widgets.length,0);
+ h.ids.get('layout-preset').value=layoutId;h.ids.get('layout-preset').dispatch('change');assert.equal(h.state().widgets.length,0);
+ h.ids.get('function-preset').value=functionId;h.ids.get('function-preset').dispatch('change');assert.equal(h.state().widgets.length,1);
 });

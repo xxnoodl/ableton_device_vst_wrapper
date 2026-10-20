@@ -1,0 +1,14 @@
+# Project schema v2
+
+TypeScript definitions and strict runtime validation live in packages/schema/index.ts. Parsing enforces a 1 MB text limit, bounded arrays and text, finite ranges/defaults, unique IDs, existing parameter references, panel containment, supported appearance tokens and valid detents. Unknown fields and future versions fail explicitly. Arbitrary code, expressions, remote assets and SDK identifiers inferred from coordinates are not accepted.
+
+Version 1 projects are deterministically migrated to version 2 in memory. Widget bounds, parameters, IDs and style intent are preserved. Missing legacy style, detent, lock and group fields receive defaults. Migration metadata records fromVersion: 1. Local project updates retain the previous raw saved contents as a backup; imports do not overwrite files. Export writes version 2. Versions older than 1 or newer than 2 are unsupported. Fixtures intentionally include v1 files to exercise migration.
+
+Version 2 adds two distinct project-level preset collections:
+
+- Functionality presets store parameter IDs to expose. Applying them retains existing selected controls/styles and allocates missing controls into free space. Missing references, hiding locked controls and insufficient panel space fail transactionally.
+- Layout presets store widget arrangement, appearance, panel and theme snapshots. Applying one updates matching currently exposed controls; it does not add functions or restore hidden controls. Locked controls remain unchanged, and any resulting overflow rejects the operation.
+
+Preset names cannot silently overwrite an existing same-type name. Users can delete presets explicitly with undo support. Presets travel with the project JSON; browser-only edits still need Save locally or Export JSON for persistence.
+
+This is a limited IR. Plugin class IDs can be unknown (null); raw host ranges do not establish physical units or SDK parameter identity. dataSource is demo-only for the editor. Graph contracts, full widget trees, responsive constraints, verified host registries and native SDK metadata remain future work. Max runtime manifests have an independent runtimeVersion: 1 and intentionally omit editor-only groups, locks and preset libraries.

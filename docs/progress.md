@@ -201,3 +201,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 - Added a simulated-DOM harness that runs the actual studio and knob modules with real schema/store/layout functions. It exercises sample loading, style/property edits, function selection, undo/redo, duplicate/group/lock/delete commands, custom ratio input, local saves, Shift-toggle selection and grouped pointer drag.
 - All forty-two tests pass. This harness verifies application wiring and state transitions; it does not emulate browser layout, paint, touch capture or accessibility APIs. Real-browser visual checks remain pending.
+
+## Presets and project migration
+
+- Added separate function and layout preset collections, saved/applied/deleted in the UI and persisted with project export. Function presets select parameter IDs; layout presets change appearance/arrangement of currently exposed controls without enabling hidden functions. Duplicate names do not overwrite existing presets.
+- Added project schema v2 and deterministic v1 migration with original IDs/layout preserved and fromVersion metadata. Existing local raw saves remain backup-protected. Future versions fail explicitly. Runtime manifest version remains independently at 1.
+- Function selection now respects locked controls and finds nonoverlapping space for newly exposed controls. Insufficient panel space fails before changing the project.
+- Forty-seven automated tests pass, including migration, preset separation/round trips, duplicate-name and missing-reference rejection, and studio preset workflows.

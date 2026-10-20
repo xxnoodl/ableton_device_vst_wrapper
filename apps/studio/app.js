@@ -1,3 +1,4 @@
+import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
 import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
 import {validateInventory} from '/packages/inventory/index.ts';
 import {exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
@@ -25,13 +26,13 @@ function render(){
  for(const p of project.parameters){
   const label=document.createElement('label');label.className='function';
   const input=document.createElement('input');input.type='checkbox';input.checked=project.widgets.some(w=>w.parameterId===p.id);
-  input.onchange=()=>run(()=>{
-   if(!input.checked){if(project.widgets.some(w=>w.id===selected&&w.parameterId===p.id))selected=null;change({...project,widgets:project.widgets.filter(w=>w.parameterId!==p.id)});}
-   else{const id=crypto.randomUUID();selected=id;selectedIds=new Set([id]);change({...project,widgets:[...project.widgets,{id,type:'knob',label:p.name,parameterId:p.id,x:16,y:Math.min(80,project.panel.height-160),width:112,height:160}]});}
-  });
+  input.onchange=()=>{run(()=>{
+   const ids=new Set(project.widgets.map(w=>w.parameterId));input.checked?ids.add(p.id):ids.delete(p.id);
+   change(exposeParameters(project,[...ids],()=>crypto.randomUUID()));
+  });render();};
   label.append(input,document.createTextNode(p.name));$('parameters').append(label);
  }
- renderWidgets();renderProperties();
+ renderWidgets();renderProperties();renderPresets();
 }
 function renderWidgets(){
  $('widgets').replaceChildren();
@@ -179,3 +180,18 @@ stage.addEventListener('pointerdown',event=>{
  stage.onpointermove=move=>{stage.scrollLeft=left-(move.clientX-x);stage.scrollTop=top-(move.clientY-y);};
  const stop=()=>{stage.onpointermove=null;stage.onpointerup=null;stage.onpointercancel=null;stage.classList.remove('panning');};stage.onpointerup=stop;stage.onpointercancel=stop;
 },true);
+
+function renderPresets(){
+ for(const [id,presets]of [['function-preset',project.functionalityPresets],['layout-preset',project.layoutPresets]]){
+  const element=$(id),value=element.value;element.replaceChildren();const empty=document.createElement('option');empty.value='';empty.textContent='Choose preset';element.append(empty);
+  for(const preset of presets){const option=document.createElement('option');option.value=preset.id;option.textContent=preset.name;element.append(option);}element.value=presets.some(p=>p.id===value)?value:'';
+ }
+}
+$('functions-all').onclick=()=>applyLayout(()=>exposeParameters(project,project.parameters.map(p=>p.id),()=>crypto.randomUUID()));
+$('functions-none').onclick=()=>applyLayout(()=>exposeParameters(project,[],()=>crypto.randomUUID()));
+$('save-functions').onclick=()=>run(()=>{change(saveFunctionalityPreset(project,crypto.randomUUID(),$('function-preset-name').value));$('function-preset-name').value='';status('Function preset saved in this project. Save locally or export JSON to keep it.');});
+$('save-layout').onclick=()=>run(()=>{change(saveLayoutPreset(project,crypto.randomUUID(),$('layout-preset-name').value));$('layout-preset-name').value='';status('Layout preset saved in this project. Save locally or export JSON to keep it.');});
+$('function-preset').onchange=()=>{if($('function-preset').value)applyLayout(()=>applyFunctionalityPreset(project,$('function-preset').value,()=>crypto.randomUUID()));};
+$('layout-preset').onchange=()=>{if($('layout-preset').value)applyLayout(()=>applyLayoutPreset(project,$('layout-preset').value));};
+$('delete-functions').onclick=()=>run(()=>{const id=$('function-preset').value;if(!id)throw new Error('Select a function preset first');if(confirm('Delete this function preset? Undo can restore it.'))change({...project,functionalityPresets:project.functionalityPresets.filter(p=>p.id!==id)});});
+$('delete-layout').onclick=()=>run(()=>{const id=$('layout-preset').value;if(!id)throw new Error('Select a layout preset first');if(confirm('Delete this layout preset? Undo can restore it.'))change({...project,layoutPresets:project.layoutPresets.filter(p=>p.id!==id)});});

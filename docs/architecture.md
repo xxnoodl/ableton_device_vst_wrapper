@@ -15,3 +15,7 @@ Local saves are browser-origin storage with explicit updates and previous-conten
 ## Canvas operations
 
 The layout engine is pure and validates results before committing history. Multi-control moves clamp once for the whole selection so spacing is preserved. Group selection expands member IDs; groups containing locked members resist structural edits. Alignment/distribution may produce fractional positions to preserve exact geometry, while manual movement/resize snaps to grid. Duplication allocates fresh group IDs, so copies do not drag the original group.
+
+## Presets and migration
+
+The canonical project format is now v2, with an explicit v1 parser migration and an independent v1 Max runtime format. Function presets contain registry IDs; layout presets contain validated geometry/style snapshots. Neither preset stores executable code. The editor applies pure preset operations through the same history/validation path as other changes.
