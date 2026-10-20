@@ -32,7 +32,7 @@
     "automationReenable": "passed-user-reported",
     "disconnectWriteIsolation": "passed-user-reported",
     "disconnectObservation": "passed-user-reported",
-    "targetDeletion": "native-errors-observed-fix-awaiting-host-retest"
+    "targetDeletion": "guard-recovery-passed-user-reported"
   },
   "evidence": [
     {
@@ -94,6 +94,12 @@
       "source": "user report in working session",
       "result": "After deleting Augmented Strings, editing Max number produced no visible patch warning or UI change",
       "limits": "Console not inspected; missing-target handling remains unverified"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report and console screenshot in working session",
+      "result": "After missing-target error, subsequent writes show readable disconnected/unavailable messages without new native errors",
+      "limits": "Native warnings around deletion/first failure remain; no inline error UI"
     }
   ]
 }
