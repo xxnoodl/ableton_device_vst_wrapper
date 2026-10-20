@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 2,
+  "graphs": [],
+  "functionalityPresets": [],
+  "layoutPresets": [],
+  "migration": {
+    "fromVersion": 1
+  },
+  "id": "augmented-strings-morph-motion",
+  "name": "Augmented Strings Morph and Motion",
+  "plugin": {
+    "vendor": "Arturia",
+    "name": "Augmented Strings",
+    "format": "VST3",
+    "classId": null
+  },
+  "target": {
+    "kind": "live-exposed",
+    "liveVersion": "12.3.2",
+    "maxVersion": "9.0.9",
+    "reconnect": "explicit"
+  },
+  "parameters": [
+    {
+      "id": "morph",
+      "name": "Morph",
+      "min": 0,
+      "max": 1,
+      "defaultValue": 0.5,
+      "unit": "",
+      "evidence": "user-reported",
+      "resetSource": "project-default",
+      "quantized": null,
+      "enumLabels": []
+    },
+    {
+      "id": "motion",
+      "name": "Motion",
+      "min": 0,
+      "max": 1,
+      "defaultValue": 0,
+      "unit": "",
+      "evidence": "user-reported",
+      "resetSource": "captured-current",
+      "quantized": false,
+      "enumLabels": []
+    }
+  ],
+  "widgets": [
+    {
+      "id": "morph-control",
+      "type": "knob",
+      "label": "Morph",
+      "parameterId": "morph",
+      "x": 16,
+      "y": 8,
+      "width": 120,
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint",
+      "stepCount": 0,
+      "stepValues": [],
+      "locked": false,
+      "groupId": null
+    },
+    {
+      "id": "motion-control",
+      "type": "knob",
+      "label": "Motion",
+      "parameterId": "motion",
+      "x": 152,
+      "y": 8,
+      "width": 120,
+      "height": 160,
+      "design": "monitor",
+      "accent": "mint",
+      "stepCount": 0,
+      "stepValues": [],
+      "locked": false,
+      "groupId": null
+    }
+  ],
+  "panel": {
+    "width": 320,
+    "height": 200,
+    "grid": 8
+  },
+  "theme": "dark",
+  "dataSource": "demo-only"
+}
