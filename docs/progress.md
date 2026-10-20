@@ -105,3 +105,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User selected the second Augmented Strings instance and clicked bindselected.
 - Max followed the second instance, and Morph changes on the original instance no longer affected its number.
 - Explicit observation retargeting and old-target observer isolation passed by user report. Writes to the second instance remain separately untested.
+
+## Retargeted write isolation
+
+- With playback stopped and the probe bound to the second synth, user entered 0.5 in Max. Only the second synth changed; the original stayed unchanged.
+- Two-instance targeting checks now cover observation, explicit switching, old-target isolation and writes to the new target. Results are specific to Augmented Strings Morph in this session.
