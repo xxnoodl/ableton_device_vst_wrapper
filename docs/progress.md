@@ -189,3 +189,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Worker timeout/crash recovery, bounded traversal/heap and IPC validation are covered by automated tests. Symlinks are skipped; permission errors are diagnostics, not bypassed. No fingerprint or parameter metadata is fabricated.
 - Initial actual-machine scan identified 69 x64 headers and one permission failure. Unreadable-header entries are now retained with unknown architecture. Local inventory stays under ignored artifacts/.
 - Thirty-one tests pass. Native SDK parameter inspection, VST2, plugin sandboxed execution and vendor/class identity remain unimplemented. Read-only inventory is not presented as native inspection.
+
+## Canvas editing slice
+
+- Added a tested layout engine for multi-selection/group movement, bounds-aware snap/resize, six alignment modes, equal-gap distribution, duplication with fresh group IDs, grouping, locking, deletion and front/back ordering. Locked groups stay immobile as a unit.
+- Wired Shift-click and marquee selection, resize handles, toolbar actions, keyboard shortcuts, zoom and middle-mouse/Space drag panning. Commands participate in existing undo/redo. Browser interaction verification remains pending; numerical/state behavior is automated.
+- Added backward-compatible lock/group defaults to schema and protected local preview values from special-key IDs using null-prototype storage.
+- Thirty-seven automated tests pass. Runtime ignores editor-only lock/group metadata and preserves widget order.

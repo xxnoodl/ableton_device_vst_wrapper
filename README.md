@@ -22,11 +22,12 @@ Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the ser
 npm test
 ```
 
-Thirty-one automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Thirty-seven automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 
 - Open the compressor study, select controls and drag their headers to position them.
+- Shift-click labels or drag empty panel space to select multiple controls. Use toolbar alignment, spacing, grouping, locks, duplication and layers. Drag the corner handle to resize. Zoom from the toolbar; middle-drag or Space-drag pans.
 - Select a header and use arrow keys to move by one grid step. Edit bounds or labels in Properties. Drag knobs up/down to adjust values; Shift gives fine control. Double-click resets to default, or type a precise value below the knob.
 - Choose Chickenhead or Raised black (or the earlier styles) under Properties, then select an accent color. Each control keeps its own design.
 - Set Value movement to Continuous, Equal steps, or Custom values, then Apply changes. The synthetic Ratio sample uses `4, 8, 10` with no intermediate values. These settings affect preview only.
