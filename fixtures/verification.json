@@ -23,7 +23,7 @@
     "targetSelection": "pending",
     "deviceMove": "pending",
     "export": "save-reported-reopen-pending",
-    "automationRecording": "pending",
+    "automationRecording": "record-and-replay-passed-user-reported",
     "automationWriteOverride": "override-observed-user-reported",
     "explicitRebind": "passed-user-reported",
     "automaticRestoration": "unsupported",
@@ -128,6 +128,12 @@
       "source": "user report in working session",
       "result": "Max write of 0.5 changes only second bound synth, leaving original unchanged",
       "limits": "Single parameter/plugin/session; automation recording and portable packaging pending"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Recorded Morph changes from Max into second synth automation lane; playback updates Live and Max",
+      "limits": "Envelope fidelity and undo grouping not measured; single plugin/parameter configuration"
     }
   ]
 }

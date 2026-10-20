@@ -110,3 +110,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 - With playback stopped and the probe bound to the second synth, user entered 0.5 in Max. Only the second synth changed; the original stayed unchanged.
 - Two-instance targeting checks now cover observation, explicit switching, old-target isolation and writes to the new target. Results are specific to Augmented Strings Morph in this session.
+
+## Automation recording check
+
+- On the second synth with an initially empty Morph lane, user enabled Automation Arm and Arrangement Record, changed values from Max, then stopped recording.
+- User confirmed playback reproduces Morph changes in both Live and Max. Automation recording/replay passed by user report for this configuration.
+- Gesture/undo grouping, exact envelope fidelity, other plugins, and portable packaging remain unverified.
