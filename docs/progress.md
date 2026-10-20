@@ -196,3 +196,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Wired Shift-click and marquee selection, resize handles, toolbar actions, keyboard shortcuts, zoom and middle-mouse/Space drag panning. Commands participate in existing undo/redo. Browser interaction verification remains pending; numerical/state behavior is automated.
 - Added backward-compatible lock/group defaults to schema and protected local preview values from special-key IDs using null-prototype storage.
 - Thirty-seven automated tests pass. Runtime ignores editor-only lock/group metadata and preserves widget order.
+
+## Studio integration harness
+
+- Added a simulated-DOM harness that runs the actual studio and knob modules with real schema/store/layout functions. It exercises sample loading, style/property edits, function selection, undo/redo, duplicate/group/lock/delete commands, custom ratio input, local saves, Shift-toggle selection and grouped pointer drag.
+- All forty-two tests pass. This harness verifies application wiring and state transitions; it does not emulate browser layout, paint, touch capture or accessibility APIs. Real-browser visual checks remain pending.
