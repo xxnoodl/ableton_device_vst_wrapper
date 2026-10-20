@@ -13,7 +13,10 @@ function disconnect() {
 }
 function scalar(api, key) {
     var result = api.get(key);
-    return result instanceof Array ? result[0] : result;
+    if (result === null || typeof result === 'undefined' ||
+        (Object.prototype.toString.call(result) === '[object Array]' && result.length === 0))
+        throw new Error('target unavailable; bind explicitly');
+    return Object.prototype.toString.call(result) === '[object Array]' ? result[0] : result;
 }
 function index(value) { return typeof value === 'number' && isFinite(value) && value >= 0 && Math.floor(value) === value; }
 function bind(track, device, parameter) {
@@ -56,7 +59,7 @@ function bindpath(path) {
 }
 function write(value) {
     try {
-        if (!target || !Number(target.id)) throw new Error('target unavailable; bind explicitly');
+        if (!target || !Number(target.id) || target.type !== 'DeviceParameter') throw new Error('target unavailable; bind explicitly');
         if (typeof value !== 'number' || !isFinite(value)) throw new Error('value must be finite');
         if (!Number(scalar(target, 'is_enabled'))) throw new Error('parameter disabled');
         var low = Number(scalar(target, 'min'));
@@ -65,6 +68,9 @@ function write(value) {
         value = Math.max(low, Math.min(high, value));
         if (Number(scalar(target, 'is_quantized'))) value = Math.round(value);
         if (Math.abs(Number(scalar(target, 'value')) - value) > 1e-9) target.set('value', value);
-    } catch (e) { report('error: ' + e.message); }
+    } catch (e) {
+        if (e.message.indexOf('target unavailable') === 0) disconnect();
+        report('error: ' + e.message);
+    }
 }
 function notifydeleted() { disconnect(); }

@@ -32,7 +32,7 @@
     "automationReenable": "passed-user-reported",
     "disconnectWriteIsolation": "passed-user-reported",
     "disconnectObservation": "passed-user-reported",
-    "targetDeletion": "pending-console-inspection"
+    "targetDeletion": "native-errors-observed-fix-awaiting-host-retest"
   },
   "evidence": [
     {

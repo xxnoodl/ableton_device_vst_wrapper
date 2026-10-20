@@ -38,3 +38,18 @@ test('quantized values round and deleted targets reject writes',()=>{
  const s=setup({min:0,max:3,value:0,is_quantized:1});s.context.bind(0,0,0);s.context.write(1.7);assert.deepEqual(s.writes,[2]);
  s.instances[0].id=0;s.context.write(1);assert.equal(s.writes.length,1);
 });
+test('empty host response disconnects after one read and blocks further reads',()=>{
+ const s=setup();s.context.bind(0,0,0);let reads=0;
+ const old=s.instances[0];old.get=()=>{reads++;return [];};
+ s.context.write(-20);
+ assert.equal(reads,1);assert.equal(old.property,'');assert.equal(s.writes.length,0);
+ assert.equal(s.events.at(-1)[1],'error: target unavailable; bind explicitly');
+ s.context.write(-30);assert.equal(reads,1);
+ const count=s.events.length;old.callback(['value',-5]);assert.equal(s.events.length,count);
+});
+test('invalid target type disconnects without reading properties',()=>{
+ const s=setup();s.context.bind(0,0,0);s.instances[0].type='';
+ s.instances[0].get=()=>{throw new Error('must not read missing object');};
+ s.context.write(-20);assert.equal(s.writes.length,0);assert.equal(s.instances[0].property,'');
+ assert.equal(s.events.at(-1)[1],'error: target unavailable; bind explicitly');
+});

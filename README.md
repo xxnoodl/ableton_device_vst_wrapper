@@ -7,7 +7,7 @@ Local-first tools for designing Max for Live controls for existing VST3 plugins.
 M0 feasibility testing is in progress. On Live 12.3.2 with bundled Max 9.0.9, the user confirmed two-way control of Arturia Augmented Strings' exposed Morph parameter. A test device was saved successfully. The user also confirmed automation playback updates Live and Max after explicit rebinding. Reopening the Set requires disconnect and explicit rebinding, which the user confirmed restores control. Automatic restoration is unsupported. Writing from Max during playback overrides Morph automation, as reported by the user. Re-enabling automation restores playback updates in Max, as confirmed by the user. Automation recording and portable packaging remain untested. This does not establish support for other plugins or parameters.
 
 - Working: one-parameter Max probe, explicit selected-device binding, value observation and writes.
-- Automated: five simulated LiveAPI contract tests pass. These do not test the real host.
+- Automated: seven simulated LiveAPI contract tests pass. These do not test the real host.
 - Pending: remaining M0 host checks before the editor and native inspector.
 
 See [progress](docs/progress.md), [feasibility](docs/feasibility.md) and [manual verification](docs/manual-verification.md).

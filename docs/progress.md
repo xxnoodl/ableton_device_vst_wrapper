@@ -74,3 +74,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User deleted Augmented Strings and edited the Max number; no visible errors or patch UI changes were reported.
 - Console output has not been inspected. This is not evidence that missing-target detection passed or failed.
 - Current patch has no inline disconnected/error indicator; diagnostics are sent to Max Console. Production UI needs visible target availability.
+
+## Missing target guard fix
+
+- After reconnecting the diagnostic outlet, user reported repeated native LiveAPI no-valid-object messages after target deletion.
+- Added target type checks and rejection of empty host responses, with disconnect on unavailable targets to prevent repeated property reads on later edits.
+- Seven automated simulated contract tests pass, including stale nonzero IDs with empty reads and invalid types. Fix still needs real-host retest; a native warning on the first failed read may remain.
+- Diagnostic wire had been removed during initial missing-script loading; user reconnected the second JS outlet and confirmed disconnect/bind messages.
