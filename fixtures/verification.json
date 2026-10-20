@@ -19,13 +19,14 @@
     "write": "passed-user-reported",
     "observe": "passed-user-reported",
     "automation": "playback-observation-passed-user-reported",
-    "reload": "pending",
+    "reload": "manual-rebind-passed-user-reported",
     "targetSelection": "pending",
     "deviceMove": "pending",
     "export": "save-reported-reopen-pending",
     "automationRecording": "pending",
     "automationWriteOverride": "pending",
-    "explicitRebind": "passed-user-reported"
+    "explicitRebind": "passed-user-reported",
+    "automaticRestoration": "unsupported"
   },
   "evidence": [
     {
@@ -39,6 +40,12 @@
       "source": "user report in working session",
       "result": "Explicit rebinding restored stalled connection; automation playback updates Live and Max",
       "limits": "Disconnect cause unknown; write during automation and recording untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "After Set reopen, disconnect and explicit bindselected restored control",
+      "limits": "No automatic restoration; dependency portability and alternate machines untested"
     }
   ]
 }

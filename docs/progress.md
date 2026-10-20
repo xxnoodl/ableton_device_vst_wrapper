@@ -34,3 +34,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Explicit disconnect, selecting Augmented Strings and clicking bindselected restored control.
 - User confirmed Morph automation updates both Live and the Max number box during playback.
 - Writing from Max while automation is active, automation recording, reopen and device lifecycle checks remain untested.
+
+## Set reopen check
+
+- User saved and reopened the Live Set. Morph control did not reconnect automatically.
+- Disconnect followed by selecting Augmented Strings and bindselected restored operation.
+- Manual reconnection after reload is confirmed by user report. Automatic restoration remains unsupported; M0 must document this limitation.
