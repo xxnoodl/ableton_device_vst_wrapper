@@ -1,7 +1,9 @@
+import {diagnoseProject} from '../diagnostics/index.ts';
 import {validateProject,serializeProject, type Project} from '../schema/index.ts';
 export const runtimeFiles = ['runtime-core.js','controller.js','renderer.js','capture-file.cjs','capture-writer.cjs'] as const;
 export function runtimeManifest(input: Project) {
  const project=validateProject(input);
+ const errors=diagnoseProject(project).filter(d=>d.severity==='error');if(errors.length)throw new Error(errors.map(d=>d.message).join(' '));
  const used=new Set(project.widgets.map(w=>w.parameterId));
  const parameters=project.parameters.filter(p=>used.has(p.id));
  if(!parameters.length)throw new Error('Select at least one control before exporting');

@@ -226,3 +226,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 - Enforced the same 1 MB UTF-8 project limit on parse and serialization so a large preset library cannot be saved/exported into a project the importer rejects. Capture file output also uses a byte-aware bound.
 - Fifty-two tests pass, including multibyte input size and oversized preset-library serialization rejection. Existing project state is retained when an operation exceeds the limit.
+
+## Project settings, diagnostics and derived previews
+
+- Added project/target version and panel/grid settings with transactional bounds validation. Export diagnostics block empty or ambiguous mappings and distinguish disconnected preview, synthetic data, unverified format, capture-time resets and pending native runtime integration.
+- Added synthetic hard-knee compressor transfer and RBJ peaking-EQ previews using explicit schema graph contracts. No real-plugin semantics are inferred. Graphs are editor-only and visibly omitted from native export.
+- Added EQ study sample, log-frequency/dB axes, per-frame graph updates and unavailable-state handling. Derived curves are not audio meters or proprietary telemetry.
+- Sixty automated tests pass, including numeric curve invariants, pole stability, graph provenance rejection, settings/diagnostic workflows and interactive graph updates under the simulated DOM. Browser visual/performance and native host checks remain pending.

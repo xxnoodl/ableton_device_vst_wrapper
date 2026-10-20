@@ -1,3 +1,5 @@
+import {createGraph} from '/apps/studio/graphs.js';
+import {diagnoseProject} from '/packages/diagnostics/index.ts';
 import {parseHostCapture,projectFromCapture} from '/packages/host-capture/index.ts';
 import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
 import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
@@ -7,6 +9,7 @@ import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
 const $=id=>document.getElementById(id);
+let graphViews=[],graphFrame=null;
 let selectedIds=new Set(),zoom=1;
 let project,selected=null,values=Object.create(null),past=[],future=[];
 const status=message=>{$('status').textContent=message;};
@@ -33,7 +36,7 @@ function render(){
   });render();};
   label.append(input,document.createTextNode(p.name));$('parameters').append(label);
  }
- renderWidgets();renderProperties();renderPresets();
+ renderWidgets();renderProperties();renderPresets();renderProjectSettings();renderDiagnostics();renderGraphs();
 }
 function renderWidgets(){
  $('widgets').replaceChildren();
@@ -63,7 +66,7 @@ function renderWidgets(){
   };
   el.dataset.id=w.id;el.append(header);
   const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,design:w.design,accent:w.accent,stepCount:w.stepCount,stepValues:w.stepValues,onSelect:()=>select(),onChange:value=>{
-   values[p.id]=value;for(const update of updates.get(p.id)||[])update(value);
+   values[p.id]=value;for(const update of updates.get(p.id)||[])update(value);scheduleGraphs();
   }});
   if(!updates.has(p.id))updates.set(p.id,[]);updates.get(p.id).push(control.update);
   el.append(control.element);
@@ -129,7 +132,7 @@ $('export-max').onclick=async()=>{
  const files=exportFiles(project,sources);const archive=zipFiles(files);const url=URL.createObjectURL(new Blob([archive],{type:'application/zip'}));
  const a=document.createElement('a');a.href=url;a.download=project.id.replace(/[^a-zA-Z0-9_-]/g,'_')+'-max-source.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  status('Exported Max patch source. Extract all files together. Save a real device in Max/Live; runtime integration is pending verification.');
- }catch(error){status('Max export failed: '+error.message);}finally{button.disabled=false;}
+ }catch(error){status('Max export failed: '+error.message);}finally{renderDiagnostics();}
 };
 
 let inventory=null;
@@ -199,3 +202,16 @@ $('delete-layout').onclick=()=>run(()=>{const id=$('layout-preset').value;if(!id
 
 $('import-capture').onclick=()=>{$('capture-file').value='';$('capture-file').click();};
 $('capture-file').onchange=async()=>{try{const file=$('capture-file').files[0];if(!file)return;if(file.size>1_000_000)throw new Error('Capture exceeds 1 MB');const next=projectFromCapture(parseHostCapture(await file.text()));if(confirm('Open this host capture as a new project? Save/export current changes first.')){activate(next);status('Loaded host-exposed metadata. Select functions to design. Preview stays disconnected; reset values are capture-time values, not factory defaults.');}}catch(error){status('Capture import failed: '+error.message);}};
+
+function renderProjectSettings(){
+ for(const [id,value]of Object.entries({'project-name':project.name,'plugin-name':project.plugin.name,'plugin-format':project.plugin.format,'panel-width':project.panel.width,'panel-height':project.panel.height,'panel-grid':project.panel.grid,'live-version':project.target.liveVersion,'max-version':project.target.maxVersion}))$(id).value=value;
+}
+$('project-settings').onsubmit=event=>{event.preventDefault();run(()=>{change({...project,name:$('project-name').value,plugin:{...project.plugin,name:$('plugin-name').value,format:$('plugin-format').value},panel:{width:Number($('panel-width').value),height:Number($('panel-height').value),grid:Number($('panel-grid').value)},target:{...project.target,liveVersion:$('live-version').value,maxVersion:$('max-version').value}});status('Project settings applied. Panel dimensions are design choices, not measured Live limits.');});};
+function renderDiagnostics(){
+ const items=diagnoseProject(project),errors=items.filter(d=>d.severity==='error').length;$('diagnostic-count').textContent=errors?errors+' blocking issues':'No schema mapping blockers';$('export-max').disabled=errors>0;$('diagnostics').replaceChildren();
+ for(const item of items){const row=document.createElement('p');row.className='diagnostic '+item.severity;row.textContent=item.severity.toUpperCase()+': '+item.message;$('diagnostics').append(row);}
+}
+
+function renderGraphs(){graphViews=[];$('graphs').replaceChildren();for(const graph of project.graphs){const view=createGraph(graph,project.parameters);graphViews.push(view);$('graphs').append(view.element);view.update(values);}}
+function scheduleGraphs(){if(graphFrame!==null)return;graphFrame=requestAnimationFrame(()=>{graphFrame=null;for(const view of graphViews)view.update(values);});}
+$('eq').onclick=()=>{if(confirm('Open sample? Save or export current changes first.'))fixture('eq');};

@@ -29,3 +29,5 @@ Live automation reference checked: https://www.ableton.com/en/live-manual/12/aut
 Checked https://docs.cycling74.com/apiref/js/mgraphics/ for native drawing primitives, https://docs.cycling74.com/legacy/max8/vignettes/jsfileobject for file reading, and https://docs.cycling74.com/apiref/lom/plugindevice/ for host-visible plugin devices. Legacy JSUI and LiveAPI execution in the new runtime still require a real-host test; successful Node simulations are not equivalent.
 
 Node capture export: checked https://docs.cycling74.com/reference/node.script/ and https://docs.cycling74.com/apiref/nodeformax/ for Node-for-Max process messaging, supplied max-api module, autostart and low-priority defer behavior. Capture saving uses built-in Node filesystem exclusive creation; no extra packages are installed.
+
+Derived synthetic EQ model: checked the W3C Audio EQ Cookbook, Working Group Note dated 2021-06-08, https://www.w3.org/TR/audio-eq-cookbook/. Used the peaking-biquad transfer-function formulas for numeric visualization only. No claim is made that arbitrary plugin EQs implement this model.

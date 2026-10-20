@@ -59,6 +59,21 @@
       "name": "Live-exposed registry capture/import",
       "status": "prototype",
       "evidence": "max/runtime/controller.js; packages/host-capture; tests; real host execution pending"
+    },
+    {
+      "name": "Canvas layout tools and presets",
+      "status": "partially verified",
+      "evidence": "packages/layout-engine; packages/presets; simulated-DOM and pure-state tests; browser visual checks pending"
+    },
+    {
+      "name": "Synthetic derived curves",
+      "status": "partially verified",
+      "evidence": "packages/analysis; numeric tests; no real telemetry or native graph export"
+    },
+    {
+      "name": "Schema v1 to v2 migration",
+      "status": "partially verified",
+      "evidence": "tests/presets.test.mjs; deterministic round trips and backup-protected local saves"
     }
   ]
 }

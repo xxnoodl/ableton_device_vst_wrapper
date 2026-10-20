@@ -1,3 +1,5 @@
+import * as analysis from '../packages/analysis/index.ts';
+import * as diagnostics from '../packages/diagnostics/index.ts';
 import * as captures from '../packages/host-capture/index.ts';
 import * as presets from '../packages/presets/index.ts';
 import {test} from 'node:test';
@@ -42,7 +44,8 @@ function harness(){
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
  const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ vm.runInContext(read('apps/studio/graphs.js').replace(/^import .*;\r?\n/gm,'').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
  const state=()=>schema.validateProject(JSON.parse(JSON.stringify(vm.runInContext('project',c))));
@@ -94,4 +97,17 @@ test('function and layout presets stay separate in actual studio workflow',async
  h.ids.get('functions-none').click();assert.equal(h.state().widgets.length,0);
  h.ids.get('layout-preset').value=layoutId;h.ids.get('layout-preset').dispatch('change');assert.equal(h.state().widgets.length,0);
  h.ids.get('function-preset').value=functionId;h.ids.get('function-preset').dispatch('change');assert.equal(h.state().widgets.length,1);
+});
+
+test('panel settings validate transactionally and empty layouts block native export',async()=>{
+ const h=harness();await ready();h.ids.get('panel-width').value='800';h.ids.get('panel-height').value='400';h.ids.get('project-settings').dispatch('submit');assert.equal(h.state().panel.width,800);assert.equal(h.state().panel.height,400);
+ h.ids.get('panel-width').value='320';h.ids.get('project-settings').dispatch('submit');assert.equal(h.state().panel.width,800);
+ h.ids.get('functions-none').click();assert.equal(h.ids.get('export-max').disabled,true);assert.match(h.ids.get('diagnostic-count').textContent,/blocking/);
+});
+
+test('synthetic graphs update with knob values and disclose their source',async()=>{
+ const h=harness();await ready();h.ids.get('compressor').click();await ready();
+ const graph=h.ids.get('graphs').children[0],curve=graph.querySelector('path'),before=curve.getAttribute('d');
+ const threshold=h.ids.get('widgets').children.find(w=>w.dataset.id==='threshold-control').querySelector('input');threshold.value='-30';threshold.dispatch('change');await ready();assert.notEqual(curve.getAttribute('d'),before);
+ h.ids.get('eq').click();await ready();assert.equal(h.state().graphs[0].type,'peaking-eq');assert.equal(h.ids.get('graphs').children.length,1);assert.ok(h.ids.get('diagnostics').children.some(row=>row.textContent.includes('omitted from Max')));
 });

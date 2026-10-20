@@ -135,5 +135,17 @@
     "grid": 8
   },
   "theme": "dark",
-  "dataSource": "demo-only"
+  "dataSource": "demo-only",
+  "graphs": [
+    {
+      "id": "transfer",
+      "type": "compressor-transfer",
+      "source": "synthetic-contract",
+      "parameters": {
+        "threshold": "threshold",
+        "ratio": "ratio"
+      },
+      "sampleRate": 48000
+    }
+  ]
 }

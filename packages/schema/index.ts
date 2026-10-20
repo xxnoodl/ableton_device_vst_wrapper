@@ -4,7 +4,8 @@ export type Parameter = { id: string; name: string; min: number; max: number; de
 export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number]; stepCount: number; stepValues: number[]; locked: boolean; groupId: string | null };
 export type FunctionalityPreset = {id:string;name:string;parameterIds:string[]};
 export type LayoutPreset = {id:string;name:string;widgets:Widget[];panel:{width:number;height:number;grid:number};theme:'dark'|'light'};
-export type Project = { schemaVersion: 2;functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3' | 'unknown'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
+export type Graph = {id:string;type:'compressor-transfer'|'peaking-eq';source:'synthetic-contract';parameters:Record<string,string>;sampleRate:number};
+export type Project = { schemaVersion: 2;graphs:Graph[];functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3' | 'unknown'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 function object(value: unknown, keys: string[], at: string, optional: string[] = []): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at}: expected object`);
@@ -30,7 +31,7 @@ function list(value: unknown, at: string): unknown[] {
   return value;
 }
 export function validateProject(input: unknown): Project {
-  const o = object(input, ['schemaVersion','id','name','plugin','target','parameters','widgets','panel','theme','dataSource','functionalityPresets','layoutPresets','migration'], 'project',['functionalityPresets','layoutPresets','migration']);
+  const o = object(input, ['schemaVersion','id','name','plugin','target','parameters','widgets','panel','theme','dataSource','functionalityPresets','layoutPresets','migration','graphs'], 'project',['functionalityPresets','layoutPresets','migration','graphs']);
   if (o.schemaVersion !== 2) throw new Error('Unsupported schema version; no migration is available');
   const plugin = object(o.plugin, ['vendor','name','format','classId'], 'plugin');
   const target = object(o.target, ['kind','liveVersion','maxVersion','reconnect'], 'target');
@@ -75,9 +76,22 @@ export function validateProject(input: unknown): Project {
     return {id:text(preset.id,'preset.id'),name:text(preset.name,'preset.name'),widgets:valid.widgets,panel:valid.panel,theme:valid.theme};
   });
   if(new Set(layoutPresets.map(p=>p.id)).size!==layoutPresets.length)throw new Error('Duplicate layout preset IDs');
+  const graphs=(o.graphs===undefined?[]:list(o.graphs,'graphs')).map((value):Graph=>{
+    const graph=object(value,['id','type','source','parameters','sampleRate'],'graph');
+    const type=choice(graph.type,['compressor-transfer','peaking-eq'],'graph.type');
+    if(graph.source!=='synthetic-contract')throw new Error('Graph semantics are supported only for declared synthetic contracts');
+    const names=type==='compressor-transfer'?['threshold','ratio']:['frequency','q','gain'];
+    const refs=object(graph.parameters,names,'graph.parameters');const mapping:Record<string,string>={};
+    for(const name of names){const id=text(refs[name],'graph parameter');const p=parameters.find(p=>p.id===id);if(!p||p.evidence!=='synthetic')throw new Error('Graph requires a synthetic parameter contract');mapping[name]=id;}
+    const sampleRate=number(graph.sampleRate,8000,192000,'graph.sampleRate');
+    if(type==='peaking-eq'){const frequency=parameters.find(p=>p.id===mapping.frequency)!,q=parameters.find(p=>p.id===mapping.q)!;if(frequency.min<=0||frequency.max>=sampleRate/2||q.min<=0||q.max>100||parameters.find(p=>p.id===mapping.gain)!.min< -60||parameters.find(p=>p.id===mapping.gain)!.max>60)throw new Error('Invalid EQ frequency/Q range');}
+    else if(parameters.find(p=>p.id===mapping.ratio)!.min<1)throw new Error('Compressor ratio must be at least 1');
+    return {id:text(graph.id,'graph.id'),type,source:'synthetic-contract',parameters:mapping,sampleRate};
+  });
+  if(graphs.length>8||new Set(graphs.map(g=>g.id)).size!==graphs.length)throw new Error('Invalid graph count or duplicate IDs');
   let migration:null|{fromVersion:1}=null;
   if(o.migration!==undefined&&o.migration!==null){const m=object(o.migration,['fromVersion'],'migration');if(m.fromVersion!==1)throw new Error('Invalid migration metadata');migration={fromVersion:1};}
-  return {schemaVersion:2,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
+  return {schemaVersion:2,graphs,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
 }
 export function parseProject(source: string): Project {
   if (typeof source !== 'string' || (source.length > 1_000_000 || new TextEncoder().encode(source).byteLength > 1_000_000)) throw new Error('Project exceeds the 1 MB text limit');
