@@ -221,3 +221,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Replaced provisional Max File writing with a Node-for-Max helper that creates UTF-8 captures using the exclusive wx flag. Existing files are atomically refused, including concurrent-create cases; no user capture is overwritten. Node output is deferred to Max's low-priority queue.
 - Fifty-one tests pass, including an actual temporary-filesystem exclusive-create test and controller-to-writer delegation. The new host writer still needs integration verification in licensed Max; the helper's filesystem behavior is independently tested in Node.
 - Export archive now contains nine files, including both capture writer dependencies. Older seven-file local artifacts are preserved; current exports include the new files.
+
+## Project size consistency
+
+- Enforced the same 1 MB UTF-8 project limit on parse and serialization so a large preset library cannot be saved/exported into a project the importer rejects. Capture file output also uses a byte-aware bound.
+- Fifty-two tests pass, including multibyte input size and oversized preset-library serialization rejection. Existing project state is retained when an operation exceeds the limit.

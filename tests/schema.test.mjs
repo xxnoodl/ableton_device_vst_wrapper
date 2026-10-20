@@ -42,3 +42,10 @@ test('step configuration round trips and rejects contradictory or invalid stops'
   const copy=structuredClone(p);mutate(copy.widgets.find(w=>w.parameterId==='ratio'));assert.throws(()=>validateProject(copy));
  }
 });
+
+test('UTF-8 project size limit applies to parsing and exported saves',()=>{
+ assert.throws(()=>parseProject('"'+'\u00e9'.repeat(500_001)+'"'),/1 MB/);
+ const p=sample();p.widgets[0].label='x'.repeat(160);
+ p.layoutPresets=Array.from({length:256},(_,i)=>({id:'layout-'+i,name:'layout-'+i,widgets:Array.from({length:30},(_,j)=>({...p.widgets[0],id:'widget-'+j})),panel:p.panel,theme:p.theme}));
+ assert.throws(()=>serializeProject(p),/1 MB/);
+});

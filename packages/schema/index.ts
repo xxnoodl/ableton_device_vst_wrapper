@@ -14,7 +14,7 @@ function object(value: unknown, keys: string[], at: string, optional: string[] =
   return o;
 }
 function text(value: unknown, at: string): string {
-  if (typeof value !== 'string' || !value.trim() || value.length > 160 || /[\u0000-\u001f]/.test(value)) throw new Error(`${at}: expected text of 1?160 characters`);
+  if (typeof value !== 'string' || !value.trim() || value.length > 160 || /[\u0000-\u001f]/.test(value)) throw new Error(`${at}: expected text of 1-160 characters`);
   return value;
 }
 function number(value: unknown, low: number, high: number, at: string): number {
@@ -55,7 +55,7 @@ export function validateProject(input: unknown): Project {
     if (!Number.isInteger(stepCount) || stepCount === 1) throw new Error('Step count must be 0 or an integer from 2 to 128');
     const parameter = parameters.find(p => p.id === parameterId)!;
     const stepValues = w.stepValues === undefined ? [] : list(w.stepValues,'widget.stepValues').map(v => number(v,parameter.min,parameter.max,'step value'));
-    if (stepValues.length === 1 || stepValues.length > 128 || stepValues.some((v,i) => i > 0 && v <= stepValues[i-1])) throw new Error('Custom values must contain 2?128 increasing values');
+    if (stepValues.length === 1 || stepValues.length > 128 || stepValues.some((v,i) => i > 0 && v <= stepValues[i-1])) throw new Error('Custom values must contain 2-128 increasing values');
     if (stepCount && stepValues.length) throw new Error('Choose equal steps or custom values, not both');
     const wWidth = number(w.width,96,width,'widget.width');
     const wHeight = number(w.height,110,height,'widget.height');
@@ -80,7 +80,7 @@ export function validateProject(input: unknown): Project {
   return {schemaVersion:2,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
 }
 export function parseProject(source: string): Project {
-  if (typeof source !== 'string' || source.length > 1_000_000) throw new Error('Project exceeds the 1 MB text limit');
+  if (typeof source !== 'string' || (source.length > 1_000_000 || new TextEncoder().encode(source).byteLength > 1_000_000)) throw new Error('Project exceeds the 1 MB text limit');
   const input=JSON.parse(source);
   if(input&&typeof input==='object'&&!Array.isArray(input)&&input.schemaVersion===1){
     // Deterministic v1 -> v2 migration; strict validation rejects unknown fields afterward.
@@ -88,7 +88,7 @@ export function parseProject(source: string): Project {
   }
   return validateProject(input);
 }
-export function serializeProject(project: Project): string { return JSON.stringify(validateProject(project), null, 2) + '\n'; }
+export function serializeProject(project: Project): string { const source=JSON.stringify(validateProject(project),null,2)+'\n';if(new TextEncoder().encode(source).byteLength>1_000_000)throw new Error('Project exceeds the 1 MB limit');return source; }
 export function normalize(value: number, p: Parameter): number {
   if (![value,p.min,p.max].every(Number.isFinite) || p.max <= p.min) throw new Error('Invalid parameter range or value');
   return Math.max(0,Math.min(1,(value-p.min)/(p.max-p.min)));
