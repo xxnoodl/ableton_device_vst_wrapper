@@ -99,3 +99,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User added a second Augmented Strings instance on a new MIDI track, exposed Morph, and changed it without rebinding.
 - The new instance did not affect the Max number connected to the original synth.
 - Explicit retargeting to the second instance and reverse-direction isolation remain untested.
+
+## Explicit retargeting check
+
+- User selected the second Augmented Strings instance and clicked bindselected.
+- Max followed the second instance, and Morph changes on the original instance no longer affected its number.
+- Explicit observation retargeting and old-target observer isolation passed by user report. Writes to the second instance remain separately untested.

@@ -34,7 +34,8 @@
     "disconnectObservation": "passed-user-reported",
     "targetDeletion": "guard-recovery-passed-user-reported",
     "targetRestore": "explicit-rebind-observation-passed-user-reported",
-    "secondInstanceIsolation": "observation-passed-user-reported"
+    "secondInstanceIsolation": "observation-passed-user-reported",
+    "explicitRetargeting": "observation-passed-user-reported"
   },
   "evidence": [
     {
@@ -114,6 +115,12 @@
       "source": "user report in working session",
       "result": "Changing second synth Morph does not affect Max connected to original instance",
       "limits": "Explicit retargeting and reverse-direction isolation pending"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "After explicit rebinding, Max observes second instance and ignores original instance changes",
+      "limits": "Write direction on second instance not separately tested; automatic restoration unsupported"
     }
   ]
 }
