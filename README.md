@@ -6,7 +6,7 @@ Local-first tools for designing Max for Live controls for original VST3 plugins.
 
 The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. Reopening requires manual rebinding. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
 
-The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob preview with six selectable designs, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and does not export devices yet. The compressor sample uses synthetic parameters and no gain-reduction telemetry.
+The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob preview with ten selectable designs, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and does not export devices yet. The compressor sample uses synthetic parameters and no gain-reduction telemetry.
 
 ## Run
 
@@ -28,7 +28,7 @@ Fifteen automated tests cover Max contracts, schema validation, round trips, ran
 
 - Open the compressor study, select controls and drag their headers to position them.
 - Select a header and use arrow keys to move by one grid step. Edit bounds or labels in Properties. Drag knobs up/down to adjust values; Shift gives fine control. Double-click resets to default, or type a precise value below the knob.
-- Choose Studio, Graphite, Alloy, Selector, Halo or LED scale under Properties, then select an accent color. Each control keeps its own design.
+- Choose from ten designs under Properties, including Classic pointer, Recessed, Gloss and Monitor, then select an accent color. Each control keeps its own design.
 - Export JSON, reopen it with Open project, or Save locally to this browser. Updating a local save keeps its previous version as a backup.
 - Export before clearing browser data or changing origins; browser saves are not portable backups.
 

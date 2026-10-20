@@ -18,10 +18,15 @@ export const designs=[
  {id:'silver',name:'Alloy',description:'Machined silver with a fine scale'},
  {id:'selector',name:'Selector',description:'Long hardware handle with scale marks'},
  {id:'halo',name:'Halo',description:'Recessed face and illuminated arc'},
- {id:'stepped',name:'LED scale',description:'Segmented light ring around a dark face'}
+ {id:'stepped',name:'LED scale',description:'Segmented light ring around a dark face'},
+ {id:'pointer',name:'Classic pointer',description:'Broad orange index and flat dark cap'},
+ {id:'recessed',name:'Recessed',description:'Deep black dish with a subtle rim and fine index'},
+ {id:'gloss',name:'Gloss',description:'Polished black face with a short luminous pointer'},
+ {id:'monitor',name:'Monitor',description:'Oversized matte hardware dial with a fine indicator'}
 ];
 export function createDial(design='studio',accent='mint',normalized=.5){
  const dial=document.createElement('div');dial.className='knob design-'+design+' accent-'+accent;
+ if(['pointer','recessed','gloss'].includes(design)){const endpoints=document.createElement('div');endpoints.className='knob-endpoints';endpoints.setAttribute('aria-hidden','true');const min=document.createElement('b');min.textContent='MIN';const max=document.createElement('b');max.textContent='MAX';endpoints.append(min,max);dial.append(endpoints);}
  const scale=document.createElementNS('http://www.w3.org/2000/svg','svg');scale.classList.add('knob-scale');scale.setAttribute('viewBox','0 0 100 100');scale.setAttribute('aria-hidden','true');
  const ticks=[];
  for(let i=0;i<=24;i++){

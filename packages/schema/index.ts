@@ -1,4 +1,4 @@
-export const knobDesigns = ['studio','graphite','silver','selector','halo','stepped'] as const;
+export const knobDesigns = ['studio','graphite','silver','selector','halo','stepped','pointer','recessed','gloss','monitor'] as const;
 export const knobAccents = ['mint','amber','cyan','red'] as const;
 export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' };
 export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number] };

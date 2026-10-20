@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {parseProject,serializeProject,validateProject,normalize,denormalize,moveWidget} from '../packages/schema/index.ts';
+import {parseProject,serializeProject,validateProject,normalize,denormalize,moveWidget,knobDesigns} from '../packages/schema/index.ts';
 import {saveProject,loadProject} from '../packages/project-store/index.ts';
 const sample=()=>parseProject(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
 test('project round trip is deterministic; compressor fixture is valid',()=>{
@@ -25,6 +25,7 @@ test('local saves validate before mutation and preserve previous version as back
 test('design choices persist and older projects receive compatible defaults',()=>{
  const raw=JSON.parse(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
  assert.equal(validateProject(raw).widgets[0].design,'studio');
+ for(const design of knobDesigns){const project=sample();project.widgets[0].design=design;assert.equal(parseProject(serializeProject(project)).widgets[0].design,design);}
  const p=sample();p.widgets[0].design='selector';p.widgets[0].accent='amber';
  assert.equal(parseProject(serializeProject(p)).widgets[0].design,'selector');
  assert.equal(parseProject(serializeProject(p)).widgets[0].accent,'amber');

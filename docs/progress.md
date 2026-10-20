@@ -158,3 +158,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Centered fixed-decimal/tabular readouts again per user feedback.
 - Optional validated design/accent fields default to Studio/Mint for old v1 projects; explicit styles persist through export/import and undo history. Unsupported style identifiers are rejected.
 - Fifteen automated tests pass, including style round trips/defaults and invalid style rejection. Headless browser launch was denied by environment policy, so visual confirmation is pending in the user's browser. Max renderer style parity remains unimplemented.
+
+## Additional dark hardware designs
+
+- Added Classic pointer, Recessed, Gloss and Monitor designs based on the user's preferred reference directions, bringing the library to ten. Original CSS/SVG only; no reference assets bundled.
+- Pointer/recessed/gloss include scale ticks and min/max markings; their default mint palette uses a warm pointer, with explicit accent overrides available. Monitor uses a matte black face, fine indicator and a dial diameter that grows with widget bounds.
+- The picker scrolls to accommodate all ten choices. Existing interaction, centered readout and save behavior retained.
+- All fifteen tests pass; appearance round-trip coverage now iterates every registered design. Visual browser verification remains pending.

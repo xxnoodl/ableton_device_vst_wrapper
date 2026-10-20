@@ -33,6 +33,7 @@ function renderWidgets(){
   if(values[p.id]===undefined)values[p.id]=p.defaultValue;
   const el=document.createElement('section');el.className='widget'+(selected===w.id?' selected':'');
   Object.assign(el.style,{left:w.x+'px',top:w.y+'px',width:w.width+'px',height:w.height+'px'});
+  el.style.setProperty('--monitor-size',Math.max(48,Math.min(160,w.width-30,w.height-84))+'px');
   const header=document.createElement('button');header.className='widget-header';header.textContent=w.label;header.title='Drag to move; arrow keys move by one grid step';
   const select=()=>{selected=w.id;for(const child of $('widgets').children)child.classList.toggle('selected',child===el);renderProperties();};
   header.onfocus=select;
