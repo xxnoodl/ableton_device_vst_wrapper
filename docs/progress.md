@@ -116,3 +116,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - On the second synth with an initially empty Morph lane, user enabled Automation Arm and Arrangement Record, changed values from Max, then stopped recording.
 - User confirmed playback reproduces Morph changes in both Live and Max. Automation recording/replay passed by user report for this configuration.
 - Gesture/undo grouping, exact envelope fidelity, other plugins, and portable packaging remain unverified.
+
+## Portable device copy inspection
+
+- Located the user-saved device in the Ableton User Library; original referenced an absolute Desktop script path. Original left unchanged.
+- User saved a repository-local copy and changed its JS object to js parameter-probe.js. Inspection confirms the relative object text and second-outlet diagnostic wire.
+- Device still records a dependency-cache bootpath to the examples folder; JS is external, not established as embedded.
+- Copied the unchanged device and script into a separate Desktop portability-check folder. Relocated host load pending; this is not yet a portable release. Local amxd remains ignored by Git.

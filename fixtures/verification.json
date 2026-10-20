@@ -22,7 +22,7 @@
     "reload": "manual-rebind-passed-user-reported",
     "targetSelection": "pending",
     "deviceMove": "pending",
-    "export": "save-reported-reopen-pending",
+    "export": "saved-device-inspected-relative-js-external",
     "automationRecording": "record-and-replay-passed-user-reported",
     "automationWriteOverride": "override-observed-user-reported",
     "explicitRebind": "passed-user-reported",
@@ -36,7 +36,8 @@
     "targetRestore": "explicit-rebind-observation-passed-user-reported",
     "secondInstanceIsolation": "observation-passed-user-reported",
     "explicitRetargeting": "observation-passed-user-reported",
-    "retargetedWriteIsolation": "passed-user-reported"
+    "retargetedWriteIsolation": "passed-user-reported",
+    "portableLoad": "pending-relocated-host-test"
   },
   "evidence": [
     {
