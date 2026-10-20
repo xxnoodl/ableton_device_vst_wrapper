@@ -1,0 +1,11 @@
+{
+  "platform": {"os":"Windows build 26200","architecture":"x64","live":"12.3.2","max":"9.0.9","node":"24.16.0"},
+  "components": [
+    {"name":"Original Morph probe","status":"partially verified","evidence":"User-guided Live tests; one plugin parameter; explicit reconnection"},
+    {"name":"New native runtime and capture writer","status":"prototype","evidence":"Simulated host/drawing tests and Node filesystem tests; actual Live execution pending"},
+    {"name":"Studio","status":"partially verified","evidence":"Initial arrangement user-tested; expanded workflows tested under simulated DOM; browser visuals/accessibility/performance pending"},
+    {"name":"Static VST3 inventory","status":"partially verified","evidence":"69 accessible entries and one permission diagnostic; no plugin loading or parameter discovery"},
+    {"name":"Other OS, CPU and host versions","status":"unsupported","evidence":"Not tested"},
+    {"name":"VST2 and proprietary telemetry","status":"unsupported","evidence":"No implementation"}
+  ]
+}

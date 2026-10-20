@@ -6,7 +6,7 @@ Local-first tools for designing Max for Live controls for original VST3 plugins.
 
 The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. Reopening requires manual rebinding. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
 
-The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob preview with selectable knob designs, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and exports reusable Max patch source and dependencies (not a finished device). The compressor and EQ studies include explicitly synthetic derived curves; neither uses plugin telemetry.
+The browser studio provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob designs, multi-selection, layout tools, separate presets, properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and exports reusable Max patch source and dependencies (not a finished device). The compressor and EQ studies include explicitly synthetic derived curves; neither uses plugin telemetry.
 
 ## Run
 
@@ -21,6 +21,8 @@ Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the ser
 ```sh
 npm test
 ```
+
+With the server running, `npm run smoke` checks local asset delivery and request guards. `npm run inventory` prints a static Windows VST3 inventory. Neither command loads plugin code.
 
 Sixty automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
@@ -59,7 +61,7 @@ Use **Export Max source** to download a ZIP, or run `node scripts/export-project
 
 `max/renderer/parameter-probe.js` is canonical; the example copy must stay synchronized. Locally saved `.amxd` files and Live Sets are ignored until dependency portability is verified. Same-machine copied-device loading passed; clean-machine packaging is unverified. No plugin binaries, SDKs or proprietary assets are bundled.
 
-See [progress](docs/progress.md), [architecture](docs/architecture.md), [risks](docs/risks.md), [research](docs/research.md) and [manual host tests](docs/manual-verification.md).
+See [progress](docs/progress.md), [architecture](docs/architecture.md), [risks](docs/risks.md), [research](docs/research.md), [troubleshooting](docs/troubleshooting.md), [extension APIs](docs/extension-apis.md) and [manual host tests](docs/manual-verification.md).
 
 ## Development
 

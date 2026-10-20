@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.cjs tests/*.test.mjs",
-    "start": "node scripts/studio-server.mjs"
+    "start": "node scripts/studio-server.mjs",
+    "smoke": "node scripts/smoke-studio.mjs",
+    "inventory": "node scripts/inventory-plugins.mjs"
   },
   "engines": {
     "node": ">=24"

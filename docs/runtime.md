@@ -6,7 +6,7 @@ The studio's Export Max source button downloads a deterministic ZIP containing a
 node scripts/export-project.mjs fixtures/morph.project.json artifacts/morph-runtime
 ```
 
-The leaf output directory must not exist; files are created exclusively and partial output is rolled back on failure. The generated source can be reproduced from tracked files. The sample export is locally available under artifacts/morph-runtime and artifacts/morph-runtime.zip (ignored generated artifacts).
+The leaf output directory must not exist; files are created exclusively and partial output is rolled back on failure. The generated source can be reproduced from tracked files. The current review export is under artifacts/review-runtime and artifacts/review-runtime.zip (ignored artifacts). Earlier exports are preserved.
 
 ## Boundaries
 

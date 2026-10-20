@@ -1,4 +1,4 @@
-import {readFile,mkdir,writeFile,unlink,rmdir} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,unlink,rmdir,stat} from 'node:fs/promises';
 import {resolve,join,dirname} from 'node:path';
 import {parseProject} from '../packages/schema/index.ts';
 import {exportFiles,runtimeFiles} from '../packages/export/index.ts';
@@ -7,7 +7,8 @@ if(!input||!output){console.error('Usage: node scripts/export-project.mjs projec
 else {
  const created=[];let made=false;
  try{
-  const project=parseProject(await readFile(resolve(input),'utf8'));const sources={};
+  const inputPath=resolve(input);if((await stat(inputPath)).size>1_000_000)throw new Error('Project exceeds 1 MB');
+  const project=parseProject(await readFile(inputPath,'utf8'));const sources={};
   for(const name of runtimeFiles)sources[name]=await readFile(new URL('../max/runtime/'+name,import.meta.url),'utf8');
   const files=exportFiles(project,sources);await mkdir(dirname(resolve(output)),{recursive:true});await mkdir(resolve(output));made=true;
   for(const [name,source] of Object.entries(files)){const file=join(resolve(output),name);await writeFile(file,source,{flag:'wx'});created.push(file);}

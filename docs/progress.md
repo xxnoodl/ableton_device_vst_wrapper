@@ -233,3 +233,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Added synthetic hard-knee compressor transfer and RBJ peaking-EQ previews using explicit schema graph contracts. No real-plugin semantics are inferred. Graphs are editor-only and visibly omitted from native export.
 - Added EQ study sample, log-frequency/dB axes, per-frame graph updates and unavailable-state handling. Derived curves are not audio meters or proprietary telemetry.
 - Sixty automated tests pass, including numeric curve invariants, pole stability, graph provenance rejection, settings/diagnostic workflows and interactive graph updates under the simulated DOM. Browser visual/performance and native host checks remain pending.
+
+## Review handoff
+
+- Final HTTP smoke check passed for 21 assets, private-path guards, cross-origin rejection and unsupported write methods. Inventory returned 69 accessible entries and one permission diagnostic without plugin execution.
+- Generated the current nine-file review source folder and ZIP under ignored artifacts/review-runtime. Independently checked ZIP CRCs with Python. Existing devices, presets and earlier exports were preserved.
+- Added compatibility, troubleshooting, extension, dependency/license and test-evidence notes. Status distinguishes the original user-tested probe from new simulated-host prototypes.
+- Remaining boundaries are in testing.md and roadmap.md. No GitHub push, external messages, SDK distribution, plugin binary loading or host-session changes were performed during unattended work.
