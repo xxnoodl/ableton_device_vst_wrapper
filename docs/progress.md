@@ -68,3 +68,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User confirmed Morph automation continues in Live after clicking disconnect.
 - While disconnected, entering 0.5 in Max did not affect Morph or interrupt its automation.
 - User also confirmed the Max number stops following automation after disconnect and stays at its locally entered value. Both observer detachment and write isolation passed by user report.
+
+## Target deletion check in progress
+
+- User deleted Augmented Strings and edited the Max number; no visible errors or patch UI changes were reported.
+- Console output has not been inspected. This is not evidence that missing-target detection passed or failed.
+- Current patch has no inline disconnected/error indicator; diagnostics are sent to Max Console. Production UI needs visible target availability.

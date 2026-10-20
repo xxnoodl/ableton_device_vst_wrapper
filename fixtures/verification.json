@@ -31,7 +31,8 @@
     "trackMove": "passed-user-reported",
     "automationReenable": "passed-user-reported",
     "disconnectWriteIsolation": "passed-user-reported",
-    "disconnectObservation": "passed-user-reported"
+    "disconnectObservation": "passed-user-reported",
+    "targetDeletion": "pending-console-inspection"
   },
   "evidence": [
     {
@@ -87,6 +88,12 @@
       "source": "user report in working session",
       "result": "Disconnected Max number stops following automation and retains its local value",
       "limits": "User-observed behavior for one parameter and plugin; no general compatibility claim"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "After deleting Augmented Strings, editing Max number produced no visible patch warning or UI change",
+      "limits": "Console not inspected; missing-target handling remains unverified"
     }
   ]
 }
