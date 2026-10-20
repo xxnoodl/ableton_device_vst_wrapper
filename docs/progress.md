@@ -208,3 +208,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Added project schema v2 and deterministic v1 migration with original IDs/layout preserved and fromVersion metadata. Existing local raw saves remain backup-protected. Future versions fail explicitly. Runtime manifest version remains independently at 1.
 - Function selection now respects locked controls and finds nonoverlapping space for newly exposed controls. Insufficient panel space fails before changing the project.
 - Forty-seven automated tests pass, including migration, preset separation/round trips, duplicate-name and missing-reference rejection, and studio preset workflows.
+
+## Host-exposed registry capture slice
+
+- Added captureselected plus explicit new-file export in the source Max controller, and Import Live capture in the studio. It reads exposed parameters only, creates no widgets automatically and never claims SDK discovery. Real host capture execution remains pending.
+- Added capture validation, registry-to-project conversion and metadata provenance. Captured current values are labeled reset baselines, not factory defaults; vendor/class ID/physical units remain unknown. Plugin format is explicitly unknown because a Live PluginDevice does not prove VST3.
+- Quantized enum metadata is preserved and validated 0..N-1 enums get corresponding preview detents. New parameter provenance defaults are backward-compatible within project v2.
+- Fifty automated tests pass, including capture failure cases, baseline/identity honesty, enum conversion, and existing-file refusal in a simulated Max File API. File creation in Max still needs actual-host verification and has no established race-free exclusive-create guarantee.

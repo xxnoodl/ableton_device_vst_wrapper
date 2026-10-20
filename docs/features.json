@@ -54,6 +54,11 @@
       "name": "Static VST3 inventory",
       "status": "partially verified",
       "evidence": "native/plugin-inspector inventory worker; tests and actual machine read-only scan; does not load plugins or discover parameters"
+    },
+    {
+      "name": "Live-exposed registry capture/import",
+      "status": "prototype",
+      "evidence": "max/runtime/controller.js; packages/host-capture; tests; real host execution pending"
     }
   ]
 }

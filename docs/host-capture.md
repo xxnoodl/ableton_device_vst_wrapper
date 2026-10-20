@@ -1,0 +1,11 @@
+# Live-exposed parameter capture prototype
+
+This is a host-side alternative to direct SDK inspection, not a native VST scanner. It reads the selected PluginDevice's exposed parameters through LiveAPI. Only the earlier Morph probe has real-host verification; this new capture path has simulated-host tests and awaits actual execution.
+
+The generated controller.maxpat includes captureselected and a Save capture dialog path. In a licensed M4L device, select the intended plugin in Live, click captureselected, then use the bang beside Save capture to choose a NEW .json filename. Existing readable files are refused. Max File does not provide an established atomic exclusive-create guarantee here, so do not share the destination with another writer. Nothing is saved automatically. Capture does not modify the current parameter binding.
+
+Import the resulting JSON with Import Live capture in the studio. It creates a new project with all captured parameters available and no exposed widgets. Select functions to design. The editor preview remains disconnected; only the exported runtime can attempt live binding.
+
+Captured metadata includes display name, raw range, current value, quantization flag and available enum labels. Reset baselines are explicitly capture-time values, not factory defaults. Physical units, SDK class/parameter IDs, vendor and even plugin format remain unknown unless established elsewhere. The schema uses format: unknown for captured devices, because PluginDevice alone does not prove VST3. Index-based local IDs are registry-local and not promised stable across host reconfiguration; runtime binding still requires exact unique name/range matching. Captures with ambiguous names may be inspected but cannot silently bind.
+
+Native parameters with constant or invalid ranges are omitted. At most 256 exposed entries are supported; expose a smaller set in Configure if necessary. A validated quantized 0..N-1 enum with N labels gets N preview detents when first exposed. Enum text remains metadata; the current renderer shows numeric host values. Unknown or future capture versions, invalid values, duplicate indices and unexpected fields are rejected. No proprietary plugin graphics, code or preset state is extracted.

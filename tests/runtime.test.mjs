@@ -9,7 +9,7 @@ const project=()=>parseProject(readFileSync(new URL('../fixtures/morph.project.j
 const plain=x=>JSON.parse(JSON.stringify(x));
 function core(){const c=vm.createContext({});vm.runInContext(source('runtime-core.js'),c);return c.RuntimeCore;}
 function controller({duplicates=false,wrongRange=false,wrongDevice=false}={}){
- const events=[],writes=[],instances=[],tasks=[];
+ const events=[],writes=[],instances=[],tasks=[],saved=new Map();
  const objects={1:{type:'PluginDevice',name:wrongDevice?'Other synth':'Augmented Strings',parameters:duplicates?['id',2,'id',3]:['id',2]},2:{type:'DeviceParameter',name:'Morph',min:0,max:wrongRange?100:1,value:.3,is_enabled:1,is_quantized:0},3:{type:'DeviceParameter',name:'Morph',min:0,max:1,value:.4,is_enabled:1,is_quantized:0}};
  function LiveAPI(callback,path){
   this.id=path==='live_set view selected_track view selected_device'?1:Number(path.split(' ')[1]);this.callback=callback;
@@ -18,10 +18,11 @@ function controller({duplicates=false,wrongRange=false,wrongDevice=false}={}){
   this.set=(key,value)=>{writes.push([this.id,key,value]);objects[this.id][key]=value;for(const instance of instances)if(instance.id===this.id&&instance.property===key)instance.callback?.([key,value]);};
   instances.push(this);
  }
+ function File(path,mode){this.isopen=mode==='write'||saved.has(path);this.close=()=>{};this.writestring=text=>saved.set(path,text);}
  function Task(fn){this.cancelled=false;this.schedule=()=>tasks.push(this);this.cancel=()=>{this.cancelled=true;};this.run=()=>{if(!this.cancelled)fn();};}
- const c=vm.createContext({LiveAPI,Task,outlet:(...args)=>events.push(args)});c.include=name=>vm.runInContext(source(name),c);vm.runInContext(source('controller.js'),c);
+ const c=vm.createContext({LiveAPI,Task,File,outlet:(...args)=>events.push(args)});c.include=name=>vm.runInContext(source(name),c);vm.runInContext(source('controller.js'),c);
  c.loadmanifest(JSON.stringify(runtimeManifest(project())));
- return {c,events,writes,instances,objects,tasks};
+ return {c,events,writes,instances,objects,tasks,saved};
 }
 test('runtime validates exported schema, blocks synthetic binding and unknown code fields',()=>{
  const c=core(),m=runtimeManifest(project());assert.equal(c.validate(m).pluginName,'Augmented Strings');
@@ -73,4 +74,10 @@ test('queued control writes coalesce and disconnect cancels stale scheduled work
  const s=controller();s.c.bindselected();s.c.queuewrite('morph',.4);s.c.queuewrite('morph',.6);
  assert.equal(s.tasks.length,1);assert.equal(s.writes.length,0);s.tasks[0].run();assert.deepEqual(s.writes,[[2,'value',.6]]);
  s.c.queuewrite('morph',.8);s.c.disconnect();s.tasks[1].run();assert.equal(s.writes.length,1);
+});
+
+test('host capture records exposed values without factory defaults and refuses existing files',()=>{
+ const s=controller();s.c.captureselected();assert.match(s.events.at(-1)[1],/^Captured 1/);s.c.exportcapture('new-capture.json');
+ const capture=JSON.parse(s.saved.get('new-capture.json'));assert.equal(capture.source,'live-exposed-parameters');assert.equal(capture.parameters[0].currentValue,.3);assert.equal('defaultValue' in capture.parameters[0],false);assert.equal('sdkId' in capture.parameters[0],false);
+ const original=s.saved.get('new-capture.json');s.c.exportcapture('new-capture.json');assert.equal(s.saved.get('new-capture.json'),original);assert.match(s.events.at(-1)[1],/File exists/);
 });

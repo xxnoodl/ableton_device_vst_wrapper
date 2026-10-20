@@ -27,3 +27,7 @@ Native rendering approximates browser styles. Chickenhead and raised-black shape
 5. Disconnect during a pending drag, delete target, change selected track, bind another identical synth and reopen the Set. Confirm safe failure and explicit rebinding.
 6. Test mismatched names/ranges and synthetic manifests; neither should bind.
 7. Measure CPU, pointer response, panel bounds and memory in the actual host. Check dependency packaging on an isolated machine before claiming portability.
+
+## Host parameter capture
+
+The source patch also includes captureselected and an explicit Save capture dialog. See host-capture.md. It can run without a loaded layout and does not rebind the existing controller. Captured defaults are reset baselines from current values. This new path is simulated-host tested only.

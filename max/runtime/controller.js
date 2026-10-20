@@ -1,7 +1,7 @@
 /* Prototype: isolated from JSUI drawing; all incoming messages go through deferlow. */
 autowatch=1;inlets=1;outlets=2;
 include('runtime-core.js');
-var manifest=null,bindings={},epoch=0,currentDevice=null,pendingWrites={},writeTask=null;
+var manifest=null,bindings={},epoch=0,currentDevice=null,pendingWrites={},writeTask=null,lastCapture=null;
 function report(message){outlet(0,'status',message);outlet(1,message);}
 function scalar(api,key){var v=api.get(key);if(v===null||typeof v==='undefined'||(Object.prototype.toString.call(v)==='[object Array]'&&!v.length))throw new Error('Target unavailable');return Object.prototype.toString.call(v)==='[object Array]'?v[0]:v;}
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
@@ -54,3 +54,29 @@ function write(id,value){
 }
 function diagnostics(){report('Runtime prototype; explicit target only; no saved IDs; '+Object.keys(bindings).length+' bindings.');}
 function notifydeleted(){disconnect();}
+
+function captureselected(){
+ try{
+  var device=new LiveAPI(null,'live_set view selected_track view selected_device');if(!valid(device,'PluginDevice'))throw new Error('Select a plugin device first');
+  var available=availableParameters(device);if(!available.length||available.length>256)throw new Error('Expose 1?256 parameters through Live Configure');
+  var parameters=[];
+  for(var i=0;i<available.length;i++){
+   var item=available[i];if(!isFinite(item.min)||!isFinite(item.max)||item.max<=item.min)continue;var api=new LiveAPI(null,'id '+item.id);if(!valid(api,'DeviceParameter'))throw new Error('Parameter disappeared during capture');
+   var quantized=!!Number(scalar(api,'is_quantized')),items=quantized?api.get('value_items'):[];
+   if(Object.prototype.toString.call(items)!=='[object Array]')items=[];
+   parameters.push({index:i,name:item.name,min:item.min,max:item.max,currentValue:Number(scalar(api,'value')),quantized:quantized,enumLabels:items.map(function(value){return String(value);})});
+  }
+  if(!parameters.length)throw new Error('No controllable ranges found');
+  var capture={captureVersion:1,source:'live-exposed-parameters',pluginName:String(scalar(device,'name')),parameters:parameters};
+  lastCapture=JSON.stringify(capture);report('Captured '+parameters.length+' exposed parameters. Choose a NEW JSON filename with Save capture. No SDK IDs or factory defaults captured.');
+ }catch(e){lastCapture=null;report('Capture error: '+e.message);}
+}
+function exportcapture(path){
+ var check=null,file=null;
+ try{
+  if(!lastCapture)throw new Error('Capture selected plugin first');
+  if(typeof path!=='string'||!/\.json$/i.test(path))throw new Error('Choose a new .json filename');
+  check=new File(path,'read');if(check.isopen){check.close();check=null;throw new Error('File exists; choose a different name');}check.close();check=null;
+  file=new File(path,'write');if(!file.isopen)throw new Error('Cannot create capture file');file.writestring(lastCapture+'\n');file.close();file=null;report('Capture saved. Import it into the studio.');
+ }catch(e){report('Capture export error: '+e.message);}finally{if(check)check.close();if(file)file.close();}
+}

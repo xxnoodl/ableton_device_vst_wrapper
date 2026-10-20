@@ -1,3 +1,4 @@
+import * as captures from '../packages/host-capture/index.ts';
 import * as presets from '../packages/presets/index.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -41,7 +42,7 @@ function harness(){
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
  const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...presets,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
  const state=()=>schema.validateProject(JSON.parse(JSON.stringify(vm.runInContext('project',c))));

@@ -1,10 +1,10 @@
 export const knobDesigns = ['studio','graphite','silver','selector','halo','stepped','pointer','recessed','gloss','monitor'] as const;
 export const knobAccents = ['mint','amber','cyan','red'] as const;
-export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' };
+export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' | 'host-captured';resetSource:'project-default'|'captured-current';quantized:boolean|null;enumLabels:string[] };
 export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number]; stepCount: number; stepValues: number[]; locked: boolean; groupId: string | null };
 export type FunctionalityPreset = {id:string;name:string;parameterIds:string[]};
 export type LayoutPreset = {id:string;name:string;widgets:Widget[];panel:{width:number;height:number;grid:number};theme:'dark'|'light'};
-export type Project = { schemaVersion: 2;functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
+export type Project = { schemaVersion: 2;functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3' | 'unknown'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 function object(value: unknown, keys: string[], at: string, optional: string[] = []): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at}: expected object`);
@@ -36,12 +36,12 @@ export function validateProject(input: unknown): Project {
   const target = object(o.target, ['kind','liveVersion','maxVersion','reconnect'], 'target');
   const panel = object(o.panel, ['width','height','grid'], 'panel');
   const parameters = list(o.parameters, 'parameters').map((value, i): Parameter => {
-    const p = object(value, ['id','name','min','max','defaultValue','unit','evidence'], `parameters[${i}]`);
+    const p = object(value, ['id','name','min','max','defaultValue','unit','evidence','resetSource','quantized','enumLabels'], `parameters[${i}]`,['resetSource','quantized','enumLabels']);
     const min = number(p.min,-1e9,1e9,'parameter.min');
     const max = number(p.max,min,1e9,'parameter.max');
     if (min === max) throw new Error('Parameter range must be nonzero');
     if (typeof p.unit !== 'string' || p.unit.length > 32) throw new Error('Invalid parameter unit');
-    return {id:text(p.id,'parameter.id'),name:text(p.name,'parameter.name'),min,max,defaultValue:number(p.defaultValue,min,max,'parameter.defaultValue'),unit:p.unit,evidence:choice(p.evidence,['synthetic','user-reported'],'parameter.evidence')};
+    return {id:text(p.id,'parameter.id'),name:text(p.name,'parameter.name'),min,max,defaultValue:number(p.defaultValue,min,max,'parameter.defaultValue'),unit:p.unit,evidence:choice(p.evidence,['synthetic','user-reported','host-captured'],'parameter.evidence'),resetSource:choice(p.resetSource===undefined?'project-default':p.resetSource,['project-default','captured-current'],'parameter.resetSource'),quantized:p.quantized===undefined||p.quantized===null?null:typeof p.quantized==='boolean'?p.quantized:(()=>{throw new Error('Invalid quantization flag');})(),enumLabels:p.enumLabels===undefined?[]:list(p.enumLabels,'enumLabels').map(v=>text(v,'enum label'))};
   });
   const width = number(panel.width,320,1600,'panel.width');
   const height = number(panel.height,160,900,'panel.height');
@@ -77,7 +77,7 @@ export function validateProject(input: unknown): Project {
   if(new Set(layoutPresets.map(p=>p.id)).size!==layoutPresets.length)throw new Error('Duplicate layout preset IDs');
   let migration:null|{fromVersion:1}=null;
   if(o.migration!==undefined&&o.migration!==null){const m=object(o.migration,['fromVersion'],'migration');if(m.fromVersion!==1)throw new Error('Invalid migration metadata');migration={fromVersion:1};}
-  return {schemaVersion:2,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
+  return {schemaVersion:2,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
 }
 export function parseProject(source: string): Project {
   if (typeof source !== 'string' || source.length > 1_000_000) throw new Error('Project exceeds the 1 MB text limit');

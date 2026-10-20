@@ -1,3 +1,4 @@
+import {parseHostCapture,projectFromCapture} from '/packages/host-capture/index.ts';
 import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
 import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
 import {validateInventory} from '/packages/inventory/index.ts';
@@ -91,7 +92,7 @@ function renderProperties(){
   $('designs').append(button);
  }
  const p=project.parameters.find(p=>p.id===w.parameterId);
- $('binding').textContent=p.name+' / '+p.min+' to '+p.max+' '+p.unit+' / '+p.evidence+' metadata. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
+ $('binding').textContent=p.name+' / '+p.min+' to '+p.max+' '+p.unit+' / '+p.evidence+' metadata. Reset source: '+p.resetSource+'. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
 }
 $('accent').onchange=()=>run(()=>{change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,accent:$('accent').value}:w)});$('accent').focus();});
 function updateStepFields(){const mode=$('step-mode').value;$('step-count-row').hidden=mode!=='equal';$('step-values-row').hidden=mode!=='custom';$('step-count').disabled=mode!=='equal';$('step-values').disabled=mode!=='custom';}
@@ -195,3 +196,6 @@ $('function-preset').onchange=()=>{if($('function-preset').value)applyLayout(()=
 $('layout-preset').onchange=()=>{if($('layout-preset').value)applyLayout(()=>applyLayoutPreset(project,$('layout-preset').value));};
 $('delete-functions').onclick=()=>run(()=>{const id=$('function-preset').value;if(!id)throw new Error('Select a function preset first');if(confirm('Delete this function preset? Undo can restore it.'))change({...project,functionalityPresets:project.functionalityPresets.filter(p=>p.id!==id)});});
 $('delete-layout').onclick=()=>run(()=>{const id=$('layout-preset').value;if(!id)throw new Error('Select a layout preset first');if(confirm('Delete this layout preset? Undo can restore it.'))change({...project,layoutPresets:project.layoutPresets.filter(p=>p.id!==id)});});
+
+$('import-capture').onclick=()=>{$('capture-file').value='';$('capture-file').click();};
+$('capture-file').onchange=async()=>{try{const file=$('capture-file').files[0];if(!file)return;if(file.size>1_000_000)throw new Error('Capture exceeds 1 MB');const next=projectFromCapture(parseHostCapture(await file.text()));if(confirm('Open this host capture as a new project? Save/export current changes first.')){activate(next);status('Loaded host-exposed metadata. Select functions to design. Preview stays disconnected; reset values are capture-time values, not factory defaults.');}}catch(error){status('Capture import failed: '+error.message);}};

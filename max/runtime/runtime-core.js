@@ -21,7 +21,7 @@ var RuntimeCore = (function () {
         function has(o,k) { return Object.prototype.hasOwnProperty.call(o,'$'+k); }
         for (i = 0; i < manifest.parameters.length; i++) {
             p = manifest.parameters[i];keys(p,['id','name','min','max','defaultValue','unit','evidence']);
-            if (!text(p.id) || !text(p.name) || has(seen,p.id) || !finite(p.min) || !finite(p.max) || p.min >= p.max || Math.abs(p.min)>1e9 || Math.abs(p.max)>1e9 || !finite(p.defaultValue) || p.defaultValue<p.min || p.defaultValue>p.max || typeof p.unit !== 'string' || p.unit.length>32 || ['synthetic','user-reported'].indexOf(p.evidence)<0) fail('Invalid parameter');
+            if (!text(p.id) || !text(p.name) || has(seen,p.id) || !finite(p.min) || !finite(p.max) || p.min >= p.max || Math.abs(p.min)>1e9 || Math.abs(p.max)>1e9 || !finite(p.defaultValue) || p.defaultValue<p.min || p.defaultValue>p.max || typeof p.unit !== 'string' || p.unit.length>32 || ['synthetic','user-reported','host-captured'].indexOf(p.evidence)<0) fail('Invalid parameter');
             if(p.evidence==='synthetic' && !manifest.demoOnly)fail('Synthetic parameters cannot enable real binding');
             seen['$'+p.id]=p;
         }

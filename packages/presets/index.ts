@@ -18,7 +18,7 @@ export function exposeParameters(project:Project,parameterIds:string[],makeId:()
  if(project.widgets.some(w=>w.locked&&!requested.has(w.parameterId)))throw new Error('Unlock controls before hiding them');
  const widgets=project.widgets.filter(w=>requested.has(w.parameterId));
  for(const id of parameterIds){if(widgets.some(w=>w.parameterId===id))continue;const p=project.parameters.find(p=>p.id===id)!;const width=112,height=project.panel.height>=208?160:110;const position=freeSlot(project,widgets,width,height);
- widgets.push({id:makeId(),type:'knob',label:p.name,parameterId:id,...position,width,height,design:'monitor',accent:'mint',stepCount:0,stepValues:[],locked:false,groupId:null});}
+ widgets.push({id:makeId(),type:'knob',label:p.name,parameterId:id,...position,width,height,design:'monitor',accent:'mint',stepCount:p.quantized&&p.enumLabels.length>=2&&p.enumLabels.length<=128&&p.min===0&&p.max===p.enumLabels.length-1?p.enumLabels.length:0,stepValues:[],locked:false,groupId:null});}
  return validateProject({...project,widgets});
 }
 export function applyFunctionalityPreset(project:Project,id:string,makeId:()=>string):Project{

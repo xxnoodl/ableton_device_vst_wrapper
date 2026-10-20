@@ -22,7 +22,7 @@ Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the ser
 npm test
 ```
 
-Forty-seven automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Fifty automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 
@@ -40,6 +40,10 @@ The preview panel dimensions are design choices, not measured Live panel limits.
 ## Plugin inventory
 
 Use **Read VST3 folders** to list installed Windows VST3 files and CPU architecture. No plugin code is loaded and no parameters are discovered. Permission failures appear as diagnostics. See [inventory boundaries](docs/plugin-inventory.md).
+
+## Live parameter capture
+
+The source Max controller can capture exposed parameter metadata from the selected Live plugin. **Import Live capture** creates a new design project with explicit provenance and capture-time reset baselines. This new path awaits host testing; it does not discover SDK IDs or prove VST3 format. See [capture details](docs/host-capture.md).
 
 ## Max runtime export
 
