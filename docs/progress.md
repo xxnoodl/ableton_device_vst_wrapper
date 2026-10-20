@@ -15,7 +15,7 @@ Host: installed Live 12.3.2, bundled Max 9.0.9, Windows x64. Exact plugin versio
 ## Next checks
 
 - Confirm saved device location and JS dependency inclusion.
-- Record and play parameter automation; check observation and write behavior separately.
+- Test writing during active automation and automation recording; playback observation passed by user report.
 - Reopen device and Set; verify explicit rebinding and document restoration limits.
 - Test target deletion, moves and duplicate devices.
 - Record plugin version, panel dimensions and performance observations.
@@ -27,3 +27,10 @@ M0 remains open. The studio and native inspector remain behind the feasibility g
 Use short, plain messages such as `add parameter probe` or `record morph test`. No credits or co-author trailers. Commit related changes together and update this log for meaningful results. Git author identity is still required by Git; configure it locally using the maintainer's supplied name and email.
 
 - Added ignore rules for local assistant/editor state, secrets and temporary files. Shared source, documentation and dependency lockfiles remain trackable.
+
+## Automation playback check
+
+- User reported the connection stopped updating before the automation test. Cause is unknown.
+- Explicit disconnect, selecting Augmented Strings and clicking bindselected restored control.
+- User confirmed Morph automation updates both Live and the Max number box during playback.
+- Writing from Max while automation is active, automation recording, reopen and device lifecycle checks remain untested.

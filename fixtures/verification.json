@@ -18,11 +18,14 @@
     "read": "passed-user-reported",
     "write": "passed-user-reported",
     "observe": "passed-user-reported",
-    "automation": "pending",
+    "automation": "playback-observation-passed-user-reported",
     "reload": "pending",
     "targetSelection": "pending",
     "deviceMove": "pending",
-    "export": "save-reported-reopen-pending"
+    "export": "save-reported-reopen-pending",
+    "automationRecording": "pending",
+    "automationWriteOverride": "pending",
+    "explicitRebind": "passed-user-reported"
   },
   "evidence": [
     {
@@ -30,6 +33,12 @@
       "source": "user report in working session",
       "result": "Morph updates Max; editing Max value updates synth; device save reported successful",
       "limits": "No automation or reopen test; exact plugin version and exported file location pending"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Explicit rebinding restored stalled connection; automation playback updates Live and Max",
+      "limits": "Disconnect cause unknown; write during automation and recording untested"
     }
   ]
 }
