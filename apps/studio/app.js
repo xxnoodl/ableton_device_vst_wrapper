@@ -1,4 +1,4 @@
-import {createKnob} from '/apps/studio/knob.js';
+import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject,moveWidget,normalize} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
 const $=id=>document.getElementById(id);
@@ -50,7 +50,7 @@ function renderWidgets(){
    header.onpointerup=finish;header.onpointercancel=()=>{header.onpointermove=null;renderWidgets();};
   };
   el.dataset.id=w.id;el.append(header);
-  const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,onSelect:select,onChange:value=>{
+  const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,design:w.design,accent:w.accent,onSelect:select,onChange:value=>{
    values[p.id]=value;for(const update of updates.get(p.id)||[])update(value);
   }});
   if(!updates.has(p.id))updates.set(p.id,[]);updates.get(p.id).push(control.update);
@@ -61,10 +61,19 @@ function renderProperties(){
  const w=project.widgets.find(w=>w.id===selected);$('properties').inert=!w;
  $('selection').textContent=w?w.label:'Select a control';
  for(const key of ['label','x','y','width','height'])$(key).value=w?w[key]:'';
+ $('designs').replaceChildren();$('accent').value=w?w.accent:'mint';
  if(!w){$('binding').textContent='Select a widget to inspect its parameter.';return;}
+ for(const design of designs){
+  const button=document.createElement('button');button.type='button';button.className='design-choice';button.setAttribute('aria-pressed',String(w.design===design.id));button.title=design.description;
+  const preview=createDial(design.id,w.accent,.62).dial;preview.setAttribute('aria-hidden','true');
+  const name=document.createElement('span');name.textContent=design.name;button.append(preview,name);
+  button.onclick=()=>run(()=>{change({...project,widgets:project.widgets.map(item=>item.id===w.id?{...item,design:design.id}:item)});$('designs').querySelector('[aria-pressed="true"]')?.focus();});
+  $('designs').append(button);
+ }
  const p=project.parameters.find(p=>p.id===w.parameterId);
  $('binding').textContent=p.name+' ? '+p.min+' to '+p.max+' '+p.unit+' ? '+p.evidence+' metadata. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
 }
+$('accent').onchange=()=>run(()=>{change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,accent:$('accent').value}:w)});$('accent').focus();});
 $('properties').onsubmit=event=>{event.preventDefault();run(()=>{
  const patch={label:$('label').value,type:'knob'};for(const key of ['x','y','width','height'])patch[key]=Number($(key).value);
  change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,...patch}:w)});status('Control updated.');

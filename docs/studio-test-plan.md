@@ -16,3 +16,5 @@ Browser manual checks (pending):
 Do not mark browser checks complete without performing them. Clean-machine Max device packaging, native inspector isolation, runtime mapping and pixel parity have separate future test plans.
 
 Interactive knob checks (pending browser verification): drag vertically, toggle Shift mid-drag without value jumps, release outside the knob, verify touch/pointer cancellation, double-click reset, arrow/fine/Page/Home/End keys, focused-only wheel behavior, precise numeric entry and empty/invalid input recovery. Moving the header must affect layout only. Imported legacy faders should render as knobs.
+
+Knob design checks: choose each design/accent from Properties, confirm control value and position survive style changes, undo/redo, export/import, and load a pre-style v1 project (Studio/Mint defaults). Confirm centered readouts retain fixed decimal formatting. Compare dark/light panels, scale visibility, indicator endpoints and Selector handle movement. Max parity is not yet implemented.

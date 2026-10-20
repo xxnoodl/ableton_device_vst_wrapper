@@ -12,12 +12,40 @@ export function keyValue(value, key, min, max, fine = false) {
  if (key === 'End') return max;
  return key in deltas ? clamp(value + deltas[key], min, max) : null;
 }
-export function createKnob({label, min, max, defaultValue, value, unit, onChange, onSelect}) {
+export const designs=[
+ {id:'studio',name:'Studio',description:'Soft face and continuous ring'},
+ {id:'graphite',name:'Graphite',description:'Dark hardware face and amber index'},
+ {id:'silver',name:'Alloy',description:'Machined silver with a fine scale'},
+ {id:'selector',name:'Selector',description:'Long hardware handle with scale marks'},
+ {id:'halo',name:'Halo',description:'Recessed face and illuminated arc'},
+ {id:'stepped',name:'LED scale',description:'Segmented light ring around a dark face'}
+];
+export function createDial(design='studio',accent='mint',normalized=.5){
+ const dial=document.createElement('div');dial.className='knob design-'+design+' accent-'+accent;
+ const scale=document.createElementNS('http://www.w3.org/2000/svg','svg');scale.classList.add('knob-scale');scale.setAttribute('viewBox','0 0 100 100');scale.setAttribute('aria-hidden','true');
+ const ticks=[];
+ for(let i=0;i<=24;i++){
+  const angle=(-135+i*270/24)*Math.PI/180;
+  const tick=document.createElementNS(scale.namespaceURI,'line');
+  const inner=i%6===0?39:42;
+  tick.setAttribute('x1',50+Math.sin(angle)*inner);tick.setAttribute('y1',50-Math.cos(angle)*inner);
+  tick.setAttribute('x2',50+Math.sin(angle)*47);tick.setAttribute('y2',50-Math.cos(angle)*47);
+  scale.append(tick);ticks.push(tick);
+ }
+ const face=document.createElement('span');face.className='knob-face';const indicator=document.createElement('i');face.append(indicator);dial.append(scale,face);
+ let previous=-1;
+ const update=position=>{
+  dial.style.setProperty('--angle',position*270+'deg');indicator.style.transform='translateX(-50%) rotate('+(-135+position*270)+'deg)';
+  const active=Math.floor(position*24);
+  if(active!==previous){ticks.forEach((tick,i)=>tick.classList.toggle('lit',i<=active));previous=active;}
+ };
+ update(normalized);return {dial,update};
+}
+export function createKnob({label, min, max, defaultValue, value, unit, design='studio', accent='mint', onChange, onSelect}) {
  const root=document.createElement('div');root.className='knob-control';
- const dial=document.createElement('div');dial.className='knob';dial.tabIndex=0;dial.setAttribute('role','slider');
+ const appearance=createDial(design,accent);const dial=appearance.dial;dial.tabIndex=0;dial.setAttribute('role','slider');
  dial.setAttribute('aria-label',label+' demo value');dial.setAttribute('aria-valuemin',min);dial.setAttribute('aria-valuemax',max);dial.setAttribute('aria-orientation','vertical');
  dial.title='Drag up/down. Shift for fine adjustment. Arrow keys to adjust. Double-click to reset.';
- const face=document.createElement('span');face.className='knob-face';const indicator=document.createElement('i');face.append(indicator);dial.append(face);
  const field=document.createElement('input');field.className='knob-value';field.type='number';field.min=min;field.max=max;field.step='any';field.setAttribute('aria-label',label+' precise demo value');
  const suffix=document.createElement('span');suffix.className='knob-unit';suffix.textContent=unit||'VALUE';
  const decimals=Math.max(0,Math.min(8,3-Math.floor(Math.log10(max-min))));
@@ -29,7 +57,7 @@ export function createKnob({label, min, max, defaultValue, value, unit, onChange
   current=clamp(next,min,max);
   if(current===drawnValue)return;
   drawnValue=current;const normalized=(current-min)/(max-min);
-  dial.style.setProperty('--angle',normalized*270+'deg');indicator.style.transform='translateX(-50%) rotate('+(-135+normalized*270)+'deg)';
+  appearance.update(normalized);
   dial.setAttribute('aria-valuenow',current);
   const spoken=format(current)+' '+unit;if(dial.getAttribute('aria-valuetext')!==spoken)dial.setAttribute('aria-valuetext',spoken);
   if(document.activeElement!==field)showValue();

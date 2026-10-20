@@ -21,3 +21,13 @@ test('movement snaps, clamps and preserves original project',()=>{
 test('local saves validate before mutation and preserve previous version as backup',()=>{
  const values=new Map();const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};const p=sample();saveProject(storage,'p',p);const first=values.get('p');saveProject(storage,'p',{...p,name:'Edited'});assert.equal(values.get('p.backup'),first);assert.equal(loadProject(storage,'p').name,'Edited');assert.throws(()=>saveProject(storage,'p',{...p,schemaVersion:2}));assert.equal(loadProject(storage,'p').name,'Edited');values.set('p','broken');assert.throws(()=>loadProject(storage,'p'));assert.deepEqual(loadProject(storage,'p.backup'),p);
 });
+
+test('design choices persist and older projects receive compatible defaults',()=>{
+ const raw=JSON.parse(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
+ assert.equal(validateProject(raw).widgets[0].design,'studio');
+ const p=sample();p.widgets[0].design='selector';p.widgets[0].accent='amber';
+ assert.equal(parseProject(serializeProject(p)).widgets[0].design,'selector');
+ assert.equal(parseProject(serializeProject(p)).widgets[0].accent,'amber');
+ p.widgets[0].design='url(evil)';assert.throws(()=>validateProject(p));
+ p.widgets[0].design='studio';p.widgets[0].accent='#arbitrary';assert.throws(()=>validateProject(p));
+});

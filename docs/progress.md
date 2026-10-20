@@ -150,3 +150,11 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Replaced variable-length decimal readouts with fixed decimal places chosen from the parameter span, right alignment and tabular digits. Decimal columns stay anchored as values change.
 - Skip repeated writes when the formatted display is unchanged; skip redundant knob redraws when a shared-parameter callback supplies the same value. Underlying values retain full precision.
 - Focusing the number field reveals its precise editable value; blur restores the compact fixed-decimal display. No animation or per-digit DOM nodes needed. Visual feel awaits user confirmation.
+
+## Knob design library
+
+- Inspected four user-supplied Desktop reference images. Built original CSS/SVG designs; reference images and third-party graphics were not copied into the repository.
+- Added six per-widget designs: Studio, Graphite, Alloy, Selector, Halo and LED scale. Properties provides visual choices plus Mint/Amber/Cyan/Red accents. All share the same knob interaction and stable readout behavior.
+- Centered fixed-decimal/tabular readouts again per user feedback.
+- Optional validated design/accent fields default to Studio/Mint for old v1 projects; explicit styles persist through export/import and undo history. Unsupported style identifiers are rejected.
+- Fifteen automated tests pass, including style round trips/defaults and invalid style rejection. Headless browser launch was denied by environment policy, so visual confirmation is pending in the user's browser. Max renderer style parity remains unimplemented.

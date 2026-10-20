@@ -2,25 +2,26 @@
 > vst-m4l-studio@0.0.1 test
 > node --test tests/*.test.cjs tests/*.test.mjs
 
-✔ knob drag supports negative ranges, fine adjustment and clamping (1.0601ms)
-✔ keyboard uses small, fine and page steps with explicit endpoints (0.2619ms)
-✔ explicit path, initial read, bounded write and observer update (3.673ms)
-✔ invalid paths and nonfinite values cannot write (1.1613ms)
-✔ missing and disabled targets fail visibly (2.8078ms)
-✔ rebind detaches observer and ignores late callbacks (1.1389ms)
-✔ quantized values round and deleted targets reject writes (0.9651ms)
-✔ empty host response disconnects after one read and blocks further reads (1.0016ms)
-✔ invalid target type disconnects without reading properties (0.9972ms)
-✔ project round trip is deterministic; compressor fixture is valid (3.8207ms)
-✔ reject malformed files, unknown versions, code fields, dangling bindings and overflow (5.8351ms)
-✔ normalized value transforms clamp, invert and reject invalid ranges (1.0564ms)
-✔ movement snaps, clamps and preserves original project (0.8555ms)
-✔ local saves validate before mutation and preserve previous version as backup (1.0577ms)
-ℹ tests 14
+✔ knob drag supports negative ranges, fine adjustment and clamping (0.9166ms)
+✔ keyboard uses small, fine and page steps with explicit endpoints (0.2938ms)
+✔ explicit path, initial read, bounded write and observer update (5.1853ms)
+✔ invalid paths and nonfinite values cannot write (1.172ms)
+✔ missing and disabled targets fail visibly (3.6337ms)
+✔ rebind detaches observer and ignores late callbacks (1.4786ms)
+✔ quantized values round and deleted targets reject writes (1.2158ms)
+✔ empty host response disconnects after one read and blocks further reads (1.053ms)
+✔ invalid target type disconnects without reading properties (0.8964ms)
+✔ project round trip is deterministic; compressor fixture is valid (3.784ms)
+✔ reject malformed files, unknown versions, code fields, dangling bindings and overflow (5.3475ms)
+✔ normalized value transforms clamp, invert and reject invalid ranges (0.7745ms)
+✔ movement snaps, clamps and preserves original project (0.7793ms)
+✔ local saves validate before mutation and preserve previous version as backup (1.1022ms)
+✔ design choices persist and older projects receive compatible defaults (1.3532ms)
+ℹ tests 15
 ℹ suites 0
-ℹ pass 14
+ℹ pass 15
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 181.291
+ℹ duration_ms 191.376

@@ -1,12 +1,14 @@
+export const knobDesigns = ['studio','graphite','silver','selector','halo','stepped'] as const;
+export const knobAccents = ['mint','amber','cyan','red'] as const;
 export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' };
-export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number };
+export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number] };
 export type Project = { schemaVersion: 1; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
-function object(value: unknown, keys: string[], at: string): Record<string, unknown> {
+function object(value: unknown, keys: string[], at: string, optional: string[] = []): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at}: expected object`);
   const o = value as Record<string, unknown>;
   for (const key of Object.keys(o)) if (!keys.includes(key)) throw new Error(`${at}: unknown field ${key}`);
-  for (const key of keys) if (!own(o, key)) throw new Error(`${at}: missing ${key}`);
+  for (const key of keys) if (!own(o, key) && !optional.includes(key)) throw new Error(`${at}: missing ${key}`);
   return o;
 }
 function text(value: unknown, at: string): string {
@@ -44,12 +46,12 @@ export function validateProject(input: unknown): Project {
   const ids = new Set(parameters.map(p => p.id));
   if (ids.size !== parameters.length) throw new Error('Duplicate parameter IDs');
   const widgets = list(o.widgets,'widgets').map((value,i): Widget => {
-    const w = object(value,['id','type','label','parameterId','x','y','width','height'],`widgets[${i}]`);
+    const w = object(value,['id','type','label','parameterId','x','y','width','height','design','accent'],`widgets[${i}]`,['design','accent']);
     const parameterId = text(w.parameterId,'widget.parameterId');
     if (!ids.has(parameterId)) throw new Error('Widget references an unknown parameter');
     const wWidth = number(w.width,96,width,'widget.width');
     const wHeight = number(w.height,110,height,'widget.height');
-    return {id:text(w.id,'widget.id'),type:choice(w.type,['knob','slider'],'widget.type'),label:text(w.label,'widget.label'),parameterId,x:number(w.x,0,width-wWidth,'widget.x'),y:number(w.y,0,height-wHeight,'widget.y'),width:wWidth,height:wHeight};
+    return {id:text(w.id,'widget.id'),type:choice(w.type,['knob','slider'],'widget.type'),label:text(w.label,'widget.label'),parameterId,x:number(w.x,0,width-wWidth,'widget.x'),y:number(w.y,0,height-wHeight,'widget.y'),width:wWidth,height:wHeight,design:choice(w.design === undefined ? 'studio' : w.design,knobDesigns,'widget.design'),accent:choice(w.accent === undefined ? 'mint' : w.accent,knobAccents,'widget.accent')};
   });
   if (new Set(widgets.map(w => w.id)).size !== widgets.length) throw new Error('Duplicate widget IDs');
   return {schemaVersion:1,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
