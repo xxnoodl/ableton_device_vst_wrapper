@@ -146,7 +146,13 @@
       "date": "2026-10-20",
       "source": "user report in working session",
       "result": "Fresh exported Morph knob runtime in a new Max Audio Effect supports two-way control, follows automation, and follows again after Set reopening and explicit rebinding",
-      "limits": "Augmented Strings Morph only; exported runtime disconnect, target deletion, capture writing and visual parity remain unverified"
+      "limits": "Augmented Strings Morph only; capture writing and visual parity remain unverified"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report and quoted Max Console messages in working session",
+      "result": "Exported runtime disconnect stops control and observation; rebinding restores control. Synth deletion reports Disconnected and Write error: Target unavailable; bind explicitly. Undo and explicit rebind restore Morph control",
+      "limits": "One plugin and parameter; no general target-lifecycle compatibility claim"
     }
   ]
 }
