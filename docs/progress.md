@@ -56,3 +56,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User entered 0.5 through Max during Morph automation playback and reported automation became disabled/overridden.
 - Current direct LiveAPI value writes interrupt automation; they do not preserve playback ownership. This behavior must be exposed in the eventual controller UX.
 - Re-enabling automation and confirming resumed playback remain pending. Automation recording remains untested.
+
+## Automation recovery check
+
+- User re-enabled Morph automation in Live and confirmed Max follows playback again.
+- Observed sequence: playback follows, manual Max write overrides automation, explicit re-enable restores playback observation.
+- Automation recording and undo behavior remain untested.

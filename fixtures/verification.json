@@ -29,7 +29,7 @@
     "automaticRestoration": "unsupported",
     "trackSelectionChange": "passed-user-reported",
     "trackMove": "passed-user-reported",
-    "automationReenable": "pending"
+    "automationReenable": "passed-user-reported"
   },
   "evidence": [
     {
@@ -67,6 +67,12 @@
       "source": "user report in working session",
       "result": "Entering 0.5 from Max during playback overrides Morph automation",
       "limits": "Re-enable recovery and automation recording untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Re-enabling Morph automation restores playback updates in Max",
+      "limits": "Automation recording and undo behavior untested"
     }
   ]
 }
