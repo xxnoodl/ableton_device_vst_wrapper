@@ -182,3 +182,10 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - All mappings validate before subscriptions, failures roll back, stale callbacks are invalidated, and UI writes coalesce over 33 ms with cancellation on disconnect. No observed values are echoed as writes.
 - Twenty-seven automated tests pass, including runtime contracts, drawing smoke checks, export determinism, missing/ambiguous targets and queued-write cancellation. This is not host integration verification.
 - Browser and Max renderers remain separate; native style/material parity is approximate. Native keyboard/value entry, undo semantics, panel measurements and packaged amxd verification remain pending. See runtime.md.
+
+## Isolated static plugin inventory
+
+- Added a read-only worker/supervisor and studio Library inventory with filtering. Reads standard VST3 folders and PE headers without loading or executing plugins; CLI supports explicit roots.
+- Worker timeout/crash recovery, bounded traversal/heap and IPC validation are covered by automated tests. Symlinks are skipped; permission errors are diagnostics, not bypassed. No fingerprint or parameter metadata is fabricated.
+- Initial actual-machine scan identified 69 x64 headers and one permission failure. Unreadable-header entries are now retained with unknown architecture. Local inventory stays under ignored artifacts/.
+- Thirty-one tests pass. Native SDK parameter inspection, VST2, plugin sandboxed execution and vendor/class identity remain unimplemented. Read-only inventory is not presented as native inspection.

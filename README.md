@@ -22,7 +22,7 @@ Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the ser
 npm test
 ```
 
-Twenty-seven automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Thirty-one automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 
@@ -34,6 +34,10 @@ Twenty-seven automated tests cover Max contracts, schema validation, round trips
 - Export before clearing browser data or changing origins; browser saves are not portable backups.
 
 The preview panel dimensions are design choices, not measured Live panel limits. Schema v1 is an initial subset; unknown fields and versions fail explicitly. Full IR, historical migrations, native inspection, desktop packaging and real-host runtime validation remain pending. React/Tauri integration is deferred because dependency downloads are blocked in the current environment.
+
+## Plugin inventory
+
+Use **Read VST3 folders** to list installed Windows VST3 files and CPU architecture. No plugin code is loaded and no parameters are discovered. Permission failures appear as diagnostics. See [inventory boundaries](docs/plugin-inventory.md).
 
 ## Max runtime export
 

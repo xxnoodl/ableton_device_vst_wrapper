@@ -1,3 +1,4 @@
+import {validateInventory} from '/packages/inventory/index.ts';
 import {exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
 import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject,moveWidget,normalize} from '/packages/schema/index.ts';
@@ -112,3 +113,14 @@ $('export-max').onclick=async()=>{
  status('Exported Max patch source. Extract all files together. Save a real device in Max/Live; runtime integration is pending verification.');
  }catch(error){status('Max export failed: '+error.message);}finally{button.disabled=false;}
 };
+
+let inventory=null;
+function renderInventory(){
+ const container=$('inventory');container.replaceChildren();if(!inventory)return;
+ const query=$('plugin-search').value.toLowerCase();const matches=inventory.plugins.filter(p=>(p.name+' '+p.architecture).toLowerCase().includes(query));
+ for(const plugin of matches){const details=document.createElement('details');details.className='inventory-item';const summary=document.createElement('summary');summary.textContent=plugin.name+' / '+plugin.architecture;
+ const info=document.createElement('p');info.className='muted small';info.textContent='Inventory only. Parameters not inspected. '+plugin.installedPath;details.append(summary,info);container.append(details);}
+ $('inventory-note').textContent=matches.length+' of '+inventory.plugins.length+' plugins. '+inventory.diagnostics.length+' diagnostics. No code loaded, fingerprints computed or parameter access verified.';
+}
+$('plugin-search').oninput=renderInventory;
+$('scan-plugins').onclick=async()=>{const button=$('scan-plugins');button.disabled=true;button.textContent='Reading folders...';try{const response=await fetch('/api/inventory');const result=await response.json();if(!response.ok)throw new Error(result.error||'Inventory failed');inventory=validateInventory(result);renderInventory();status('Read-only inventory complete. Plugin parameters are still uninspected.');}catch(error){status('Inventory failed: '+error.message);}finally{button.disabled=false;button.textContent='Read VST3 folders';}};

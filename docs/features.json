@@ -49,6 +49,11 @@
       "name": "Deterministic Max source export",
       "status": "partially verified",
       "evidence": "packages/export; automated ZIP tests and independent Python CRC check; no amxd generated"
+    },
+    {
+      "name": "Static VST3 inventory",
+      "status": "partially verified",
+      "evidence": "native/plugin-inspector inventory worker; tests and actual machine read-only scan; does not load plugins or discover parameters"
     }
   ]
 }
