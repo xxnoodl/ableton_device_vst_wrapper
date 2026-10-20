@@ -15,6 +15,8 @@ test('device bundle preserves supplied shell byte for byte and selected registry
  const p=project(),template=envelope(runtimePatch(p)),before=template.slice(),files=deviceFiles(p,sources(),template);
  assert.deepEqual(files['Wrapper.amxd'],before);assert.deepEqual(template,before);assert.notEqual(files['Wrapper.amxd'],template);
  assert.deepEqual(JSON.parse(files['project.runtime.json']).parameters.map(p=>p.name),['Morph','Motion']);
+ assert.equal(JSON.parse(files['project.runtime.json']).autoBindPrevious,true);
+ assert.equal(JSON.parse(files['project.studio.json']).target.reconnect,'previous-on-load');
  assert.ok(!Object.keys(files).some(name=>/capture|\.maxpat$/.test(name)));
  const subset={...p,widgets:[p.widgets[1]]};assert.deepEqual(JSON.parse(deviceFiles(subset,sources(),template)['project.runtime.json']).parameters.map(p=>p.name),['Motion']);
 });

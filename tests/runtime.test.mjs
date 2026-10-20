@@ -33,11 +33,13 @@ test('default patch omits suspended Node writer and capture save controls after 
  for(const {patchline} of patch.lines){assert.ok(ids.has(patchline.source[0]));assert.ok(ids.has(patchline.destination[0]));}
 });
 function core(){const c=vm.createContext({});vm.runInContext(source('runtime-core.js'),c);return c.RuntimeCore;}
-function controller({duplicates=false,wrongRange=false,wrongDevice=false}={}){
+function controller({duplicates=false,wrongRange=false,wrongDevice=false,selectedDevice=1,chainDevices=['id',1,'id',10]}={}){
  const events=[],writes=[],instances=[],tasks=[],saved=new Map();
  const objects={1:{type:'PluginDevice',name:wrongDevice?'Other synth':'Augmented Strings',parameters:duplicates?['id',2,'id',3]:['id',2]},2:{type:'DeviceParameter',name:'Morph',min:0,max:wrongRange?100:1,value:.3,is_enabled:1,is_quantized:0},3:{type:'DeviceParameter',name:'Morph',min:0,max:1,value:.4,is_enabled:1,is_quantized:0}};
+ objects[10]={type:'MaxDevice'};objects[20]={type:'Track',devices:chainDevices};objects[5]={type:'AudioEffectDevice',name:'Other effect'};
+ objects[6]={type:'PluginDevice',name:'Augmented Strings',parameters:['id',7]};objects[7]={type:'DeviceParameter',name:'Morph',min:0,max:1,value:.9,is_enabled:1,is_quantized:0};
  function LiveAPI(callback,path){
-  this.id=path==='live_set view selected_track view selected_device'?1:Number(path.split(' ')[1]);this.callback=callback;
+  this.id=path==='this_device'?10:path==='this_device canonical_parent'?20:path==='live_set view selected_track view selected_device'?selectedDevice:Number(path.split(' ')[1]);this.callback=callback;
   Object.defineProperty(this,'type',{get:()=>objects[this.id]?.type||''});
   this.get=key=>{const object=objects[this.id];if(!object)throw new Error('Native invalid target');const value=object[key];return Array.isArray(value)?value:[value];};
   this.set=(key,value)=>{writes.push([this.id,key,value]);objects[this.id][key]=value;for(const instance of instances)if(instance.id===this.id&&instance.property===key)instance.callback?.([key,value]);};
@@ -61,6 +63,18 @@ test('controller binds by selected device/name/range; observations never write b
  s.c.write('morph',.5);assert.deepEqual(s.writes,[[2,'value',.5]]);
  s.c.write('morph',.5);assert.equal(s.writes.length,1);
  s.c.disconnect();s.c.write('morph',.8);assert.equal(s.writes.length,1);
+});
+test('automatic load binds only the immediate preceding plugin regardless of selection and never writes initial values',()=>{
+ const s=controller({selectedDevice:6,chainDevices:['id',6,'id',1,'id',10]});
+ s.c.loadmanifest(JSON.stringify({...runtimeManifest(project()),autoBindPrevious:true}));
+ assert.match(s.events.at(-1)[1],/^Bound 1/);assert.equal(s.writes.length,0);
+ s.c.write('morph',.7);assert.deepEqual(s.writes,[[2,'value',.7]]);assert.equal(s.objects[7].value,.9);
+});
+test('automatic load refuses intervening devices, wrong ranges and missing predecessors without falling back to selection',()=>{
+ for(const options of [{chainDevices:['id',1,'id',5,'id',10]},{chainDevices:['id',10]},{wrongRange:true},{wrongDevice:true}]){
+  const s=controller(options);s.c.loadmanifest(JSON.stringify({...runtimeManifest(project()),autoBindPrevious:true}));
+  assert.match(s.events.at(-1)[1],/^Binding error:/);assert.equal(s.writes.length,0);assert.ok(s.instances.every(i=>i.property!=='value'));
+ }
 });
 test('ambiguous names, wrong ranges and wrong selected device cannot bind',()=>{
  for(const options of [{duplicates:true},{wrongRange:true},{wrongDevice:true}]){const s=controller(options);s.c.bindselected();assert.match(s.events.at(-1)[1],/^Binding error:/);s.c.write('morph',.5);assert.equal(s.writes.length,0);}

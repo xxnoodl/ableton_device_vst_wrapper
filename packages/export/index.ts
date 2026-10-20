@@ -7,7 +7,7 @@ export function runtimeManifest(input: Project) {
  const used=new Set(project.widgets.map(w=>w.parameterId));
  const parameters=project.parameters.filter(p=>used.has(p.id));
  if(!parameters.length)throw new Error('Select at least one control before exporting');
- return {runtimeVersion:1,projectId:project.id,name:project.name,pluginName:project.plugin.name,theme:project.theme,panel:{width:project.panel.width,height:project.panel.height},demoOnly:parameters.some(p=>p.evidence==='synthetic'),parameters:parameters.map(({id,name,min,max,defaultValue,unit,evidence})=>({id,name,min,max,defaultValue,unit,evidence})),widgets:project.widgets.map(({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues})=>({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues}))};
+ return {runtimeVersion:1,autoBindPrevious:project.target.reconnect==='previous-on-load',projectId:project.id,name:project.name,pluginName:project.plugin.name,theme:project.theme,panel:{width:project.panel.width,height:project.panel.height},demoOnly:parameters.some(p=>p.evidence==='synthetic'),parameters:parameters.map(({id,name,min,max,defaultValue,unit,evidence})=>({id,name,min,max,defaultValue,unit,evidence})),widgets:project.widgets.map(({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues})=>({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues}))};
 }
 export function runtimePatch(project: Project) {
  project=validateProject(project);
@@ -64,12 +64,13 @@ export function validateDeviceTemplate(bytes:Uint8Array){
 }
 export function deviceFiles(input:Project,sources:Record<string,string>,template:Uint8Array):Record<string,string|Uint8Array>{
  validateDeviceTemplate(template);
- const files=exportFiles(input,sources);
+ const configured=validateProject({...input,target:{...input.target,reconnect:'previous-on-load'}});
+ const files=exportFiles(configured,sources);
  return {
   'Wrapper.amxd':template.slice(),
   'controller.js':files['controller.js'],'renderer.js':files['renderer.js'],'runtime-core.js':files['runtime-core.js'],
   'project.runtime.json':files['project.runtime.json'],'project.studio.json':files['project.studio.json'],
-  'README.txt':'Extract this entire folder, then drag Wrapper.amxd into Live after your plugin. Select the plugin device title, then click bindselected in the wrapper. Keep the files together. No Max editing or patch copying is needed.\n\nThis prototype controls an existing plugin instance; it does not host or distribute the plugin. Only exposed Live parameters are available. Rebind explicitly after reopening. Manual edits override automation; use Re-Enable Automation to resume.\n\nThe device shell is copied unchanged from a locally supplied Max-saved device. Generated bundle loading and clean-machine portability still require host verification. Capture saving is disabled.\n'
+  'README.txt':'Extract this entire folder, then drag Wrapper.amxd into Live after your plugin. It connects automatically to the matching plugin immediately before it. Keep the files together. Use bindselected only for explicit recovery. No Max editing or patch copying is needed.\n\nThis prototype controls an existing plugin instance; it does not host or distribute the plugin. Only exposed Live parameters are available. On reopening, automatic connection checks the immediate predecessor again. Manual edits override automation; use Re-Enable Automation to resume.\n\nThe device shell is copied unchanged from a locally supplied Max-saved device. Generated bundle loading and clean-machine portability still require host verification. Capture saving is disabled.\n'
  };
 }
 function crc32(bytes:Uint8Array):number {let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let i=0;i<8;i++)crc=(crc>>>1)^(0xedb88320&-(crc&1));}return (crc^0xffffffff)>>>0;}

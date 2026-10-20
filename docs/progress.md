@@ -250,6 +250,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed the first generated Wrapper.amxd loads and controls the plugin after explicit binding, without patch editing or positioning. Added automatic connection for generated bundles: after manifest initialization, locate this_device in its parent's device list and bind only its immediate predecessor using the same strict mapping checks. Missing/wrong predecessor fails without scanning or using the selected device. Explicit disconnect stays disconnected until another initialization or manual bind. Automatic host behavior remains unverified.
+- Sixty-nine tests pass. New simulated-host cases verify selection-independent predecessor binding, no initialization writes, second-instance isolation and refusal of intervening effects, missing predecessors and wrong metadata. Source exports retain their explicit reconnect default; generated device projects persist previous-on-load reconnect policy.
+
 - Product target clarified: choose plugin, check controls, generate a usable wrapper with automatic layout; customization is optional. Implemented template-backed device generation in browser and CLI. It copies the locally authored, Max-saved shell unchanged and bundles only selected-control metadata plus runtime dependencies. No manual patch assembly is required by this new path; generated-bundle host loading awaits verification. Public shell distribution, parameter discovery and automatic target connection remain pending.
 - Sixty-seven automated tests pass, including studio Generate-handler success/failure, shell validation, selected-only registry generation and binary-safe ZIP tests. Independently verified seven-entry ZIP CRCs and unchanged shell bytes. Repeated CLI build refused the existing directory. Local template and generated binaries stay ignored by Git.
 

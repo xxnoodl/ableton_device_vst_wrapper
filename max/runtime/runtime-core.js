@@ -10,7 +10,9 @@ var RuntimeCore = (function () {
         for (var i = 0; i < allowed.length; i++) if (!Object.prototype.hasOwnProperty.call(o, allowed[i])) fail('Missing field: ' + allowed[i]);
     }
     function validate(manifest) {
-        keys(manifest, ['runtimeVersion','projectId','name','pluginName','theme','panel','demoOnly','parameters','widgets']);
+        var fields=['runtimeVersion','projectId','name','pluginName','theme','panel','demoOnly','parameters','widgets'];
+        if(Object.prototype.hasOwnProperty.call(manifest,'autoBindPrevious')){fields.push('autoBindPrevious');if(typeof manifest.autoBindPrevious!=='boolean')fail('Invalid automatic binding option');}
+        keys(manifest, fields);
         if (manifest.runtimeVersion !== 1) fail('Unsupported runtime version');
         if (!text(manifest.projectId) || !text(manifest.name) || !text(manifest.pluginName)) fail('Invalid project identity');
         if (['dark','light'].indexOf(manifest.theme) < 0 || typeof manifest.demoOnly !== 'boolean') fail('Invalid theme or provenance');

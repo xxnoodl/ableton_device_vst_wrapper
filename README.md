@@ -8,7 +8,7 @@ The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph para
 
 The intended workflow is choose a plugin, check the controls to show, generate a wrapper with a sensible default layout, and optionally customize it. Manual Max assembly is not a product requirement.
 
-The browser studio provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob designs, multi-selection, layout tools, separate presets, properties, undo/redo and panel themes. Generate device now creates a ZIP containing a locally supplied Max-saved device shell, selected-control manifest and runtime dependencies. Extract together and drag Wrapper.amxd into Live; no patch copying or positioning is required by this path. The shell is copied unchanged, not encoded or rewritten. Generated-bundle loading remains unverified in Live. A public release needs an approved distributable shell; plugin metadata discovery and automatic target connection remain unfinished. The preview itself has no Live connection.
+The browser studio provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob designs, multi-selection, layout tools, separate presets, properties, undo/redo and panel themes. Generate device now creates a ZIP containing a locally supplied Max-saved device shell, selected-control manifest and runtime dependencies. Extract together and drag Wrapper.amxd into Live; no patch copying or positioning is required by this path. The shell is copied unchanged, not encoded or rewritten. The first generated Morph/Motion bundle loaded and worked in Live after explicit binding. Automatic connection to the immediate preceding plugin is now implemented with automated tests; its host check is pending. A public release needs an approved distributable shell; plugin metadata discovery remains unfinished. The preview itself has no Live connection.
 
 Morph and Motion passed independent two-way control, simultaneous automation and compact in-Live visibility in user tests. Capture reading works; Node-for-Max capture saving is suspended after two native host crashes and is excluded from generated bundles. See [device generation](docs/device-generation.md).
 
@@ -28,7 +28,7 @@ npm test
 
 With the server running, `npm run smoke` checks local asset delivery and request guards. `npm run inventory` prints a static Windows VST3 inventory. Neither command loads plugin code.
 
-Sixty-seven automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Sixty-nine automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 

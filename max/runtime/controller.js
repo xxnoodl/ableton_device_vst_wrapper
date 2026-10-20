@@ -7,13 +7,25 @@ function scalar(api,key){var v=api.get(key);if(v===null||typeof v==='undefined'|
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
 function disconnect(){epoch++;if(writeTask){writeTask.cancel();writeTask=null;}pendingWrites={};for(var k in bindings)if(Object.prototype.hasOwnProperty.call(bindings,k)){try{bindings[k].api.property='';}catch(e){}}bindings={};currentDevice=null;report('Disconnected. Select the intended plugin and bind.');}
 function read(path){var file=null;try{file=new File(path,'read');if(!file.isopen)throw new Error('Cannot open manifest');if(file.eof>1000000)throw new Error('Manifest exceeds 1 MB');var source='';while(file.position<file.eof){var line=file.readline();source+=line+'\n';if(source.length>1000000)throw new Error('Manifest exceeds 1 MB');}file.close();file=null;loadmanifest(source);}catch(e){report('Load error: '+e.message);}finally{if(file)file.close();}}
-function loadmanifest(source){try{var next=RuntimeCore.parse(source);disconnect();manifest=next;outlet(0,'manifest',JSON.stringify(manifest));report(manifest.demoOnly?'Demo only. Synthetic parameters cannot bind.':'Loaded. Select '+manifest.pluginName+' in Live and bind explicitly.');}catch(e){report('Load error: '+e.message);}}
+function loadmanifest(source){try{var next=RuntimeCore.parse(source);disconnect();manifest=next;outlet(0,'manifest',JSON.stringify(manifest));report(manifest.demoOnly?'Demo only. Synthetic parameters cannot bind.':'Loaded. Select '+manifest.pluginName+' in Live and bind explicitly.');if(manifest.autoBindPrevious&&!manifest.demoOnly)bindprevious();}catch(e){report('Load error: '+e.message);}}
 function availableParameters(device){var ids=device.get('parameters'),items=[];if(Object.prototype.toString.call(ids)!=='[object Array]')throw new Error('No exposed parameter list');for(var i=0;i<ids.length;i++)if(ids[i]==='id'&&Number(ids[i+1])){var api=new LiveAPI(null,'id '+ids[++i]);if(!valid(api,'DeviceParameter'))continue;items.push({id:Number(api.id),name:String(scalar(api,'name')),min:Number(scalar(api,'min')),max:Number(scalar(api,'max'))});}return items;}
-function bindselected(){
+function bindselected(){binddevice(false);}
+function bindprevious(){binddevice(true);}
+function previousDevice(){
+ var self=new LiveAPI(null,'this_device'),parent=new LiveAPI(null,'this_device canonical_parent');
+ if(!Number(self.id)||!Number(parent.id))throw new Error('Wrapper chain unavailable');
+ var raw=parent.get('devices'),ids=[];
+ if(Object.prototype.toString.call(raw)!=='[object Array]')throw new Error('Device chain unavailable');
+ for(var i=0;i<raw.length;i++)if(raw[i]==='id'&&Number(raw[i+1]))ids.push(Number(raw[++i]));
+ var position=ids.indexOf(Number(self.id));
+ if(position<=0)throw new Error('Place the wrapper immediately after '+manifest.pluginName);
+ return new LiveAPI(null,'id '+ids[position-1]);
+}
+function binddevice(previous){
  disconnect();
  try{
   if(!manifest)throw new Error('Load a manifest first');if(manifest.demoOnly)throw new Error('Demo-only manifest cannot bind');
-  var device=new LiveAPI(null,'live_set view selected_track view selected_device');
+  var device=previous?previousDevice():new LiveAPI(null,'live_set view selected_track view selected_device');
   if(!valid(device,'PluginDevice'))throw new Error('Select a plugin device in Live');
   var name=String(scalar(device,'name'));
   if(RuntimeCore.normalizedName(name)!==RuntimeCore.normalizedName(manifest.pluginName))throw new Error('Selected device name does not match '+manifest.pluginName);
