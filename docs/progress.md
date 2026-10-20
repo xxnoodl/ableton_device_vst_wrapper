@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- Read-only Windows event inspection located both crashes in node.script.mxe64 9.0.9.0, access violation 0xc0000005 at offset 0x44d4. Live remained open. Added an export regression check excluding Node writer/save controls while retaining capture reads and binding. No crash was retriggered during investigation.
+
 - Capture read reported two exposed parameters in Live. Saving produced no acknowledgement or Desktop JSON file. User reported Max crashing on script running; two Max crash dumps from this session exist. Root cause is unresolved. Removed Node writer and save controls from new generated patches pending investigation; existing .amxd devices are unchanged.
 
 - User tested a fresh nine-file Morph export in Live with Augmented Strings, copied into a new stock Max Audio Effect and saved as Morph Knob Test.amxd.

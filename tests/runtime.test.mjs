@@ -3,10 +3,18 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {parseProject} from '../packages/schema/index.ts';
-import {runtimeManifest,exportFiles,zipFiles,runtimeFiles} from '../packages/export/index.ts';
+import {runtimeManifest,runtimePatch,exportFiles,zipFiles,runtimeFiles} from '../packages/export/index.ts';
 const source=name=>readFileSync(new URL('../max/runtime/'+name,import.meta.url),'utf8');
 const project=()=>parseProject(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
 const plain=x=>JSON.parse(JSON.stringify(x));
+test('default patch omits suspended Node writer and capture save controls after host crashes',()=>{
+ const patch=runtimePatch(project()).patcher;
+ assert.equal(patch.boxes.some(({box})=>/node\.script|savedialog|prepend exportcapture/.test(box.text||'')),false);
+ assert.ok(patch.boxes.some(({box})=>box.text==='captureselected'));
+ assert.ok(patch.boxes.some(({box})=>box.text==='bindselected'));
+ const ids=new Set(patch.boxes.map(({box})=>box.id));
+ for(const {patchline} of patch.lines){assert.ok(ids.has(patchline.source[0]));assert.ok(ids.has(patchline.destination[0]));}
+});
 function core(){const c=vm.createContext({});vm.runInContext(source('runtime-core.js'),c);return c.RuntimeCore;}
 function controller({duplicates=false,wrongRange=false,wrongDevice=false}={}){
  const events=[],writes=[],instances=[],tasks=[],saved=new Map();
