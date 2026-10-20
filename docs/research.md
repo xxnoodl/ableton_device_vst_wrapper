@@ -17,3 +17,9 @@ Documentation is rolling unless noted. Installed versions: Live 12.3.2, bundled 
 | https://cycling74.com/terms-and-conditions | Website terms only, not the Max software EULA. Software/asset redistribution rights unresolved; inspect installed EULA before packaging. |
 
 No downloaded SDK, Max runtime, third-party graphics or plugin binaries are included. Max software license and exact Tauri dependency license text remain explicit research gaps, not assumed grants.
+
+## Studio slice sources
+
+Checked https://react.dev/learn, https://vite.dev/guide/ and https://zod.dev/basics before attempting installation. No packages were successfully installed; no versions or dependency license compliance are claimed. Shell currently uses only Node built-ins and browser facilities.
+
+Live automation reference checked: https://www.ableton.com/en/live-manual/12/automation/ ? manual changes override automation until re-enabled; actual probe recording/replay was separately user-tested.

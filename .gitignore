@@ -40,3 +40,5 @@ Desktop.ini
 *.tmp
 *.swp
 *~
+
+.npm-cache/

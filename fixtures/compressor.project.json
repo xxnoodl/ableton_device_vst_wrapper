@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "id": "compressor-study",
+  "name": "Compressor study",
+  "plugin": {
+    "vendor": "Synthetic fixture",
+    "name": "Compressor study",
+    "format": "VST3",
+    "classId": null
+  },
+  "target": {
+    "kind": "live-exposed",
+    "liveVersion": "12.3.2",
+    "maxVersion": "9.0.9",
+    "reconnect": "explicit"
+  },
+  "parameters": [
+    {
+      "id": "threshold",
+      "name": "Threshold",
+      "min": -60,
+      "max": 0,
+      "defaultValue": -18,
+      "unit": "dB",
+      "evidence": "synthetic"
+    },
+    {
+      "id": "ratio",
+      "name": "Ratio",
+      "min": 1,
+      "max": 20,
+      "defaultValue": 4,
+      "unit": ":1",
+      "evidence": "synthetic"
+    },
+    {
+      "id": "attack",
+      "name": "Attack",
+      "min": 0.1,
+      "max": 100,
+      "defaultValue": 10,
+      "unit": "ms",
+      "evidence": "synthetic"
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "min": 10,
+      "max": 1000,
+      "defaultValue": 180,
+      "unit": "ms",
+      "evidence": "synthetic"
+    },
+    {
+      "id": "mix",
+      "name": "Mix",
+      "min": 0,
+      "max": 100,
+      "defaultValue": 100,
+      "unit": "%",
+      "evidence": "synthetic"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "threshold-control",
+      "type": "knob",
+      "label": "Threshold",
+      "parameterId": "threshold",
+      "x": 16,
+      "y": 80,
+      "width": 112,
+      "height": 160
+    },
+    {
+      "id": "ratio-control",
+      "type": "knob",
+      "label": "Ratio",
+      "parameterId": "ratio",
+      "x": 136,
+      "y": 80,
+      "width": 112,
+      "height": 160
+    },
+    {
+      "id": "attack-control",
+      "type": "knob",
+      "label": "Attack",
+      "parameterId": "attack",
+      "x": 256,
+      "y": 80,
+      "width": 112,
+      "height": 160
+    },
+    {
+      "id": "release-control",
+      "type": "knob",
+      "label": "Release",
+      "parameterId": "release",
+      "x": 376,
+      "y": 80,
+      "width": 112,
+      "height": 160
+    },
+    {
+      "id": "mix-control",
+      "type": "knob",
+      "label": "Mix",
+      "parameterId": "mix",
+      "x": 496,
+      "y": 80,
+      "width": 112,
+      "height": 160
+    }
+  ],
+  "panel": {
+    "width": 640,
+    "height": 300,
+    "grid": 8
+  },
+  "theme": "dark",
+  "dataSource": "demo-only"
+}

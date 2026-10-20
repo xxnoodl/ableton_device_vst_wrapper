@@ -1,1 +1,13 @@
-{"name":"vst-m4l-studio","version":"0.0.1","private":true,"scripts":{"test":"node --test tests/*.test.cjs"},"engines":{"node":">=22"}}
+{
+  "name": "vst-m4l-studio",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs tests/*.test.mjs",
+    "start": "node scripts/studio-server.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "type": "module"
+}

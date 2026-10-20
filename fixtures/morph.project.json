@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "augmented-strings-study",
+  "name": "Augmented Strings",
+  "plugin": {
+    "vendor": "Arturia",
+    "name": "Augmented Strings",
+    "format": "VST3",
+    "classId": null
+  },
+  "target": {
+    "kind": "live-exposed",
+    "liveVersion": "12.3.2",
+    "maxVersion": "9.0.9",
+    "reconnect": "explicit"
+  },
+  "parameters": [
+    {
+      "id": "morph",
+      "name": "Morph",
+      "min": 0,
+      "max": 1,
+      "defaultValue": 0.5,
+      "unit": "",
+      "evidence": "user-reported"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "morph-control",
+      "type": "knob",
+      "label": "Morph",
+      "parameterId": "morph",
+      "x": 240,
+      "y": 80,
+      "width": 120,
+      "height": 160
+    }
+  ],
+  "panel": {
+    "width": 640,
+    "height": 300,
+    "grid": 8
+  },
+  "theme": "dark",
+  "dataSource": "demo-only"
+}

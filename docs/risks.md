@@ -7,3 +7,7 @@
 - Proprietary gain reduction unavailable; future meter must show unavailable until verified telemetry exists.
 - No native sandbox, discovery worker, packaged desktop or actual amxd yet.
 - Website terms do not establish Max redistribution rights. Verify installed EULA and asset licenses before packaging.
+
+## Studio slice limitations
+
+Browser local saves can be cleared by browser policy or storage exhaustion; export JSON for durable backups. The current schema is a deliberately limited v1 subset and does not encode full runtime mappings. UI smoke checks and TypeScript static checking are pending. Localhost preview does not inspect or load plugins. Same-machine copied-device success does not prove that Max ignored its cached original dependency path.

@@ -1,31 +1,46 @@
 # VST-to-M4L Interface Studio
 
-Local-first tools for designing Max for Live controls for existing VST3 plugins. The original plugin keeps its DSP in Live.
+Local-first tools for designing Max for Live controls for original VST3 plugins. The plugin keeps its DSP in Live.
 
-## Current progress
+## Current state
 
-M0 feasibility testing is in progress. On Live 12.3.2 with bundled Max 9.0.9, the user confirmed two-way control of Arturia Augmented Strings' exposed Morph parameter. A test device was saved successfully. The user also confirmed automation playback updates Live and Max after explicit rebinding. Reopening the Set requires disconnect and explicit rebinding, which the user confirmed restores control. Automatic restoration is unsupported. Writing from Max during playback overrides Morph automation, as reported by the user. Re-enabling automation restores playback updates in Max, as confirmed by the user. The user also recorded Morph changes from Max and confirmed playback in Live and Max. Portable packaging and undo/gesture behavior remain untested. This does not establish support for other plugins or parameters.
+The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. Reopening requires manual rebinding. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
 
-- Working: one-parameter Max probe, explicit selected-device binding, value observation and writes.
-- Automated: seven simulated LiveAPI contract tests pass. These do not test the real host.
-- Pending: remaining M0 host checks before the editor and native inspector.
+The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, knob/fader preview, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and does not export devices yet. The compressor sample uses synthetic parameters and no gain-reduction telemetry.
 
-See [progress](docs/progress.md), [feasibility](docs/feasibility.md) and [manual verification](docs/manual-verification.md).
+## Run
 
-## Run tests
+Requires Node 24 or later. No package installation needed.
 
-Requires Node >=22. No dependency installation needed.
+```sh
+npm start
+```
+
+Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the server. The server listens only on loopback and serves allowlisted project assets.
 
 ```sh
 npm test
 ```
 
-## Max source
+Twelve automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. Browser interaction, visual, accessibility and performance checks remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
-`max/examples/parameter-probe.maxpat` is patch source. Copy its objects into a stock Max Audio Effect, preserving the audio pass-through. Point its `js` object to `max/renderer/parameter-probe.js`. Expose Morph with Live Configure, select Augmented Strings, then click `bindselected`. The number box uses the raw host range.
+## Try the studio
 
-The example-folder JS copy supports opening the patch directly; the renderer-folder copy is canonical. Local exported devices and Live Sets are ignored by Git until their dependencies and portability have been checked. No plugin binaries, SDKs or proprietary assets are bundled.
+- Open the compressor study, select controls and drag their headers to position them.
+- Select a header and use arrow keys to move by one grid step. Change component type, bounds or labels in Properties.
+- Export JSON, reopen it with Open project, or Save locally to this browser. Updating a local save keeps its previous version as a backup.
+- Export before clearing browser data or changing origins; browser saves are not portable backups.
+
+The preview panel dimensions are design choices, not measured Live panel limits. Schema v1 is an initial subset; unknown fields and versions fail explicitly. Full IR, historical migrations, native inspection, desktop packaging and schema-driven Max runtime remain pending. React/Tauri integration is deferred because dependency downloads are blocked in the current environment.
+
+## Max probe
+
+`max/examples/parameter-probe.maxpat` is source. Copy its objects into a stock Max Audio Effect while preserving audio pass-through. Keep `parameter-probe.js` beside the device and expose Morph with Live Configure. Select Augmented Strings, then click `bindselected`. The number box uses the raw host range. The second JS outlet must connect to `print M0-status` for diagnostics.
+
+`max/renderer/parameter-probe.js` is canonical; the example copy must stay synchronized. Locally saved `.amxd` files and Live Sets are ignored until dependency portability is verified. Same-machine copied-device loading passed; clean-machine packaging is unverified. No plugin binaries, SDKs or proprietary assets are bundled.
+
+See [progress](docs/progress.md), [architecture](docs/architecture.md), [risks](docs/risks.md), [research](docs/research.md) and [manual host tests](docs/manual-verification.md).
 
 ## Development
 
-Keep commits small with short, plain messages. Do not add credit or co-author trailers. Update `docs/progress.md` when a meaningful test or milestone changes. Record what was actually observed and keep pending work explicit.
+Use short, plain commit messages with no credit or co-author trailers. Update the progress log after meaningful changes and distinguish automated checks from user-reported host results. Keep dependency lockfiles when dependencies are introduced.

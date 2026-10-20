@@ -16,9 +16,9 @@
       "evidence": "explicit bind required"
     },
     {
-      "name": "Desktop editor",
-      "status": "unsupported",
-      "evidence": "not implemented; M0 gate"
+      "name": "Browser studio shell",
+      "status": "prototype",
+      "evidence": "apps/studio; disconnected demo preview, not packaged desktop"
     },
     {
       "name": "Native plugin inspection",
@@ -29,6 +29,16 @@
       "name": "Plugin telemetry",
       "status": "unsupported",
       "evidence": "no telemetry source"
+    },
+    {
+      "name": "Project schema and local storage subset",
+      "status": "partially verified",
+      "evidence": "tests/schema.test.mjs; strict v1 subset, 5 automated tests; full IR and migrations pending"
+    },
+    {
+      "name": "Same-machine copied device load",
+      "status": "partially verified",
+      "evidence": "User reported copied device follows Morph; clean-machine dependency isolation pending"
     }
   ]
 }

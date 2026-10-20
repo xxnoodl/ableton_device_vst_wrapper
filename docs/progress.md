@@ -123,3 +123,16 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User saved a repository-local copy and changed its JS object to js parameter-probe.js. Inspection confirms the relative object text and second-outlet diagnostic wire.
 - Device still records a dependency-cache bootpath to the examples folder; JS is external, not established as embedded.
 - Copied the unchanged device and script into a separate Desktop portability-check folder. Relocated host load pending; this is not yet a portable release. Local amxd remains ignored by Git.
+
+## M0 gate and first studio slice
+
+- User confirmed the copied device loads from the separate portability-check folder and follows the second synth. Same-machine relocation passed; original dependency-cache paths remain available, so clean-machine portability is not established.
+- M0 gate passed for the narrow Live-exposed Morph path with documented manual reconnection and automation override behavior. No universal VST3 claim.
+- Implemented a dependency-free local studio shell and typed v1 project subset with strict parsing, deterministic export, binding references, range validation, and rejection of unknown fields/versions.
+- Added Morph metadata sample and five-control synthetic compressor sample; every preview value is explicitly simulated.
+- Studio includes function selection, knob/fader preview, drag/grid/keyboard movement, numeric bounds editing, undo/redo, theme switch, import/export, and explicit browser-local saves with previous-version backup recovery.
+- React/Vite/Zod installation failed with EACCES contacting npm registry. Chose browser ES modules and Node TypeScript stripping for a runnable first slice; no TypeScript compiler/typecheck, dependency lockfile or Tauri packaging claimed.
+- Twelve automated tests pass for Max contracts, schema round trips/failure cases, range transforms, layout bounds and local save recovery. Browser interaction/accessibility/performance verification remains pending.
+- Native inspection, persistent Live mappings, runtime schema export and full IR/migrations remain next milestones. Unsupported versions fail explicitly; no historical migration exists yet.
+
+- Local server smoke check passed: studio, JS, stripped schema/store modules and fixture return 200; /.git/config and /package.json return 404. Server listens on 127.0.0.1:5173. Browser interactions have not yet been visually inspected.
