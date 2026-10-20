@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed compact controls appear inside Live after moving the pasted presentation objects back to the top-left. Inspecting the saved device showed Max paste had shifted presentation Y positions below 169 pixels (JSUI Y=212); group repositioning resolved visibility. Copy/paste setup must account for presentation offsets and duplicate source-window names. Corrected in-panel interaction remains to be confirmed.
+
 - User screenshot confirmed the previous presentation exceeded Live's fixed 169-pixel device height. Export now places binding controls above a 139-pixel JSUI, hides capture diagnostics from presentation, and fits occupied control bounds rather than empty editor canvas margins. Hit testing uses the same transform as drawing. Actual corrected in-Live appearance awaits review.
 
 - Read-only Windows event inspection located both crashes in node.script.mxe64 9.0.9.0, access violation 0xc0000005 at offset 0x44d4. Live remained open. Added an export regression check excluding Node writer/save controls while retaining capture reads and binding. No crash was retriggered during investigation.
