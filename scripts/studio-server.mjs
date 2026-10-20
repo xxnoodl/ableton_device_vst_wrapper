@@ -4,7 +4,7 @@ import {resolve,extname,sep} from 'node:path';
 import {stripTypeScriptTypes} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
-const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/fixtures/'];
+const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/packages/export/','/max/runtime/','/fixtures/'];
 const mime={'.html':'text/html','.js':'text/javascript','.ts':'text/javascript','.css':'text/css','.json':'application/json'};
 const server=http.createServer(async(req,res)=>{
  try {

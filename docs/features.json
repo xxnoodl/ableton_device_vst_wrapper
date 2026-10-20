@@ -39,6 +39,16 @@
       "name": "Same-machine copied device load",
       "status": "partially verified",
       "evidence": "User reported copied device follows Morph; clean-machine dependency isolation pending"
+    },
+    {
+      "name": "Reusable native Max runtime source",
+      "status": "prototype",
+      "evidence": "max/runtime; tests/runtime.test.mjs; real host execution pending"
+    },
+    {
+      "name": "Deterministic Max source export",
+      "status": "partially verified",
+      "evidence": "packages/export; automated ZIP tests and independent Python CRC check; no amxd generated"
     }
   ]
 }

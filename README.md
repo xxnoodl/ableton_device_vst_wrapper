@@ -6,7 +6,7 @@ Local-first tools for designing Max for Live controls for original VST3 plugins.
 
 The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. Reopening requires manual rebinding. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
 
-The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob preview with selectable knob designs, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and does not export devices yet. The compressor sample uses synthetic parameters and no gain-reduction telemetry.
+The first browser studio slice provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob preview with selectable knob designs, drag and keyboard layout editing, bounds properties, undo/redo and panel themes. All editor values are simulated; it has no Live connection and exports reusable Max patch source and dependencies (not a finished device). The compressor sample uses synthetic parameters and no gain-reduction telemetry.
 
 ## Run
 
@@ -22,7 +22,7 @@ Open **http://127.0.0.1:5173**. Keep that terminal running; Ctrl+C stops the ser
 npm test
 ```
 
-Eighteen automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Twenty-seven automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 
@@ -33,7 +33,11 @@ Eighteen automated tests cover Max contracts, schema validation, round trips, ra
 - Export JSON, reopen it with Open project, or Save locally to this browser. Updating a local save keeps its previous version as a backup.
 - Export before clearing browser data or changing origins; browser saves are not portable backups.
 
-The preview panel dimensions are design choices, not measured Live panel limits. Schema v1 is an initial subset; unknown fields and versions fail explicitly. Full IR, historical migrations, native inspection, desktop packaging and schema-driven Max runtime remain pending. React/Tauri integration is deferred because dependency downloads are blocked in the current environment.
+The preview panel dimensions are design choices, not measured Live panel limits. Schema v1 is an initial subset; unknown fields and versions fail explicitly. Full IR, historical migrations, native inspection, desktop packaging and real-host runtime validation remain pending. React/Tauri integration is deferred because dependency downloads are blocked in the current environment.
+
+## Max runtime export
+
+Use **Export Max source** to download a ZIP, or run `node scripts/export-project.mjs fixtures/morph.project.json artifacts/NEW-DIRECTORY`. Extract all files together and follow its README in licensed Max/Live. The source runtime is a prototype with simulated-host tests; its actual Live execution is pending. See [runtime details](docs/runtime.md).
 
 ## Max probe
 

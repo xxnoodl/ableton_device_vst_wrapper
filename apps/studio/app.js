@@ -1,3 +1,4 @@
+import {exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
 import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject,moveWidget,normalize} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
@@ -102,3 +103,12 @@ function refreshSaves(){
 }
 $('save').onclick=()=>run(()=>{const key=prefix+project.id;if(localStorage.getItem(key)&&!confirm('Update this local save? The previous contents will be backed up.'))return;saveProject(localStorage,key,project);refreshSaves();status('Saved in this browser. Export JSON for a portable backup.');});
 fixture('morph').then(refreshSaves);
+
+$('export-max').onclick=async()=>{
+ const button=$('export-max');button.disabled=true;
+ try{const sources={};for(const file of runtimeFiles){const response=await fetch('/max/runtime/'+file);if(!response.ok)throw new Error('Cannot load runtime source '+file);sources[file]=await response.text();}
+ const files=exportFiles(project,sources);const archive=zipFiles(files);const url=URL.createObjectURL(new Blob([archive],{type:'application/zip'}));
+ const a=document.createElement('a');a.href=url;a.download=project.id.replace(/[^a-zA-Z0-9_-]/g,'_')+'-max-source.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ status('Exported Max patch source. Extract all files together. Save a real device in Max/Live; runtime integration is pending verification.');
+ }catch(error){status('Max export failed: '+error.message);}finally{button.disabled=false;}
+};

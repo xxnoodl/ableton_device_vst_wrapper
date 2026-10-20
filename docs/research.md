@@ -23,3 +23,7 @@ No downloaded SDK, Max runtime, third-party graphics or plugin binaries are incl
 Checked https://react.dev/learn, https://vite.dev/guide/ and https://zod.dev/basics before attempting installation. No packages were successfully installed; no versions or dependency license compliance are claimed. Shell currently uses only Node built-ins and browser facilities.
 
 Live automation reference checked: https://www.ableton.com/en/live-manual/12/automation/ ? manual changes override automation until re-enabled; actual probe recording/replay was separately user-tested.
+
+## Native runtime sources
+
+Checked https://docs.cycling74.com/apiref/js/mgraphics/ for native drawing primitives, https://docs.cycling74.com/legacy/max8/vignettes/jsfileobject for file reading, and https://docs.cycling74.com/apiref/lom/plugindevice/ for host-visible plugin devices. Legacy JSUI and LiveAPI execution in the new runtime still require a real-host test; successful Node simulations are not equivalent.

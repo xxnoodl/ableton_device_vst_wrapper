@@ -174,3 +174,11 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - All input methods snap to configured stops. Pointer motion accumulates before snapping; keyboard/wheel advance discrete positions. Custom values use equal angular spacing. Settings apply to preview only and do not establish actual plugin enum semantics.
 - Synthetic compressor Ratio demonstrates 4, 8, 10. No real host bindings or plugin files changed.
 - Eighteen automated tests pass, including allowed-value isolation, endpoint behavior, fine-motion accumulation, step validation and serialization. Revised visuals await user confirmation.
+
+## Reusable native Max export slice
+
+- Added strict runtime manifest validation, deterministic source ZIP export in the studio and a no-overwrite CLI exporter. Generated local Morph source/archive in artifacts/. Python zipfile independently validated seven archive entries and CRCs.
+- Added native JSUI drawing, pointer/fine/double-click controls, visible status, shared detent logic and a separate LiveAPI controller. Exact selected-plugin name and unique parameter name/range matching; synthetic manifests refuse real binding.
+- All mappings validate before subscriptions, failures roll back, stale callbacks are invalidated, and UI writes coalesce over 33 ms with cancellation on disconnect. No observed values are echoed as writes.
+- Twenty-seven automated tests pass, including runtime contracts, drawing smoke checks, export determinism, missing/ambiguous targets and queued-write cancellation. This is not host integration verification.
+- Browser and Max renderers remain separate; native style/material parity is approximate. Native keyboard/value entry, undo semantics, panel measurements and packaged amxd verification remain pending. See runtime.md.
