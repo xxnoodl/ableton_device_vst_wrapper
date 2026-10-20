@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed both Morph/Motion knobs and numeric readouts are fully visible inside Live after presentation placement. Two-control control/observation isolation, simultaneous automation and in-panel visibility now pass for this specific Augmented Strings configuration. Capture saving remains suspended; broader plugin compatibility and clean-machine packaging are unverified.
+
 - User confirmed independent reverse observation for Morph and Motion and simultaneous playback of separate automation curves in both Max knobs. Two-control panel visibility in Live remains to be checked.
 
 - User loaded the two-knob Morph/Motion export into Morph Motion Test.amxd and confirmed each Max knob changes only its intended synth parameter. Reverse observation and simultaneous automation for this layout remain to be checked.
