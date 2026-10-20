@@ -25,3 +25,5 @@ M0 remains open. The studio and native inspector remain behind the feasibility g
 ## Commit convention
 
 Use short, plain messages such as `add parameter probe` or `record morph test`. No credits or co-author trailers. Commit related changes together and update this log for meaningful results. Git author identity is still required by Git; configure it locally using the maintainer's supplied name and email.
+
+- Added ignore rules for local assistant/editor state, secrets and temporary files. Shared source, documentation and dependency lockfiles remain trackable.

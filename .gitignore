@@ -10,3 +10,33 @@ target/
 *.bak
 .DS_Store
 Thumbs.db
+
+# Local assistant and editor state
+.codex/
+.claude/
+.cursor/
+.continue/
+.aider*
+.clinerules/
+.roo/
+.windsurf/
+.vscode/
+.idea/
+*.code-workspace
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# OS and temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+*.tmp
+*.swp
+*~
