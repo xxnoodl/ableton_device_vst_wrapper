@@ -7,6 +7,23 @@ import {runtimeManifest,runtimePatch,exportFiles,zipFiles,runtimeFiles} from '..
 const source=name=>readFileSync(new URL('../max/runtime/'+name,import.meta.url),'utf8');
 const project=()=>parseProject(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
 const plain=x=>JSON.parse(JSON.stringify(x));
+test('device presentation fits Live height and scaled knob hit testing matches its drawing',()=>{
+ const p=project(),patch=runtimePatch(p).patcher;
+ for(const {box} of patch.boxes.filter(({box})=>box.presentation)){
+  const [x,y,width,height]=box.presentation_rect;
+  assert.ok(x>=0&&y>=0&&width>0&&height>0&&y+height<=169);
+  assert.notEqual(box.text,'captureselected');
+ }
+ const ui=patch.boxes.find(({box})=>box.id==='ui').box;
+ assert.equal(ui.presentation_rect[2],220);
+ const c=vm.createContext({mgraphics:{size:[220,139],init(){},redraw(){}},outlet(){}});
+ c.include=name=>vm.runInContext(source(name),c);
+ vm.runInContext(source('renderer.js'),c);c.manifest(JSON.stringify(runtimeManifest(p)));
+ const view=c.frame(),w=p.widgets[0];
+ assert.equal(c.hit(view.x+(w.x+w.width/2)*view.scale,view.y+(w.y+w.height/2)*view.scale),0);
+ assert.equal(c.hit(110,138),-1);
+ assert.ok(view.y+(w.y+w.height)*view.scale<=117);
+});
 test('default patch omits suspended Node writer and capture save controls after host crashes',()=>{
  const patch=runtimePatch(project()).patcher;
  assert.equal(patch.boxes.some(({box})=>/node\.script|savedialog|prepend exportcapture/.test(box.text||'')),false);

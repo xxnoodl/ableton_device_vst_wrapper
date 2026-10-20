@@ -10,17 +10,23 @@ function color(r,g,b,a){mgraphics.set_source_rgba(r,g,b,typeof a==='number'?a:1)
 function circle(x,y,r){mgraphics.ellipse(x-r,y-r,r*2,r*2);mgraphics.fill();}
 function line(x1,y1,x2,y2,width){mgraphics.set_line_width(width);mgraphics.move_to(x1,y1);mgraphics.line_to(x2,y2);mgraphics.stroke();}
 function centered(text,x,y){var width=mgraphics.text_measure(String(text))[0];mgraphics.move_to(x-width/2,y);mgraphics.show_text(String(text));}
-function scaleFactor(){if(!project)return 1;return Math.min(mgraphics.size[0]/project.panel.width,Math.max(1,mgraphics.size[1]-36)/project.panel.height);}
+function frame(){
+ if(!project||!project.widgets.length)return {scale:1,x:0,y:0};
+ var left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
+ for(var i=0;i<project.widgets.length;i++){var w=project.widgets[i];left=Math.min(left,w.x);top=Math.min(top,w.y);right=Math.max(right,w.x+w.width);bottom=Math.max(bottom,w.y+w.height);}
+ var scale=Math.min(Math.max(1,mgraphics.size[0]-16)/(right-left),Math.max(1,mgraphics.size[1]-28)/(bottom-top));
+ return {scale:scale,x:(mgraphics.size[0]-(right-left)*scale)/2-left*scale,y:3-top*scale};
+}
 function paint(){
  var light=project&&project.theme==='light';color(light ? 0.81 : 0.10,light ? 0.85 : 0.12,light ? 0.82 : 0.14);mgraphics.paint();
  mgraphics.select_font_face('Arial');mgraphics.set_font_size(11);
  if(project){
-  var scale=scaleFactor();mgraphics.save();mgraphics.scale(scale,scale);
+  var view=frame();mgraphics.save();mgraphics.translate(view.x,view.y);mgraphics.scale(view.scale,view.scale);
   for(var i=0;i<project.widgets.length;i++)drawWidget(project.widgets[i],i===selected,light);
   mgraphics.restore();
  }
- color(.08,.10,.11);mgraphics.rectangle(0,mgraphics.size[1]-34,mgraphics.size[0],34);mgraphics.fill();
- color(.75,.83,.77);mgraphics.set_font_size(10);mgraphics.move_to(10,mgraphics.size[1]-13);mgraphics.show_text(message.substring(0,150));
+ color(.08,.10,.11);mgraphics.rectangle(0,mgraphics.size[1]-22,mgraphics.size[0],22);mgraphics.fill();
+ color(.75,.83,.77);mgraphics.set_font_size(10);mgraphics.move_to(6,mgraphics.size[1]-7);var display=message.indexOf('Bound ')===0?'Connected':message.indexOf('Disconnected')===0?'Disconnected':message;while(display.length>1&&mgraphics.text_measure(display)[0]>mgraphics.size[0]-12)display=display.substring(0,display.length-2);mgraphics.show_text(display);
 }
 function drawWidget(w,active,light){
  var p=RuntimeCore.parameter(project,w.parameterId),current=values['$'+p.id],pos=RuntimeCore.position(current,p,w),angle=(-135+pos*270)*Math.PI/180;
@@ -48,7 +54,7 @@ function drawWidget(w,active,light){
  var decimals=Math.max(0,Math.min(8,3-Math.floor(Math.log(p.max-p.min)/Math.LN10)));
  color(light ? 0.15 : 0.78,light ? 0.22 : 0.83,light ? 0.18 : 0.80);mgraphics.select_font_face('Courier New');mgraphics.set_font_size(11);centered(current.toFixed(decimals)+' '+p.unit,x,w.y+w.height-17);mgraphics.select_font_face('Arial');
 }
-function hit(x,y){if(!project)return -1;var scale=scaleFactor();x/=scale;y/=scale;for(var i=project.widgets.length-1;i>=0;i--){var w=project.widgets[i];if(x>=w.x&&x<=w.x+w.width&&y>=w.y&&y<=w.y+w.height)return i;}return -1;}
+function hit(x,y){if(!project||y>=mgraphics.size[1]-22)return -1;var view=frame();x=(x-view.x)/view.scale;y=(y-view.y)/view.scale;for(var i=project.widgets.length-1;i>=0;i--){var w=project.widgets[i];if(x>=w.x&&x<=w.x+w.width&&y>=w.y&&y<=w.y+w.height)return i;}return -1;}
 function emit(w,next){var p=RuntimeCore.parameter(project,w.parameterId);next=RuntimeCore.snap(next,p,w);if(project.demoOnly){values['$'+p.id]=next;mgraphics.redraw();}else outlet(0,'queuewrite',p.id,next);}
 function onclick(x,y,but,cmd,shift){selected=hit(x,y);if(selected<0)return;var w=project.widgets[selected],p=RuntimeCore.parameter(project,w.parameterId);drag={index:selected,lastY:y,position:RuntimeCore.position(values['$'+p.id],p,w)};mgraphics.redraw();}
 function ondrag(x,y,but,cmd,shift){if(!drag||!project)return;if(!but){drag=null;return;}var w=project.widgets[drag.index],p=RuntimeCore.parameter(project,w.parameterId);drag.position=RuntimeCore.clamp(drag.position-(y-drag.lastY)/(shift?2000:200),0,1);drag.lastY=y;emit(w,RuntimeCore.at(drag.position,p,w));}
