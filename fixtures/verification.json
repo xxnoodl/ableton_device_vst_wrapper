@@ -31,7 +31,7 @@
     "trackMove": "passed-user-reported",
     "automationReenable": "passed-user-reported",
     "disconnectWriteIsolation": "passed-user-reported",
-    "disconnectObservation": "pending"
+    "disconnectObservation": "passed-user-reported"
   },
   "evidence": [
     {
@@ -81,6 +81,12 @@
       "source": "user report in working session",
       "result": "After disconnect, Live Morph automation continues and ignores a Max write of 0.5",
       "limits": "Observer display freeze not separately confirmed; automation recording and undo untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Disconnected Max number stops following automation and retains its local value",
+      "limits": "User-observed behavior for one parameter and plugin; no general compatibility claim"
     }
   ]
 }
