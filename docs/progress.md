@@ -62,3 +62,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User re-enabled Morph automation in Live and confirmed Max follows playback again.
 - Observed sequence: playback follows, manual Max write overrides automation, explicit re-enable restores playback observation.
 - Automation recording and undo behavior remain untested.
+
+## Disconnect check
+
+- User confirmed Morph automation continues in Live after clicking disconnect.
+- While disconnected, entering 0.5 in Max did not affect Morph or interrupt its automation.
+- Stopping Max display updates after disconnect was not separately confirmed.

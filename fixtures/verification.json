@@ -29,7 +29,9 @@
     "automaticRestoration": "unsupported",
     "trackSelectionChange": "passed-user-reported",
     "trackMove": "passed-user-reported",
-    "automationReenable": "passed-user-reported"
+    "automationReenable": "passed-user-reported",
+    "disconnectWriteIsolation": "passed-user-reported",
+    "disconnectObservation": "pending"
   },
   "evidence": [
     {
@@ -73,6 +75,12 @@
       "source": "user report in working session",
       "result": "Re-enabling Morph automation restores playback updates in Max",
       "limits": "Automation recording and undo behavior untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "After disconnect, Live Morph automation continues and ignores a Max write of 0.5",
+      "limits": "Observer display freeze not separately confirmed; automation recording and undo untested"
     }
   ]
 }
