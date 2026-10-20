@@ -1,5 +1,7 @@
 # Device generation prototype
 
+Initial automatic binding passed in Live, but a Set reopen required manual binding. The runtime now retries failed startup binding six times over 8.25 seconds to accommodate delayed host restoration; explicit disconnect and manual binding cancel pending attempts. There is no ongoing polling after exhaustion or successful connection. Timing remains a hypothesis until the reopen retest passes.
+
 The producer flow is choose a plugin, check desired controls, generate, and optionally edit the result. Device assembly and presentation positioning belong to the builder.
 
 Generate device creates a seven-file ZIP with Wrapper.amxd, controller.js, renderer.js, runtime-core.js, project.runtime.json, project.studio.json and README.txt. The existing parameter checkboxes determine exported controls; newly enabled functions receive default positions. Current manual customizations are preserved. Native rendering fits occupied control bounds into the validated shell panel.

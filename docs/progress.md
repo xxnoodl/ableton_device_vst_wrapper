@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- Reopen test required manual binding; automatic reconnect did not pass. Startup previously tried once. Added six bounded retries over 8.25 seconds after initial failure, with no initial writes and cancellation on disconnect, manual binding or manifest replacement. Timing is a hypothesis, not an established root cause. Updated the active local auto-ready controller without changing its saved device. Seventy-one tests pass, including delayed-restoration recovery, finite retry exhaustion and stale-task cancellation; host reopen retest pending.
+
 - User confirmed the automatically connecting generated wrapper follows Morph and Motion and their automation after direct loading immediately after Augmented Strings, without Bind or Max editing. This verifies initial automatic connection for this two-parameter configuration; automatic connection after reopening, arbitrary plugin discovery and clean-machine distribution remain unverified.
 
 - User confirmed the first generated Wrapper.amxd loads and controls the plugin after explicit binding, without patch editing or positioning. Added automatic connection for generated bundles: after manifest initialization, locate this_device in its parent's device list and bind only its immediate predecessor using the same strict mapping checks. Missing/wrong predecessor fails without scanning or using the selected device. Explicit disconnect stays disconnected until another initialization or manual bind. Automatic host behavior remains unverified.

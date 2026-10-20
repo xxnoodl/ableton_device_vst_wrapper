@@ -2,15 +2,28 @@
 autowatch=1;inlets=1;outlets=3;
 include('runtime-core.js');
 var manifest=null,bindings={},epoch=0,currentDevice=null,pendingWrites={},writeTask=null,lastCapture=null;
+var automaticTask=null,automaticEpoch=0;
 function report(message){outlet(0,'status',message);outlet(1,message);}
 function scalar(api,key){var v=api.get(key);if(v===null||typeof v==='undefined'||(Object.prototype.toString.call(v)==='[object Array]'&&!v.length))throw new Error('Target unavailable');return Object.prototype.toString.call(v)==='[object Array]'?v[0]:v;}
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
-function disconnect(){epoch++;if(writeTask){writeTask.cancel();writeTask=null;}pendingWrites={};for(var k in bindings)if(Object.prototype.hasOwnProperty.call(bindings,k)){try{bindings[k].api.property='';}catch(e){}}bindings={};currentDevice=null;report('Disconnected. Select the intended plugin and bind.');}
+function cancelAutomatic(){automaticEpoch++;if(automaticTask){automaticTask.cancel();automaticTask=null;}}
+function clearBindings(){epoch++;if(writeTask){writeTask.cancel();writeTask=null;}pendingWrites={};for(var k in bindings)if(Object.prototype.hasOwnProperty.call(bindings,k)){try{bindings[k].api.property='';}catch(e){}}bindings={};currentDevice=null;}
+function disconnect(){cancelAutomatic();clearBindings();report('Disconnected. Select the intended plugin and bind.');}
 function read(path){var file=null;try{file=new File(path,'read');if(!file.isopen)throw new Error('Cannot open manifest');if(file.eof>1000000)throw new Error('Manifest exceeds 1 MB');var source='';while(file.position<file.eof){var line=file.readline();source+=line+'\n';if(source.length>1000000)throw new Error('Manifest exceeds 1 MB');}file.close();file=null;loadmanifest(source);}catch(e){report('Load error: '+e.message);}finally{if(file)file.close();}}
-function loadmanifest(source){try{var next=RuntimeCore.parse(source);disconnect();manifest=next;outlet(0,'manifest',JSON.stringify(manifest));report(manifest.demoOnly?'Demo only. Synthetic parameters cannot bind.':'Loaded. Select '+manifest.pluginName+' in Live and bind explicitly.');if(manifest.autoBindPrevious&&!manifest.demoOnly)bindprevious();}catch(e){report('Load error: '+e.message);}}
+function loadmanifest(source){try{var next=RuntimeCore.parse(source);disconnect();manifest=next;outlet(0,'manifest',JSON.stringify(manifest));report(manifest.demoOnly?'Demo only. Synthetic parameters cannot bind.':'Loaded. Select '+manifest.pluginName+' in Live and bind explicitly.');if(manifest.autoBindPrevious&&!manifest.demoOnly)startAutomatic();}catch(e){cancelAutomatic();report('Load error: '+e.message);}}
 function availableParameters(device){var ids=device.get('parameters'),items=[];if(Object.prototype.toString.call(ids)!=='[object Array]')throw new Error('No exposed parameter list');for(var i=0;i<ids.length;i++)if(ids[i]==='id'&&Number(ids[i+1])){var api=new LiveAPI(null,'id '+ids[++i]);if(!valid(api,'DeviceParameter'))continue;items.push({id:Number(api.id),name:String(scalar(api,'name')),min:Number(scalar(api,'min')),max:Number(scalar(api,'max'))});}return items;}
-function bindselected(){binddevice(false);}
-function bindprevious(){binddevice(true);}
+function bindselected(){cancelAutomatic();binddevice(false);}
+function bindprevious(){cancelAutomatic();binddevice(true);}
+function startAutomatic(){
+ cancelAutomatic();var token=automaticEpoch,attempt=0,delays=[250,500,1000,1500,2000,3000];
+ function retry(){
+  automaticTask=null;if(token!==automaticEpoch)return;
+  if(binddevice(true,attempt>0&&attempt<delays.length))return;
+  if(attempt>=delays.length)return;
+  automaticTask=new Task(retry,this);automaticTask.schedule(delays[attempt++]);
+ }
+ retry();
+}
 function previousDevice(){
  var self=new LiveAPI(null,'this_device'),parent=new LiveAPI(null,'this_device canonical_parent');
  if(!Number(self.id)||!Number(parent.id))throw new Error('Wrapper chain unavailable');
@@ -21,8 +34,8 @@ function previousDevice(){
  if(position<=0)throw new Error('Place the wrapper immediately after '+manifest.pluginName);
  return new LiveAPI(null,'id '+ids[position-1]);
 }
-function binddevice(previous){
- disconnect();
+function binddevice(previous,quiet){
+ clearBindings();
  try{
   if(!manifest)throw new Error('Load a manifest first');if(manifest.demoOnly)throw new Error('Demo-only manifest cannot bind');
   var device=previous?previousDevice():new LiveAPI(null,'live_set view selected_track view selected_device');
@@ -37,8 +50,8 @@ function binddevice(previous){
    pending.push({parameter:p,host:matches[0]});
   }
   for(var n=0;n<pending.length;n++)subscribe(pending[n],token);
-  currentDevice=device;report('Bound '+pending.length+' parameters on '+name+'. Manual writes override automation.');
- }catch(e){disconnect();report('Binding error: '+e.message);}
+  currentDevice=device;report('Bound '+pending.length+' parameters on '+name+'. Manual writes override automation.');return true;
+ }catch(e){clearBindings();if(!quiet)report('Binding error: '+e.message);return false;}
 }
 function subscribe(item,token){
  var key='$'+item.parameter.id;

@@ -28,7 +28,7 @@ npm test
 
 With the server running, `npm run smoke` checks local asset delivery and request guards. `npm run inventory` prints a static Windows VST3 inventory. Neither command loads plugin code.
 
-Sixty-nine automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Seventy-one automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 

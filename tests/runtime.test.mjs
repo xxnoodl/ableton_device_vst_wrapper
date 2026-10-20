@@ -76,6 +76,20 @@ test('automatic load refuses intervening devices, wrong ranges and missing prede
   assert.match(s.events.at(-1)[1],/^Binding error:/);assert.equal(s.writes.length,0);assert.ok(s.instances.every(i=>i.property!=='value'));
  }
 });
+test('startup retries recover delayed parameter restoration and stop after success without writing',()=>{
+ const s=controller({wrongRange:true});s.c.loadmanifest(JSON.stringify({...runtimeManifest(project()),autoBindPrevious:true}));
+ assert.equal(s.tasks.length,1);s.objects[2].max=1;s.tasks[0].run();
+ assert.match(s.events.at(-1)[1],/^Bound 1/);assert.equal(s.tasks.length,1);assert.equal(s.writes.length,0);
+});
+test('startup retries are bounded and explicit disconnect or manual binding cancels stale attempts',()=>{
+ const s=controller({wrongRange:true});s.c.loadmanifest(JSON.stringify({...runtimeManifest(project()),autoBindPrevious:true}));
+ for(let i=0;i<s.tasks.length;i++){assert.ok(i<6);s.tasks[i].run();}
+ assert.equal(s.tasks.length,6);assert.match(s.events.at(-1)[1],/^Binding error:/);
+ for(const action of ['disconnect','bindselected']){
+  const r=controller({wrongRange:true});r.c.loadmanifest(JSON.stringify({...runtimeManifest(project()),autoBindPrevious:true}));
+  r.objects[2].max=1;r.c[action]();const count=r.events.length;r.tasks[0].run();assert.equal(r.events.length,count);
+ }
+});
 test('ambiguous names, wrong ranges and wrong selected device cannot bind',()=>{
  for(const options of [{duplicates:true},{wrongRange:true},{wrongDevice:true}]){const s=controller(options);s.c.bindselected();assert.match(s.events.at(-1)[1],/^Binding error:/);s.c.write('morph',.5);assert.equal(s.writes.length,0);}
 });
