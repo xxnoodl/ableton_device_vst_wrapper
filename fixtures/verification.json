@@ -24,11 +24,12 @@
     "deviceMove": "pending",
     "export": "save-reported-reopen-pending",
     "automationRecording": "pending",
-    "automationWriteOverride": "pending",
+    "automationWriteOverride": "override-observed-user-reported",
     "explicitRebind": "passed-user-reported",
     "automaticRestoration": "unsupported",
     "trackSelectionChange": "passed-user-reported",
-    "trackMove": "passed-user-reported"
+    "trackMove": "passed-user-reported",
+    "automationReenable": "pending"
   },
   "evidence": [
     {
@@ -60,6 +61,12 @@
       "source": "user report in working session",
       "result": "Morph observation survives reordering its track without rebinding",
       "limits": "Device moves, duplication and deletion untested; no automatic restoration after reload"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Entering 0.5 from Max during playback overrides Morph automation",
+      "limits": "Re-enable recovery and automation recording untested"
     }
   ]
 }

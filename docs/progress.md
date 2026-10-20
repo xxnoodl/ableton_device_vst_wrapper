@@ -50,3 +50,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 - User moved the Augmented Strings track above or below another track and confirmed Max still follows Morph during playback without rebinding.
 - This verifies the existing connection survives track reorder in this session. Device moves, duplication and deletion remain untested.
+
+## Write during automation check
+
+- User entered 0.5 through Max during Morph automation playback and reported automation became disabled/overridden.
+- Current direct LiveAPI value writes interrupt automation; they do not preserve playback ownership. This behavior must be exposed in the eventual controller UX.
+- Re-enabling automation and confirming resumed playback remain pending. Automation recording remains untested.
