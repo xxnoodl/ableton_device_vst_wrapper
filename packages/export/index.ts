@@ -1,5 +1,5 @@
 import {validateProject, type Project} from '../schema/index.ts';
-export const runtimeFiles = ['runtime-core.js','controller.js','renderer.js'] as const;
+export const runtimeFiles = ['runtime-core.js','controller.js','renderer.js','capture-file.cjs','capture-writer.cjs'] as const;
 export function runtimeManifest(input: Project) {
  const project=validateProject(input);
  const used=new Set(project.widgets.map(w=>w.parameterId));
@@ -23,6 +23,7 @@ export function runtimePatch(project: Project) {
  box('defer','newobj',[330,160,70,22],'deferlow');
  box('controller','newobj',[330,205,125,22],'js controller.js');
  box('ui','jsui',[20,280,project.panel.width,project.panel.height+36],undefined,{filename:'renderer.js',numinlets:1,numoutlets:1,presentation:1,presentation_rect:[0,42,project.panel.width,project.panel.height+36]});
+ box('capture-writer','newobj',[480,245,315,22],'node.script capture-writer.cjs @autostart 1 @defer 1');line('controller',2,'capture-writer',0);line('capture-writer',0,'ui',0);line('capture-writer',0,'console',0);
  box('console','newobj',[500,205,130,22],'print Studio-runtime');
  for(const id of ['read','bind','disconnect','capture'])line(id,0,'defer',0);
  line('defer',0,'controller',0);line('controller',0,'ui',0);line('controller',1,'console',0);line('ui',0,'defer',0);

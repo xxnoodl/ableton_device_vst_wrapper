@@ -1,5 +1,5 @@
 /* Prototype: isolated from JSUI drawing; all incoming messages go through deferlow. */
-autowatch=1;inlets=1;outlets=2;
+autowatch=1;inlets=1;outlets=3;
 include('runtime-core.js');
 var manifest=null,bindings={},epoch=0,currentDevice=null,pendingWrites={},writeTask=null,lastCapture=null;
 function report(message){outlet(0,'status',message);outlet(1,message);}
@@ -72,11 +72,9 @@ function captureselected(){
  }catch(e){lastCapture=null;report('Capture error: '+e.message);}
 }
 function exportcapture(path){
- var check=null,file=null;
  try{
   if(!lastCapture)throw new Error('Capture selected plugin first');
   if(typeof path!=='string'||!/\.json$/i.test(path))throw new Error('Choose a new .json filename');
-  check=new File(path,'read');if(check.isopen){check.close();check=null;throw new Error('File exists; choose a different name');}check.close();check=null;
-  file=new File(path,'write');if(!file.isopen)throw new Error('Cannot create capture file');file.writestring(lastCapture+'\n');file.close();file=null;report('Capture saved. Import it into the studio.');
- }catch(e){report('Capture export error: '+e.message);}finally{if(check)check.close();if(file)file.close();}
+  outlet(2,'savecapture',path,lastCapture);report('Saving capture through Node for Max (existing files are refused).');
+ }catch(e){report('Capture export error: '+e.message);}
 }

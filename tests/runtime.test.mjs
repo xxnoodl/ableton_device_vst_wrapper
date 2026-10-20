@@ -63,7 +63,7 @@ test('native renderer paints and emits edits; incoming values do not emit writes
 });
 test('deterministic export contains source and references with no fabricated device or personal paths',()=>{
  const sources=Object.fromEntries(runtimeFiles.map(n=>[n,source(n)]));const files=exportFiles(project(),sources);
- assert.equal(Object.keys(files).length,7);assert.ok(!Object.keys(files).some(n=>n.endsWith('.amxd')));
+ assert.equal(Object.keys(files).length,9);assert.ok(!Object.keys(files).some(n=>n.endsWith('.amxd')));
  const patch=JSON.parse(files['controller.maxpat']).patcher;assert.ok(patch.lines.some(l=>l.patchline.source[0]==='controller'&&l.patchline.destination[0]==='ui'));
  assert.ok(!JSON.stringify(files).includes('C:/Users/'));assert.deepEqual(zipFiles(files),zipFiles(files));
  const archive=zipFiles({'hello.txt':'Knobs and UTF-8: \u2713'});const view=new DataView(archive.buffer);assert.equal(view.getUint32(0,true),0x04034b50);assert.equal(view.getUint32(archive.length-22,true),0x06054b50);
@@ -76,8 +76,8 @@ test('queued control writes coalesce and disconnect cancels stale scheduled work
  s.c.queuewrite('morph',.8);s.c.disconnect();s.tasks[1].run();assert.equal(s.writes.length,1);
 });
 
-test('host capture records exposed values without factory defaults and refuses existing files',()=>{
+test('host capture records exposed values and delegates saving without writing from the controller',()=>{
  const s=controller();s.c.captureselected();assert.match(s.events.at(-1)[1],/^Captured 1/);s.c.exportcapture('new-capture.json');
- const capture=JSON.parse(s.saved.get('new-capture.json'));assert.equal(capture.source,'live-exposed-parameters');assert.equal(capture.parameters[0].currentValue,.3);assert.equal('defaultValue' in capture.parameters[0],false);assert.equal('sdkId' in capture.parameters[0],false);
- const original=s.saved.get('new-capture.json');s.c.exportcapture('new-capture.json');assert.equal(s.saved.get('new-capture.json'),original);assert.match(s.events.at(-1)[1],/File exists/);
+ const event=s.events.find(e=>e[0]===2&&e[1]==='savecapture');assert.equal(event[2],'new-capture.json');const capture=JSON.parse(event[3]);
+ assert.equal(capture.source,'live-exposed-parameters');assert.equal(capture.parameters[0].currentValue,.3);assert.equal('defaultValue' in capture.parameters[0],false);assert.equal('sdkId' in capture.parameters[0],false);assert.equal(s.saved.size,0);
 });

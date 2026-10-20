@@ -215,3 +215,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Added capture validation, registry-to-project conversion and metadata provenance. Captured current values are labeled reset baselines, not factory defaults; vendor/class ID/physical units remain unknown. Plugin format is explicitly unknown because a Live PluginDevice does not prove VST3.
 - Quantized enum metadata is preserved and validated 0..N-1 enums get corresponding preview detents. New parameter provenance defaults are backward-compatible within project v2.
 - Fifty automated tests pass, including capture failure cases, baseline/identity honesty, enum conversion, and existing-file refusal in a simulated Max File API. File creation in Max still needs actual-host verification and has no established race-free exclusive-create guarantee.
+
+## Exclusive capture export
+
+- Replaced provisional Max File writing with a Node-for-Max helper that creates UTF-8 captures using the exclusive wx flag. Existing files are atomically refused, including concurrent-create cases; no user capture is overwritten. Node output is deferred to Max's low-priority queue.
+- Fifty-one tests pass, including an actual temporary-filesystem exclusive-create test and controller-to-writer delegation. The new host writer still needs integration verification in licensed Max; the helper's filesystem behavior is independently tested in Node.
+- Export archive now contains nine files, including both capture writer dependencies. Older seven-file local artifacts are preserved; current exports include the new files.

@@ -27,3 +27,5 @@ Live automation reference checked: https://www.ableton.com/en/live-manual/12/aut
 ## Native runtime sources
 
 Checked https://docs.cycling74.com/apiref/js/mgraphics/ for native drawing primitives, https://docs.cycling74.com/legacy/max8/vignettes/jsfileobject for file reading, and https://docs.cycling74.com/apiref/lom/plugindevice/ for host-visible plugin devices. Legacy JSUI and LiveAPI execution in the new runtime still require a real-host test; successful Node simulations are not equivalent.
+
+Node capture export: checked https://docs.cycling74.com/reference/node.script/ and https://docs.cycling74.com/apiref/nodeformax/ for Node-for-Max process messaging, supplied max-api module, autostart and low-priority defer behavior. Capture saving uses built-in Node filesystem exclusive creation; no extra packages are installed.

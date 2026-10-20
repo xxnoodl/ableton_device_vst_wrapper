@@ -2,7 +2,7 @@
 
 This is a host-side alternative to direct SDK inspection, not a native VST scanner. It reads the selected PluginDevice's exposed parameters through LiveAPI. Only the earlier Morph probe has real-host verification; this new capture path has simulated-host tests and awaits actual execution.
 
-The generated controller.maxpat includes captureselected and a Save capture dialog path. In a licensed M4L device, select the intended plugin in Live, click captureselected, then use the bang beside Save capture to choose a NEW .json filename. Existing readable files are refused. Max File does not provide an established atomic exclusive-create guarantee here, so do not share the destination with another writer. Nothing is saved automatically. Capture does not modify the current parameter binding.
+The generated controller.maxpat includes captureselected and a Save capture dialog path. In a licensed M4L device, select the intended plugin in Live, click captureselected, then use the bang beside Save capture to choose a NEW .json filename. A small Node-for-Max helper writes UTF-8 with the exclusive wx flag; existing files and symlinks are refused atomically. Nothing is saved automatically. Keep capture-file.cjs and capture-writer.cjs with the patch. The max-api module is supplied by Node for Max rather than installed from npm. Capture does not modify the current parameter binding.
 
 Import the resulting JSON with Import Live capture in the studio. It creates a new project with all captured parameters available and no exposed widgets. Select functions to design. The editor preview remains disconnected; only the exported runtime can attempt live binding.
 

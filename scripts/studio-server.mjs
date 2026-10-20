@@ -7,7 +7,7 @@ import {stripTypeScriptTypes} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/packages/export/','/packages/layout-engine/','/packages/presets/','/packages/host-capture/','/packages/inventory/','/max/runtime/','/fixtures/'];
-const mime={'.html':'text/html','.js':'text/javascript','.ts':'text/javascript','.css':'text/css','.json':'application/json'};
+const mime={'.html':'text/html','.js':'text/javascript','.cjs':'text/javascript','.ts':'text/javascript','.css':'text/css','.json':'application/json'};
 let inventoryPromise=null;let inventoryTime=0;
 const server=http.createServer(async(req,res)=>{
  try {

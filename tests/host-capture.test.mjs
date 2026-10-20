@@ -1,3 +1,7 @@
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import captureFile from '../max/runtime/capture-file.cjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {parseHostCapture,projectFromCapture} from '../packages/host-capture/index.ts';
@@ -10,4 +14,11 @@ test('capture import preserves provenance and current reset baseline without cla
 });
 test('capture rejects malformed ranges, duplicate indexes, executable fields and unknown versions',()=>{
  for(const mutate of [c=>c.captureVersion=2,c=>c.parameters[0].currentValue=99,c=>c.parameters[1].index=0,c=>c.script='evil',c=>c.parameters[0].sdkId='fake',c=>c.parameters[0].quantized='true']){const c=capture();mutate(c);assert.throws(()=>parseHostCapture(JSON.stringify(c)));}
+});
+
+test('capture file writer creates UTF-8 files exclusively and never replaces an existing file',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'capture-save-'));
+ try{const path=join(dir,'capture.json'),source=JSON.stringify(capture());await captureFile.saveCapture(path,source);assert.equal((await readFile(path,'utf8')).trim(),source);
+ await assert.rejects(()=>captureFile.saveCapture(path,source),{code:'EEXIST'});assert.equal((await readFile(path,'utf8')).trim(),source);await assert.rejects(()=>captureFile.saveCapture(join(dir,'wrong.exe'),source));}
+ finally{await rm(dir,{recursive:true,force:true});}
 });
