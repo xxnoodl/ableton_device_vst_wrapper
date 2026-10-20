@@ -26,7 +26,8 @@
     "automationRecording": "pending",
     "automationWriteOverride": "pending",
     "explicitRebind": "passed-user-reported",
-    "automaticRestoration": "unsupported"
+    "automaticRestoration": "unsupported",
+    "trackSelectionChange": "passed-user-reported"
   },
   "evidence": [
     {
@@ -46,6 +47,12 @@
       "source": "user report in working session",
       "result": "After Set reopen, disconnect and explicit bindselected restored control",
       "limits": "No automatic restoration; dependency portability and alternate machines untested"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "Morph observation continues after selecting another track without rebinding",
+      "limits": "Structural moves, duplicates and target deletion untested"
     }
   ]
 }
