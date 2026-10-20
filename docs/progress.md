@@ -87,3 +87,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - User confirmed subsequent edits after deletion show only disconnected and error: target unavailable; bind explicitly, without new native LiveAPI errors.
 - Missing-target guard recovery passed for this session by user report. Native warnings seen around deletion/initial failure remain a limitation; zero-warning teardown is not verified.
 - Automatic restoration and inline target/error display remain unsupported.
+
+## Restored target check
+
+- User restored the deleted synth with Live undo, selected Augmented Strings and rebound. Morph changes again update the Max number.
+- Delete/restore recovery is confirmed with explicit rebinding. Automatic restoration is not supported.
+- Remaining M0 work includes automation recording, duplicate target selection, plugin version evidence and portable device dependency checks. Performance and device panel measurements are also pending.

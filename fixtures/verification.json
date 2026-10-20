@@ -32,7 +32,8 @@
     "automationReenable": "passed-user-reported",
     "disconnectWriteIsolation": "passed-user-reported",
     "disconnectObservation": "passed-user-reported",
-    "targetDeletion": "guard-recovery-passed-user-reported"
+    "targetDeletion": "guard-recovery-passed-user-reported",
+    "targetRestore": "explicit-rebind-observation-passed-user-reported"
   },
   "evidence": [
     {
@@ -100,6 +101,12 @@
       "source": "user report and console screenshot in working session",
       "result": "After missing-target error, subsequent writes show readable disconnected/unavailable messages without new native errors",
       "limits": "Native warnings around deletion/first failure remain; no inline error UI"
+    },
+    {
+      "date": "2026-10-20",
+      "source": "user report in working session",
+      "result": "After undoing synth deletion and explicit rebinding, Morph updates Max again",
+      "limits": "Automatic restoration unsupported; restored-target write direction not separately retested"
     }
   ]
 }
