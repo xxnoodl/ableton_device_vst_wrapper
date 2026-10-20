@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed two-way Morph control directly in Live's compact device panel with the Max editor closed. This verifies interaction after scaling and presentation repositioning for the single-knob layout.
+
 - User confirmed compact controls appear inside Live after moving the pasted presentation objects back to the top-left. Inspecting the saved device showed Max paste had shifted presentation Y positions below 169 pixels (JSUI Y=212); group repositioning resolved visibility. Copy/paste setup must account for presentation offsets and duplicate source-window names. Corrected in-panel interaction remains to be confirmed.
 
 - User screenshot confirmed the previous presentation exceeded Live's fixed 169-pixel device height. Export now places binding controls above a 139-pixel JSUI, hides capture diagnostics from presentation, and fits occupied control bounds rather than empty editor canvas margins. Hit testing uses the same transform as drawing. Actual corrected in-Live appearance awaits review.
