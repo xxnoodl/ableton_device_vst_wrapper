@@ -250,6 +250,8 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 
 ## Exported renderer host checks
 
+- User confirmed the automatically connecting generated wrapper follows Morph and Motion and their automation after direct loading immediately after Augmented Strings, without Bind or Max editing. This verifies initial automatic connection for this two-parameter configuration; automatic connection after reopening, arbitrary plugin discovery and clean-machine distribution remain unverified.
+
 - User confirmed the first generated Wrapper.amxd loads and controls the plugin after explicit binding, without patch editing or positioning. Added automatic connection for generated bundles: after manifest initialization, locate this_device in its parent's device list and bind only its immediate predecessor using the same strict mapping checks. Missing/wrong predecessor fails without scanning or using the selected device. Explicit disconnect stays disconnected until another initialization or manual bind. Automatic host behavior remains unverified.
 - Sixty-nine tests pass. New simulated-host cases verify selection-independent predecessor binding, no initialization writes, second-instance isolation and refusal of intervening effects, missing predecessors and wrong metadata. Source exports retain their explicit reconnect default; generated device projects persist previous-on-load reconnect policy.
 
