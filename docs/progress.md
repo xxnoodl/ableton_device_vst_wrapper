@@ -144,3 +144,9 @@ Use short, plain messages such as `add parameter probe` or `record morph test`. 
 - Removed the fader selector. Legacy slider project entries remain readable and render as knobs; saving edited properties changes that widget to knob. Duplicate widgets sharing a parameter update together.
 - Fourteen automated tests pass, including drag scaling/clamping and keyboard endpoint/fine steps. Pointer/keyboard DOM interactions still need user/browser verification.
 - Next vertical slice: render an exported knob layout with Max native drawing, initially using the proven Morph binding. General parameter discovery remains separate pending work.
+
+## Stable knob readouts
+
+- Replaced variable-length decimal readouts with fixed decimal places chosen from the parameter span, right alignment and tabular digits. Decimal columns stay anchored as values change.
+- Skip repeated writes when the formatted display is unchanged; skip redundant knob redraws when a shared-parameter callback supplies the same value. Underlying values retain full precision.
+- Focusing the number field reveals its precise editable value; blur restores the compact fixed-decimal display. No animation or per-digit DOM nodes needed. Visual feel awaits user confirmation.

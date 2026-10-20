@@ -20,15 +20,24 @@ export function createKnob({label, min, max, defaultValue, value, unit, onChange
  const face=document.createElement('span');face.className='knob-face';const indicator=document.createElement('i');face.append(indicator);dial.append(face);
  const field=document.createElement('input');field.className='knob-value';field.type='number';field.min=min;field.max=max;field.step='any';field.setAttribute('aria-label',label+' precise demo value');
  const suffix=document.createElement('span');suffix.className='knob-unit';suffix.textContent=unit||'VALUE';
+ const decimals=Math.max(0,Math.min(8,3-Math.floor(Math.log10(max-min))));
+ const format=next=>Number(next.toFixed(decimals)).toFixed(decimals);
  let current=value;
+ let drawnValue;
+ const showValue=()=>{const display=format(current);if(field.value!==display)field.value=display;};
  const update=next=>{
-  current=clamp(next,min,max);const normalized=(current-min)/(max-min);
+  current=clamp(next,min,max);
+  if(current===drawnValue)return;
+  drawnValue=current;const normalized=(current-min)/(max-min);
   dial.style.setProperty('--angle',normalized*270+'deg');indicator.style.transform='translateX(-50%) rotate('+(-135+normalized*270)+'deg)';
-  dial.setAttribute('aria-valuenow',current);dial.setAttribute('aria-valuetext',Number(current.toFixed(4))+' '+unit);
-  if(document.activeElement!==field)field.value=Number(current.toFixed(6));
+  dial.setAttribute('aria-valuenow',current);
+  const spoken=format(current)+' '+unit;if(dial.getAttribute('aria-valuetext')!==spoken)dial.setAttribute('aria-valuetext',spoken);
+  if(document.activeElement!==field)showValue();
  };
  const commit=next=>{update(next);onChange(current);};
- dial.onfocus=onSelect;field.onfocus=onSelect;
+ dial.onfocus=onSelect;
+ field.onfocus=()=>{onSelect();field.value=Number(current.toPrecision(12));};
+ field.onblur=showValue;
  dial.onpointerdown=event=>{
   if(event.button!==0)return;event.preventDefault();onSelect();dial.focus();dial.setPointerCapture(event.pointerId);
   let previousY=event.clientY;const initial=current;dial.classList.add('adjusting');
@@ -40,7 +49,7 @@ export function createKnob({label, min, max, defaultValue, value, unit, onChange
  dial.onkeydown=event=>{const next=keyValue(current,event.key,min,max,event.shiftKey);if(next===null)return;event.preventDefault();commit(next);};
  dial.ondblclick=()=>commit(defaultValue);
  dial.addEventListener('wheel',event=>{if(document.activeElement!==dial)return;event.preventDefault();if(event.deltaY)commit(keyValue(current,event.deltaY<0?'ArrowUp':'ArrowDown',min,max,event.shiftKey));},{passive:false});
- field.onchange=()=>{if(field.value.trim()===''||!Number.isFinite(field.valueAsNumber)){field.value=Number(current.toFixed(6));return;}commit(field.valueAsNumber);field.value=Number(current.toFixed(6));};
- field.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();field.blur();}if(event.key==='Escape'){field.value=Number(current.toFixed(6));field.blur();}};
+ field.onchange=()=>{if(field.value.trim()===''||!Number.isFinite(field.valueAsNumber)){field.value=format(current);return;}commit(field.valueAsNumber);field.value=format(current);};
+ field.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();field.blur();}if(event.key==='Escape'){field.value=format(current);field.blur();}};
  update(value);root.append(dial,field,suffix);return {element:root,update};
 }
