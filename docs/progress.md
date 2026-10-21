@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 captured Color wrapper reopen
+
+- User saved and reopened the Live Set with the extracted Color wrapper folder unchanged, then confirmed Color control worked without bindselected. Automatic predecessor reconnection now passes for this session-discovered, captured-registry control in addition to the earlier measured Morph/Motion projects.
+- Current verified path: actual session discovery, Configure/refresh of Color, browser selection, automatic layout/generation, two-way control and Set reopen. Evidence remains limited to Augmented Strings; a different plugin product is the next compatibility check. Color automation and broader lifecycle cases are not inferred from this result.
+
 ## 2026-10-21 generic Color wrapper host result
 
 - User confirmed the session picker showed each actual Strings instance and its exposed controls. After adding Color through Live Configure, Refresh session discovered Color. The user selected only Color, generated/extracted a new wrapper and placed it immediately after the intended synth.

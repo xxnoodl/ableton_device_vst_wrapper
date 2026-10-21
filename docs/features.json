@@ -87,8 +87,8 @@
     },
     {
       "name": "Read-only Live session discovery and generic wrapper generation",
-      "status": "partially verified: session discovery and two-way Color wrapper",
-      "evidence": "User confirmed actual two-plugin catalog, browser selection, Color discovery after Configure/refresh, generation and two-way Color control. Captured-registry reopen/automation and broader plugin coverage remain pending. docs/progress.md"
+      "status": "partially verified: Color discovery, two-way control and reopen",
+      "evidence": "User confirmed actual session discovery, Color refresh/generation, two-way control and automatic reconnection after Set reopen. Different plugin products and Color automation remain pending. docs/progress.md"
     }
   ]
 }
