@@ -46,8 +46,8 @@
     },
     {
       "name": "Read-only Live session bridge",
-      "status": "prototype; host verification pending",
-      "evidence": "Legacy XMLHttpRequest and bounded LiveAPI reads tested under simulation and actual HTTP; generic generated control uses actual raw ranges. No new plugin product is claimed host-verified."
+      "status": "partially verified: session discovery and two-way Color wrapper",
+      "evidence": "User confirmed actual two-plugin catalog, browser selection, Color discovery after Configure/refresh, generation and two-way Color control. Captured-registry reopen/automation and broader plugin coverage remain pending. docs/progress.md"
     }
   ]
 }

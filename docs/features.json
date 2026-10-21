@@ -87,8 +87,8 @@
     },
     {
       "name": "Read-only Live session discovery and generic wrapper generation",
-      "status": "prototype; actual bridge host verification pending",
-      "evidence": "packages/live-session; max/runtime/session-bridge.js; scripts/live-bridge-*; tests/live-session.test.mjs and simulated studio choose/check/download flows. No SDK ID guesses or automatic Configure."
+      "status": "partially verified: session discovery and two-way Color wrapper",
+      "evidence": "User confirmed actual two-plugin catalog, browser selection, Color discovery after Configure/refresh, generation and two-way Color control. Captured-registry reopen/automation and broader plugin coverage remain pending. docs/progress.md"
     }
   ]
 }

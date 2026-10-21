@@ -1,5 +1,11 @@
 # Progress
 
+## 2026-10-21 generic Color wrapper host result
+
+- User confirmed the session picker showed each actual Strings instance and its exposed controls. After adding Color through Live Configure, Refresh session discovered Color. The user selected only Color, generated/extracted a new wrapper and placed it immediately after the intended synth.
+- User confirmed both directions: the generated Color knob controls the synth, and direct changes in the synth reach the wrapper. This verifies the actual session-to-selection-to-layout-to-generation path for a control outside the hardcoded native Morph/Motion adapter. It does not establish all plugins or all controls.
+- Saving/reopening this new captured-registry wrapper and its automation behavior remain to be checked independently. Automatic exposure without Configure remains unimplemented.
+
 ## 2026-10-21 session bridge first host result
 
 - User loaded the read-only bridge in Live and reported Live session ready: 2 plugins. This confirms the new Max controller initialized, traversed the current session and received a successful HTTP catalog acknowledgement from the local server. Browser instance selection, metadata accuracy and generating a wrapper from that actual catalog remain to be checked.
@@ -9,7 +15,7 @@
 - Returned focus to the core choose/select/generate workflow; macro automation is deferred. Implemented a separate read-only session bridge, strict catalog protocol, ephemeral authenticated loopback endpoints and a Live session instance picker in the builder. No Node for Max, metadata files or parameter writes are involved in the bridge.
 - The helper traverses tracks, returns, main and nested rack chains in bounded scheduled tasks, then transfers actual exposed names/ranges/current values/quantization/enums. Refresh generations, stale callbacks, deletion, transfer/scan limits, network deadlines and server restart token renewal are handled. Omissions remain visible.
 - Choosing an instance and checking controls creates an automatic layout and ordinary generated wrapper through the generic Live runtime, with captured-current reset provenance. No hardcoded Morph/Motion adapter is needed for this path, and no SDK identities, transient Live IDs or track labels enter the project. Unexposed controls still need Configure; automatic exposure is not implemented.
-- All 135 tests pass, with 33-asset and endpoint guard smoke checks. Tests cover generic synth/effect metadata, rack nesting, refresh/deletion, no bridge writes, generic generated binding to a 0?100 Mix control, capability/body limits, native task scheduling, budget omissions, server restart and browser choose/check/helper-download handlers. Actual Max HTTP transport and Live session scanning remain unverified. A new ignored bridge bundle is prepared without changing any existing wrapper or Set.
+- All 135 tests pass, with 33-asset and endpoint guard smoke checks. Tests cover generic synth/effect metadata, rack nesting, refresh/deletion, no bridge writes, generic generated binding to a 0-100 Mix control, capability/body limits, native task scheduling, budget omissions, server restart and browser choose/check/helper-download handlers. Actual Max HTTP transport and Live session scanning remain unverified. A new ignored bridge bundle is prepared without changing any existing wrapper or Set.
 
 ## 2026-10-21 two-instance macro host check
 
