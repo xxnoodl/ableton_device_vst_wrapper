@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 canvas and performance direction
+
+- Added absolute grid snapping, nearby alignment guides and collision-aware placement, resizing and duplication. Direct geometry edits and layout preset application reject new overlap unless explicitly enabled. Older projects remain readable.
+- Removed the redundant VALUE caption while retaining numerical readouts. Added optional seams, visual cables, sockets and bend editing. Project saves and layout presets preserve them; the exported native renderer draws them without parameter writes.
+- Defined the next functional routing slice: one macro controlling explicitly bound instances of several plugins, with per-route ranges, curves and staged activation. Broader XY surfaces, scenes, gesture paths and conflict/feedback behavior are documented in performance-routing.md. This routing is not implemented; today's cables remain decorative.
+- All 89 automated tests pass, including placement guards, cable validation/deletion, layout preset remapping, browser handlers and matching native cable geometry. HTTP smoke checks pass for 23 assets and request guards. Browser appearance and native decoration still need visual review in their actual environments.
+
 ## 2026-10-21 native discovery
 
 - Found installed Visual Studio Build Tools 2026/MSVC 19.51 and CMake through vswhere outside PATH. Fetched the official MIT-licensed VST3 interface subset via the read-only GitHub connector after direct git network failure; vendored the required notice and recorded upstream file blob SHAs.

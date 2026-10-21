@@ -113,7 +113,7 @@ test('studio boot, function selection, properties and style changes are wired to
 });
 test('studio selection, duplication, grouping, lock and delete commands work through toolbar',async()=>{
  const h=harness();await ready();h.ids.get('compressor').click();await ready();assert.equal(h.state().widgets.length,5);
- h.ids.get('select-all').click();h.ids.get('group').click();assert.ok(h.state().widgets.every(w=>w.groupId));
+ h.ids.get('panel-height').value='600';h.ids.get('project-settings').dispatch('submit');h.ids.get('select-all').click();h.ids.get('group').click();assert.ok(h.state().widgets.every(w=>w.groupId));
  h.ids.get('duplicate').click();assert.equal(h.state().widgets.length,10);assert.notEqual(h.state().widgets[0].groupId,h.state().widgets[5].groupId);
  h.ids.get('lock').click();h.ids.get('delete').click();assert.equal(h.state().widgets.length,10);
  h.ids.get('unlock').click();h.ids.get('delete').click();assert.equal(h.state().widgets.length,5);h.ids.get('undo').click();assert.equal(h.state().widgets.length,10);
@@ -132,12 +132,12 @@ test('studio rejects out-of-bounds edits and local save round trips retain proje
 });
 
 test('Shift selection toggles off and grouped header drags preserve spacing',async()=>{
- const h=harness();await ready();h.ids.get('compressor').click();await ready();
+ const h=harness();await ready();h.ids.get('compressor').click();await ready();h.ids.get('panel-height').value='600';h.ids.get('project-settings').dispatch('submit');
  const first=h.ids.get('widgets').children[0].querySelector('button');const second=h.ids.get('widgets').children[1].querySelector('button');
  first.dispatch('pointerdown');first.dispatch('pointerup');second.dispatch('pointerdown',{shiftKey:true});assert.equal(vm.runInContext('selectedIds.size',h.c),2);
  second.dispatch('pointerdown',{shiftKey:true});assert.equal(vm.runInContext('selectedIds.size',h.c),1);
  second.dispatch('pointerdown',{shiftKey:true});h.ids.get('group').click();const handle=h.ids.get('widgets').children[0].querySelector('button');
- handle.dispatch('pointerdown',{clientX:20,clientY:100});handle.dispatch('pointermove',{clientX:36,clientY:116});handle.dispatch('pointerup');
+ handle.dispatch('pointerdown',{clientX:20,clientY:100});handle.dispatch('pointermove',{clientX:36,clientY:276});handle.dispatch('pointerup');
  assert.equal(h.state().widgets[0].x,32);assert.equal(h.state().widgets[1].x,152);
 });
 
@@ -161,4 +161,12 @@ test('synthetic graphs update with knob values and disclose their source',async(
  const graph=h.ids.get('graphs').children[0],curve=graph.querySelector('path'),before=curve.getAttribute('d');
  const threshold=h.ids.get('widgets').children.find(w=>w.dataset.id==='threshold-control').querySelector('input');threshold.value='-30';threshold.dispatch('change');await ready();assert.notEqual(curve.getAttribute('d'),before);
  h.ids.get('eq').click();await ready();assert.equal(h.state().graphs[0].type,'peaking-eq');assert.equal(h.ids.get('graphs').children.length,1);assert.ok(h.ids.get('diagnostics').children.some(row=>row.textContent.includes('omitted from Max')));
+});
+test('canvas policy and decorative cable controls save through actual studio handlers',async()=>{
+ const h=harness();await ready();h.ids.get('compressor').click();await ready();
+ const ids=h.state().widgets.slice(0,2).map(w=>w.id);vm.runInContext('selectedIds=new Set('+JSON.stringify(ids)+');render();',h.c);
+ h.ids.get('add-cable').click();assert.equal(h.state().connections.length,1);
+ h.ids.get('panel-seams').value='groove';h.ids.get('panel-seams').dispatch('change');assert.equal(h.state().canvas.seams,'groove');
+ h.ids.get('snap-grid').checked=false;h.ids.get('snap-grid').dispatch('change');assert.equal(h.state().canvas.snapToGrid,false);
+ assert.ok(h.ids.get('panel-art').children.length>0);
 });

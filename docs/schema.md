@@ -11,6 +11,8 @@ Version 2 adds two distinct project-level preset collections:
 
 Preset names cannot silently overwrite an existing same-type name. Users can delete presets explicitly with undo support. Presets travel with the project JSON; browser-only edits still need Save locally or Export JSON for persistence.
 
+Canvas policy defaults to grid snapping, control alignment snapping, no overlap, an eight-unit gap and no seams. Existing overlapping imports remain readable, but geometry changes must respect the policy; explicitly enabling overlap bypasses that guard. Visual connections reference two distinct existing widget IDs, with an accent and bounded bend amount. They never express parameter mappings. Layout presets include canvas policy and visual connections, remapped to matching exposed controls on application. Runtime manifests optionally include panelStyle and visual connections for drawing only.
+
 This is a limited IR. Plugin class IDs can be unknown (null); raw host ranges do not establish physical units or SDK parameter identity. dataSource is demo-only for the editor. Graph contracts, full widget trees, responsive constraints, verified host registries and native SDK metadata remain future work. Max runtime manifests have an independent runtimeVersion: 1 and intentionally omit editor-only groups, locks and preset libraries.
 
 Host-capture extension: optional parameter resetSource, quantized and enumLabels preserve capture provenance; legacy records default to project-default/unknown/empty. Captured plugin format is unknown, and captured-current explicitly identifies reset baselines. Live capture import does not establish SDK identity, physical units, native plugin compatibility or a running editor connection.

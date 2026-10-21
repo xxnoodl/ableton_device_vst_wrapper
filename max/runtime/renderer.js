@@ -14,6 +14,8 @@ function frame(){
  if(!project||!project.widgets.length)return {scale:1,x:0,y:0};
  var left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
  for(var i=0;i<project.widgets.length;i++){var w=project.widgets[i];left=Math.min(left,w.x);top=Math.min(top,w.y);right=Math.max(right,w.x+w.width);bottom=Math.max(bottom,w.y+w.height);}
+ if(project.panelStyle&&project.panelStyle.seams!=='none'){left-=5;top-=5;right+=5;bottom+=5;}
+ for(var j=0;j<(project.connections||[]).length;j++){var g=RuntimeCore.connectionGeometry(project,project.connections[j]);for(var key in g){left=Math.min(left,g[key].x-5);top=Math.min(top,g[key].y-5);right=Math.max(right,g[key].x+5);bottom=Math.max(bottom,g[key].y+5);}}
  var scale=Math.min(Math.max(1,mgraphics.size[0]-16)/(right-left),Math.max(1,mgraphics.size[1]-28)/(bottom-top));
  return {scale:scale,x:(mgraphics.size[0]-(right-left)*scale)/2-left*scale,y:3-top*scale};
 }
@@ -22,11 +24,21 @@ function paint(){
  mgraphics.select_font_face('Arial');mgraphics.set_font_size(11);
  if(project){
   var view=frame();mgraphics.save();mgraphics.translate(view.x,view.y);mgraphics.scale(view.scale,view.scale);
+  drawPanelArt(light);
   for(var i=0;i<project.widgets.length;i++)drawWidget(project.widgets[i],i===selected,light);
   mgraphics.restore();
  }
  color(.08,.10,.11);mgraphics.rectangle(0,mgraphics.size[1]-22,mgraphics.size[0],22);mgraphics.fill();
  color(.75,.83,.77);mgraphics.set_font_size(10);mgraphics.move_to(6,mgraphics.size[1]-7);var display=message.indexOf('Bound ')===0?'Connected':message.indexOf('Disconnected')===0?'Disconnected':message;while(display.length>1&&mgraphics.text_measure(display)[0]>mgraphics.size[0]-12)display=display.substring(0,display.length-2);mgraphics.show_text(display);
+}
+function drawPanelArt(light){
+ var seams=project.panelStyle&&project.panelStyle.seams;
+ if(seams&&seams!=='none')for(var i=0;i<project.widgets.length;i++){var w=project.widgets[i];color(light ? .55 : .06,light ? .60 : .08,light ? .56 : .09);mgraphics.rectangle(w.x-4,w.y-4,w.width+8,w.height+8);mgraphics.set_line_width(1);mgraphics.stroke();if(seams==='groove'){color(light ? .95 : .26,light ? .97 : .30,light ? .95 : .28,.55);mgraphics.rectangle(w.x-3,w.y-3,w.width+8,w.height+8);mgraphics.stroke();}}
+ var colors={mint:[.64,.78,.69],amber:[.86,.65,.35],cyan:[.44,.73,.79],red:[.81,.45,.44]};
+ for(var j=0;j<(project.connections||[]).length;j++){var c=project.connections[j],g=RuntimeCore.connectionGeometry(project,c),accent=colors[c.accent];
+  for(var pass=0;pass<2;pass++){if(pass)color(accent[0],accent[1],accent[2]);else color(.06,.08,.09);mgraphics.set_line_width(pass?2:5);mgraphics.move_to(g.start.x,g.start.y);mgraphics.curve_to(g.c1.x,g.c1.y,g.c2.x,g.c2.y,g.end.x,g.end.y);mgraphics.stroke();}
+  var points=[g.start,g.end];for(var k=0;k<points.length;k++){color(.06,.08,.09);circle(points[k].x,points[k].y,5);color(accent[0],accent[1],accent[2]);circle(points[k].x,points[k].y,2);}
+ }
 }
 function drawWidget(w,active,light){
  var p=RuntimeCore.parameter(project,w.parameterId),current=values['$'+p.id],pos=RuntimeCore.position(current,p,w),angle=(-135+pos*270)*Math.PI/180;

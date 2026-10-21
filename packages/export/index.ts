@@ -7,7 +7,7 @@ export function runtimeManifest(input: Project) {
  const used=new Set(project.widgets.map(w=>w.parameterId));
  const parameters=project.parameters.filter(p=>used.has(p.id));
  if(!parameters.length)throw new Error('Select at least one control before exporting');
- return {runtimeVersion:1,autoBindPrevious:project.target.reconnect==='previous-on-load',projectId:project.id,name:project.name,pluginName:project.plugin.name,theme:project.theme,panel:{width:project.panel.width,height:project.panel.height},demoOnly:parameters.some(p=>p.evidence==='synthetic'),parameters:parameters.map(({id,name,min,max,defaultValue,unit,evidence})=>({id,name,min,max,defaultValue,unit,evidence})),widgets:project.widgets.map(({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues})=>({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues}))};
+ return {...(project.canvas.seams==='none'?{}:{panelStyle:{seams:project.canvas.seams}}),...(project.connections.length?{connections:project.connections}:{}),runtimeVersion:1,autoBindPrevious:project.target.reconnect==='previous-on-load',projectId:project.id,name:project.name,pluginName:project.plugin.name,theme:project.theme,panel:{width:project.panel.width,height:project.panel.height},demoOnly:parameters.some(p=>p.evidence==='synthetic'),parameters:parameters.map(({id,name,min,max,defaultValue,unit,evidence})=>({id,name,min,max,defaultValue,unit,evidence})),widgets:project.widgets.map(({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues})=>({id,parameterId,label,x,y,width,height,design,accent,stepCount,stepValues}))};
 }
 export function runtimePatch(project: Project) {
  project=validateProject(project);

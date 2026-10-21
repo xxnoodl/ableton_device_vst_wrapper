@@ -3,9 +3,11 @@ export const knobAccents = ['mint','amber','cyan','red'] as const;
 export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' | 'host-captured' | 'native-inspected';resetSource:'project-default'|'captured-current';quantized:boolean|null;enumLabels:string[] };
 export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number]; stepCount: number; stepValues: number[]; locked: boolean; groupId: string | null };
 export type FunctionalityPreset = {id:string;name:string;parameterIds:string[]};
-export type LayoutPreset = {id:string;name:string;widgets:Widget[];panel:{width:number;height:number;grid:number};theme:'dark'|'light'};
+export type LayoutPreset = {canvas:CanvasPolicy;connections:Connection[];id:string;name:string;widgets:Widget[];panel:{width:number;height:number;grid:number};theme:'dark'|'light'};
 export type Graph = {id:string;type:'compressor-transfer'|'peaking-eq';source:'synthetic-contract';parameters:Record<string,string>;sampleRate:number};
-export type Project = { schemaVersion: 2;graphs:Graph[];functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3' | 'unknown'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' | 'previous-on-load' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
+export type CanvasPolicy={snapToGrid:boolean;snapToControls:boolean;allowOverlap:boolean;gap:number;seams:'none'|'line'|'groove'};
+export type Connection={id:string;kind:'visual';fromWidgetId:string;toWidgetId:string;accent:typeof knobAccents[number];slack:number};
+export type Project = { schemaVersion: 2;canvas:CanvasPolicy;connections:Connection[];graphs:Graph[];functionalityPresets:FunctionalityPreset[];layoutPresets:LayoutPreset[];migration:{fromVersion:1}|null; id: string; name: string; plugin: { vendor: string; name: string; format: 'VST3' | 'unknown'; classId: string | null }; target: { kind: 'live-exposed'; liveVersion: string; maxVersion: string; reconnect: 'explicit' | 'previous-on-load' }; parameters: Parameter[]; widgets: Widget[]; panel: { width: number; height: number; grid: number }; theme: 'dark' | 'light'; dataSource: 'demo-only' };
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 function object(value: unknown, keys: string[], at: string, optional: string[] = []): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at}: expected object`);
@@ -31,7 +33,7 @@ function list(value: unknown, at: string): unknown[] {
   return value;
 }
 export function validateProject(input: unknown): Project {
-  const o = object(input, ['schemaVersion','id','name','plugin','target','parameters','widgets','panel','theme','dataSource','functionalityPresets','layoutPresets','migration','graphs'], 'project',['functionalityPresets','layoutPresets','migration','graphs']);
+  const o = object(input, ['schemaVersion','id','name','plugin','target','parameters','widgets','panel','theme','dataSource','functionalityPresets','layoutPresets','migration','graphs','canvas','connections'], 'project',['functionalityPresets','layoutPresets','migration','graphs','canvas','connections']);
   if (o.schemaVersion !== 2) throw new Error('Unsupported schema version; no migration is available');
   const plugin = object(o.plugin, ['vendor','name','format','classId'], 'plugin');
   const target = object(o.target, ['kind','liveVersion','maxVersion','reconnect'], 'target');
@@ -63,6 +65,12 @@ export function validateProject(input: unknown): Project {
     return {id:text(w.id,'widget.id'),type:choice(w.type,['knob','slider'],'widget.type'),label:text(w.label,'widget.label'),parameterId,x:number(w.x,0,width-wWidth,'widget.x'),y:number(w.y,0,height-wHeight,'widget.y'),width:wWidth,height:wHeight,design:choice(w.design === undefined ? 'studio' : w.design,knobDesigns,'widget.design'),accent:choice(w.accent === undefined ? 'mint' : w.accent,knobAccents,'widget.accent'),stepCount,stepValues,locked:w.locked === undefined ? false : typeof w.locked === 'boolean' ? w.locked : (()=>{throw new Error('Invalid lock state');})(),groupId:w.groupId === undefined || w.groupId === null ? null : text(w.groupId,'widget.groupId')};
   });
   if (new Set(widgets.map(w => w.id)).size !== widgets.length) throw new Error('Duplicate widget IDs');
+  const rawCanvas=o.canvas===undefined?{snapToGrid:true,snapToControls:true,allowOverlap:false,gap:8,seams:'none'}:object(o.canvas,['snapToGrid','snapToControls','allowOverlap','gap','seams'],'canvas');
+  for(const key of ['snapToGrid','snapToControls','allowOverlap'])if(typeof rawCanvas[key]!=='boolean')throw new Error('Invalid canvas switch');
+  const canvas:CanvasPolicy={snapToGrid:rawCanvas.snapToGrid as boolean,snapToControls:rawCanvas.snapToControls as boolean,allowOverlap:rawCanvas.allowOverlap as boolean,gap:number(rawCanvas.gap,0,32,'canvas.gap'),seams:choice(rawCanvas.seams,['none','line','groove'],'canvas.seams')};
+  const widgetIds=new Set(widgets.map(w=>w.id));
+  const connections=(o.connections===undefined?[]:list(o.connections,'connections')).map((value):Connection=>{const c=object(value,['id','kind','fromWidgetId','toWidgetId','accent','slack'],'connection');const fromWidgetId=text(c.fromWidgetId,'connection.from'),toWidgetId=text(c.toWidgetId,'connection.to');if(fromWidgetId===toWidgetId||!widgetIds.has(fromWidgetId)||!widgetIds.has(toWidgetId))throw new Error('Connection needs two existing controls');return {id:text(c.id,'connection.id'),kind:choice(c.kind,['visual'],'connection.kind'),fromWidgetId,toWidgetId,accent:choice(c.accent,knobAccents,'connection.accent'),slack:number(c.slack,0,120,'connection.slack')};});
+  if(new Set(connections.map(c=>c.id)).size!==connections.length)throw new Error('Duplicate connection IDs');
   const functionalityPresets=(o.functionalityPresets===undefined?[]:list(o.functionalityPresets,'functionalityPresets')).map(value=>{
     const preset=object(value,['id','name','parameterIds'],'functionalityPreset');
     const parameterIds=list(preset.parameterIds,'preset.parameterIds').map(value=>text(value,'preset.parameterId'));
@@ -71,9 +79,9 @@ export function validateProject(input: unknown): Project {
   });
   if(new Set(functionalityPresets.map(p=>p.id)).size!==functionalityPresets.length)throw new Error('Duplicate function preset IDs');
   const layoutPresets=(o.layoutPresets===undefined?[]:list(o.layoutPresets,'layoutPresets')).map(value=>{
-    const preset=object(value,['id','name','widgets','panel','theme'],'layoutPreset');
-    const valid=validateProject({...o,widgets:preset.widgets,panel:preset.panel,theme:preset.theme,functionalityPresets:[],layoutPresets:[]});
-    return {id:text(preset.id,'preset.id'),name:text(preset.name,'preset.name'),widgets:valid.widgets,panel:valid.panel,theme:valid.theme};
+    const preset=object(value,['id','name','widgets','panel','theme','canvas','connections'],'layoutPreset',['canvas','connections']);
+    const valid=validateProject({...o,widgets:preset.widgets,panel:preset.panel,theme:preset.theme,canvas:preset.canvas,connections:preset.connections,functionalityPresets:[],layoutPresets:[]});
+    return {id:text(preset.id,'preset.id'),name:text(preset.name,'preset.name'),widgets:valid.widgets,panel:valid.panel,theme:valid.theme,canvas:valid.canvas,connections:valid.connections};
   });
   if(new Set(layoutPresets.map(p=>p.id)).size!==layoutPresets.length)throw new Error('Duplicate layout preset IDs');
   const graphs=(o.graphs===undefined?[]:list(o.graphs,'graphs')).map((value):Graph=>{
@@ -91,7 +99,7 @@ export function validateProject(input: unknown): Project {
   if(graphs.length>8||new Set(graphs.map(g=>g.id)).size!==graphs.length)throw new Error('Invalid graph count or duplicate IDs');
   let migration:null|{fromVersion:1}=null;
   if(o.migration!==undefined&&o.migration!==null){const m=object(o.migration,['fromVersion'],'migration');if(m.fromVersion!==1)throw new Error('Invalid migration metadata');migration={fromVersion:1};}
-  return {schemaVersion:2,graphs,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit','previous-on-load'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
+  return {schemaVersion:2,canvas,connections,graphs,functionalityPresets,layoutPresets,migration,id:text(o.id,'id'),name:text(o.name,'name'),plugin:{vendor:text(plugin.vendor,'plugin.vendor'),name:text(plugin.name,'plugin.name'),format:choice(plugin.format,['VST3','unknown'],'plugin.format'),classId:plugin.classId === null ? null : text(plugin.classId,'plugin.classId')},target:{kind:choice(target.kind,['live-exposed'],'target.kind'),liveVersion:text(target.liveVersion,'target.liveVersion'),maxVersion:text(target.maxVersion,'target.maxVersion'),reconnect:choice(target.reconnect,['explicit','previous-on-load'],'target.reconnect')},parameters,widgets,panel:{width,height,grid:number(panel.grid,1,32,'panel.grid')},theme:choice(o.theme,['dark','light'],'theme'),dataSource:choice(o.dataSource,['demo-only'],'dataSource')};
 }
 export function parseProject(source: string): Project {
   if (typeof source !== 'string' || (source.length > 1_000_000 || new TextEncoder().encode(source).byteLength > 1_000_000)) throw new Error('Project exceeds the 1 MB text limit');

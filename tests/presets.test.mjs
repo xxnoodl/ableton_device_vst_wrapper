@@ -18,3 +18,8 @@ test('invalid preset references and hiding locked controls are rejected transact
  assert.throws(()=>applyFunctionalityPreset(p,'missing',()=> 'new'));assert.throws(()=>saveLayoutPreset(p,'layout',''));
  const bad={...p,functionalityPresets:[{id:'bad',name:'Bad',parameterIds:['missing']}]};assert.throws(()=>serializeProject(bad));
 });
+test('layout presets restore seams and visual cables against regenerated control IDs',()=>{
+ let p=sample();p.canvas.seams='groove';p.connections=[{id:'wire',kind:'visual',fromWidgetId:p.widgets[0].id,toWidgetId:p.widgets[1].id,accent:'mint',slack:20}];
+ p=saveLayoutPreset(p,'panel','Panel');const changed={...p,canvas:{...p.canvas,seams:'none'},connections:[],widgets:p.widgets.map(w=>({...w,id:'new-'+w.id}))};
+ const restored=applyLayoutPreset(changed,'panel');assert.equal(restored.canvas.seams,'groove');assert.equal(restored.connections[0].fromWidgetId,'new-'+p.widgets[0].id);assert.deepEqual(parseProject(serializeProject(restored)),restored);
+});

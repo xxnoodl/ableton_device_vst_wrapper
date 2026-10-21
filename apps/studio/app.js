@@ -2,7 +2,7 @@ import {createGraph} from '/apps/studio/graphs.js';
 import {diagnoseProject} from '/packages/diagnostics/index.ts';
 import {parseHostCapture,projectFromCapture} from '/packages/host-capture/index.ts';
 import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
-import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
+import {selection,planMove,cableGeometry,assertLayoutChange,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
 import {validateInventory} from '/packages/inventory/index.ts';
 import {validatePluginInspection,projectFromInspection,selectableParameter,verifiedLiveBinding} from '/packages/plugin-inspection/index.ts';
 import {deviceFiles,exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
@@ -16,7 +16,7 @@ let project,selected=null,values=Object.create(null),past=[],future=[];
 let activeInspection=null;
 const status=message=>{$('status').textContent=message;};
 const run=fn=>{try{fn();}catch(error){status(error.message);}};
-function change(next){next=validateProject(next);if(serializeProject(next)===serializeProject(project))return;past.push(serializeProject(project));if(past.length>100)past.shift();future=[];project=next;render();}
+function change(next){next=assertLayoutChange(project,validateProject(next));if(serializeProject(next)===serializeProject(project))return;past.push(serializeProject(project));if(past.length>100)past.shift();future=[];project=next;render();}
 function activate(next){project=validateProject(next);activeInspection=null;selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
 function render(){
  selectedIds=new Set([...selectedIds].filter(id=>project.widgets.some(w=>w.id===id)));
@@ -28,6 +28,7 @@ function render(){
  $('panel').style.width=project.panel.width+'px';$('panel').style.height=project.panel.height+'px';
  $('dimensions').textContent=project.panel.width+' x '+project.panel.height+' / '+project.panel.grid+' px grid';
  $('undo').disabled=!past.length;$('redo').disabled=!future.length;
+ $('snap-grid').checked=project.canvas.snapToGrid;$('snap-controls').checked=project.canvas.snapToControls;$('allow-overlap').checked=project.canvas.allowOverlap;$('panel-seams').value=project.canvas.seams;$('add-cable').disabled=selectedIds.size!==2;
  $('parameters').replaceChildren();
  $('native-search-label').hidden=!activeInspection;$('functions-all').disabled=!!activeInspection;
  if(activeInspection)renderNativeControls();else for(const p of project.parameters){
@@ -39,7 +40,7 @@ function render(){
   });render();};
   label.append(input,document.createTextNode(p.name));$('parameters').append(label);
  }
- renderWidgets();renderProperties();renderPresets();renderProjectSettings();renderDiagnostics();renderGraphs();
+ renderWidgets();renderPanelArt(project);renderProperties();renderPresets();renderProjectSettings();renderDiagnostics();renderGraphs();
 }
 function renderWidgets(){
  $('widgets').replaceChildren();
@@ -52,7 +53,7 @@ function renderWidgets(){
   el.style.setProperty('--dial-size',Math.max(36,Math.min(160,w.width-12,w.height-72))+'px');
   const header=document.createElement('button');header.className='widget-header';header.textContent=w.label;header.title='Drag to move; arrow keys move by one grid step';
   const select=(extend=false)=>{selected=w.id;if(extend){const ids=selection(project,[w.id]).map(w=>w.id);const remove=ids.every(id=>selectedIds.has(id));for(const id of ids)remove?selectedIds.delete(id):selectedIds.add(id);}else if(!selectedIds.has(w.id))selectedIds=new Set(selection(project,[w.id]).map(w=>w.id));
-   if(!selectedIds.has(selected))selected=[...selectedIds][0]||null;for(const child of $('widgets').children)child.classList.toggle('selected',selectedIds.has(child.dataset.id));renderProperties();};
+   if(!selectedIds.has(selected))selected=[...selectedIds][0]||null;for(const child of $('widgets').children)child.classList.toggle('selected',selectedIds.has(child.dataset.id));$('add-cable').disabled=selectedIds.size!==2;renderProperties();};
   header.onfocus=()=>{if(!selectedIds.has(w.id))select();};
   header.onkeydown=event=>{
    const deltas={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
@@ -63,9 +64,9 @@ function renderWidgets(){
   header.onpointerdown=event=>{
    if(event.button!==0)return;event.preventDefault();event.stopPropagation();select(event.shiftKey);if(!event.shiftKey||selectedIds.has(w.id))header.focus();if(w.locked||event.shiftKey)return;header.setPointerCapture(event.pointerId);
    const x=event.clientX,y=event.clientY,start=project,ids=[...selectedIds];let pending=start;
-   header.onpointermove=next=>{pending=moveSelection(start,ids,(next.clientX-x)/zoom,(next.clientY-y)/zoom);for(const moved of pending.widgets){const node=[...$('widgets').children].find(el=>el.dataset.id===moved.id);if(node){node.style.left=moved.x+'px';node.style.top=moved.y+'px';}}};
-   const finish=()=>{header.onpointermove=null;header.onpointerup=null;header.onpointercancel=null;run(()=>change(pending));};
-   header.onpointerup=finish;header.onpointercancel=()=>{header.onpointermove=null;renderWidgets();};
+   header.onpointermove=next=>{const plan=planMove(start,ids,(next.clientX-x)/zoom,(next.clientY-y)/zoom);pending=plan.project;for(const moved of pending.widgets){const node=[...$('widgets').children].find(el=>el.dataset.id===moved.id);if(node){node.style.left=moved.x+'px';node.style.top=moved.y+'px';}}renderPanelArt(pending,plan.guides);};
+   const finish=()=>{header.onpointermove=null;header.onpointerup=null;header.onpointercancel=null;run(()=>change(pending));renderPanelArt(project);};
+   header.onpointerup=finish;header.onpointercancel=()=>{header.onpointermove=null;renderWidgets();renderPanelArt(project);};
   };
   el.dataset.id=w.id;el.append(header);
   const control=createKnob({label:w.label,min:p.min,max:p.max,defaultValue:p.defaultValue,value:values[p.id],unit:p.unit,design:w.design,accent:w.accent,stepCount:w.stepCount,stepValues:w.stepValues,onSelect:()=>select(),onChange:value=>{
@@ -77,8 +78,8 @@ function renderWidgets(){
   const resize=document.createElement('button');resize.className='resize-handle';resize.type='button';resize.setAttribute('aria-label','Resize '+w.label);resize.title='Drag to resize; arrow keys resize by grid';resize.disabled=w.locked;
   resize.onkeydown=event=>{const delta={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[event.key];if(!delta)return;event.preventDefault();change(resizeWidget(project,w.id,w.width+delta[0]*project.panel.grid,w.height+delta[1]*project.panel.grid));};
   resize.onpointerdown=event=>{if(event.button!==0)return;event.preventDefault();event.stopPropagation();select();resize.setPointerCapture(event.pointerId);const x=event.clientX,y=event.clientY,start=project;let pending=start;
-   resize.onpointermove=move=>{pending=resizeWidget(start,w.id,w.width+(move.clientX-x)/zoom,w.height+(move.clientY-y)/zoom);const next=pending.widgets.find(i=>i.id===w.id);el.style.width=next.width+'px';el.style.height=next.height+'px';el.style.setProperty('--dial-size',Math.max(36,Math.min(160,next.width-12,next.height-72))+'px');};
-   resize.onpointerup=()=>{resize.onpointermove=null;change(pending);};resize.onpointercancel=()=>{resize.onpointermove=null;renderWidgets();};
+   resize.onpointermove=move=>{pending=resizeWidget(start,w.id,w.width+(move.clientX-x)/zoom,w.height+(move.clientY-y)/zoom);const next=pending.widgets.find(i=>i.id===w.id);el.style.width=next.width+'px';el.style.height=next.height+'px';el.style.setProperty('--dial-size',Math.max(36,Math.min(160,next.width-12,next.height-72))+'px');renderPanelArt(pending);};
+   resize.onpointerup=()=>{resize.onpointermove=null;change(pending);};resize.onpointercancel=()=>{resize.onpointermove=null;renderWidgets();renderPanelArt(project);};
   };
   el.append(resize);$('widgets').append(el);
  }
@@ -100,6 +101,29 @@ function renderProperties(){
  const p=project.parameters.find(p=>p.id===w.parameterId);
  $('binding').textContent=p.name+' / '+p.min+' to '+p.max+' '+p.unit+' / '+p.evidence+' metadata. Reset source: '+p.resetSource+'. No SDK class ID or persistent runtime mapping. Preview values are simulated.';
 }
+function renderPanelArt(scene,guides=[]){
+ const svg=$('panel-art');svg.replaceChildren();svg.setAttribute('viewBox','0 0 '+scene.panel.width+' '+scene.panel.height);svg.setAttribute('width',scene.panel.width);svg.setAttribute('height',scene.panel.height);
+ const node=(tag,attrs)=>{const element=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attrs))element.setAttribute(key,value);svg.append(element);return element;};
+ const light=scene.theme==='light';
+ if(scene.canvas.seams!=='none')for(const w of scene.widgets){
+  node('rect',{x:Math.max(0,w.x-4),y:Math.max(0,w.y-4),width:w.width+8,height:w.height+8,rx:3,fill:'none',stroke:light?'#9ca69e':'#11171a','stroke-width':1});
+  if(scene.canvas.seams==='groove')node('rect',{x:Math.max(0,w.x-3),y:Math.max(0,w.y-3),width:w.width+8,height:w.height+8,rx:3,fill:'none',stroke:light?'#edf1ec':'#44504a','stroke-opacity':.55,'stroke-width':1});
+ }
+ const colors={mint:'#a4c6b1',amber:'#dca659',cyan:'#6fb9ca',red:'#cf7470'};
+ for(const c of scene.connections){const g=cableGeometry(scene,c),d='M '+g.start.x+' '+g.start.y+' C '+g.c1.x+' '+g.c1.y+', '+g.c2.x+' '+g.c2.y+', '+g.end.x+' '+g.end.y;
+  node('path',{d,fill:'none',stroke:'#111519','stroke-width':5,'stroke-linecap':'round'});node('path',{d,fill:'none',stroke:colors[c.accent],'stroke-width':2,'stroke-linecap':'round','data-cable-id':c.id});
+  for(const p of [g.start,g.end]){node('circle',{cx:p.x,cy:p.y,r:5,fill:'#111519',stroke:light?'#6f7b74':'#68756d','stroke-width':1});node('circle',{cx:p.x,cy:p.y,r:2,fill:colors[c.accent]});}
+ }
+ for(const guide of guides)node('line',{x1:guide.axis==='x'?guide.position:0,y1:guide.axis==='y'?guide.position:0,x2:guide.axis==='x'?guide.position:scene.panel.width,y2:guide.axis==='y'?guide.position:scene.panel.height,stroke:'#90bba4','stroke-width':1,'stroke-dasharray':'4 4','data-snap-guide':guide.axis});
+ const list=$('cable-list');list.replaceChildren();
+ for(const c of scene.connections){const row=document.createElement('div');row.className='cable-row';const label=document.createElement('span');label.textContent=scene.widgets.find(w=>w.id===c.fromWidgetId).label+' / '+scene.widgets.find(w=>w.id===c.toWidgetId).label;
+  const slack=document.createElement('input');slack.type='number';slack.min=0;slack.max=120;slack.value=c.slack;slack.setAttribute('aria-label','Cable bend');slack.onchange=()=>run(()=>change({...project,connections:project.connections.map(item=>item.id===c.id?{...item,slack:Number(slack.value)}:item)}));
+  const remove=document.createElement('button');remove.textContent='Remove';remove.onclick=()=>change({...project,connections:project.connections.filter(item=>item.id!==c.id)});row.append(label,slack,remove);list.append(row);
+ }
+}
+for(const [id,key] of [['snap-grid','snapToGrid'],['snap-controls','snapToControls'],['allow-overlap','allowOverlap']])$(id).onchange=()=>{run(()=>change({...project,canvas:{...project.canvas,[key]:$(id).checked}}));render();};
+$('panel-seams').onchange=()=>change({...project,canvas:{...project.canvas,seams:$('panel-seams').value}});
+$('add-cable').onclick=()=>run(()=>{const ids=[...selectedIds];if(ids.length!==2)throw new Error('Select two controls to add a cable');change({...project,connections:[...project.connections,{id:crypto.randomUUID(),kind:'visual',fromWidgetId:ids[0],toWidgetId:ids[1],accent:'mint',slack:18}]});status('Decorative cable added. It does not change parameter mappings.');});
 $('accent').onchange=()=>run(()=>{change({...project,widgets:project.widgets.map(w=>w.id===selected?{...w,accent:$('accent').value}:w)});$('accent').focus();});
 function updateStepFields(){const mode=$('step-mode').value;$('step-count-row').hidden=mode!=='equal';$('step-values-row').hidden=mode!=='custom';$('step-count').disabled=mode!=='equal';$('step-values').disabled=mode!=='custom';}
 $('step-mode').onchange=updateStepFields;

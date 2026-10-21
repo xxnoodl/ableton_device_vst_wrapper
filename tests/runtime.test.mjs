@@ -134,3 +134,11 @@ test('host capture records exposed values and delegates saving without writing f
  const event=s.events.find(e=>e[0]===2&&e[1]==='savecapture');assert.equal(event[2],'new-capture.json');const capture=JSON.parse(event[3]);
  assert.equal(capture.source,'live-exposed-parameters');assert.equal(capture.parameters[0].currentValue,.3);assert.equal('defaultValue' in capture.parameters[0],false);assert.equal('sdkId' in capture.parameters[0],false);assert.equal(s.saved.size,0);
 });
+test('panel seams and visual cables export with matching native geometry',async()=>{
+ const {cableGeometry}=await import('../packages/layout-engine/index.ts');
+ const p=parseProject(readFileSync(new URL('../fixtures/compressor.project.json',import.meta.url),'utf8'));p.canvas.seams='groove';p.connections=[{id:'wire',kind:'visual',fromWidgetId:p.widgets[0].id,toWidgetId:p.widgets[1].id,accent:'mint',slack:18}];
+ const manifest=runtimeManifest(p),c=vm.createContext({});vm.runInContext(source('runtime-core.js'),c);
+ assert.equal(manifest.panelStyle.seams,'groove');c.RuntimeCore.validate(manifest);
+ assert.deepEqual(plain(c.RuntimeCore.connectionGeometry(manifest,manifest.connections[0])),cableGeometry(p,p.connections[0]));
+ assert.throws(()=>c.RuntimeCore.validate({...manifest,connections:[{...manifest.connections[0],kind:'macro'}]}));
+});

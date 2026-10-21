@@ -113,7 +113,7 @@ export function createKnob({label, min, max, defaultValue, value, unit, design='
  dial.setAttribute('aria-label',label+' demo value');dial.setAttribute('aria-valuemin',min);dial.setAttribute('aria-valuemax',max);dial.setAttribute('aria-orientation','vertical');
  dial.title='Drag up/down. Shift for fine adjustment. Arrow keys to adjust. Double-click to reset.';
  const field=document.createElement('input');field.className='knob-value';field.type='number';field.min=min;field.max=max;field.step='any';field.setAttribute('aria-label',label+' precise demo value');
- const suffix=document.createElement('span');suffix.className='knob-unit';suffix.textContent=unit||'VALUE';
+ const suffix=document.createElement('span');suffix.className='knob-unit';suffix.textContent=unit||'';suffix.hidden=!unit;
  const decimals=Math.max(0,Math.min(8,3-Math.floor(Math.log10(max-min))));
  const format=next=>Number(next.toFixed(decimals)).toFixed(decimals);
  let current=value;
