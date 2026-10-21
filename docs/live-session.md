@@ -1,6 +1,6 @@
 # Live session discovery
 
-Status: read-only bridge prototype, HTTP and simulated-host tests pass. Actual Max/Live bridge execution is not verified yet. This path removes the hardcoded Morph/Motion adapter requirement for controls that are already exposed by Live; it does not make unexposed native parameters available automatically.
+Status: read-only bridge prototype, HTTP and simulated-host tests pass. User confirmed actual bridge initialization and a successful two-plugin catalog upload from Live. Browser selection and generated-wrapper behavior from that real catalog remain to be checked. This path removes the hardcoded Morph/Motion adapter requirement for controls that are already exposed by Live; it does not make unexposed native parameters available automatically.
 
 ## Producer workflow
 

@@ -1,5 +1,9 @@
 # Progress
 
+## 2026-10-21 session bridge first host result
+
+- User loaded the read-only bridge in Live and reported Live session ready: 2 plugins. This confirms the new Max controller initialized, traversed the current session and received a successful HTTP catalog acknowledgement from the local server. Browser instance selection, metadata accuracy and generating a wrapper from that actual catalog remain to be checked.
+
 ## 2026-10-21 core Live session discovery
 
 - Returned focus to the core choose/select/generate workflow; macro automation is deferred. Implemented a separate read-only session bridge, strict catalog protocol, ephemeral authenticated loopback endpoints and a Live session instance picker in the builder. No Node for Max, metadata files or parameter writes are involved in the bridge.
