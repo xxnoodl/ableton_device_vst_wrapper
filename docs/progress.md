@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 hosted Attack two-way control passed
+
+- User dragged the Studio Attack knob and confirmed the internally hosted FabFilter Attack moves with matching time values in both interfaces. Combined with the previous native-editor check, Attack now has real-host evidence for two-way control and formatted time display.
+- Ratio/other readouts, audible processing, persistence, automation, latency compensation and sidechain routing remain separate checks.
+
 ## 2026-10-21 hosted Attack readout passed
 
 - User changed Attack in the internally hosted FabFilter editor and confirmed the Studio readout follows with the same time value, including ms. This verifies incoming Attack feedback and plugin-formatted time text on the real hosting path.

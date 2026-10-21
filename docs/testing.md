@@ -41,3 +41,5 @@ Internal hosting proof: six simulated-host tests cover local graph creation/reus
 Internal Pro-C 3 host result: user confirmed the standalone test device loads and its Open plugin button opens the internal FabFilter window. This establishes load/editor operation only; formatted values, control, audio and remaining hosting gates require separate checks.
 
 Hosted Attack formatting: user changed Attack in the internal FabFilter editor and confirmed the Studio readout follows with matching time text including ms. This verifies native-to-panel Attack feedback and formatting, not reverse control or other hosting gates.
+
+Hosted Attack reverse-control result: user confirmed dragging the Studio Attack knob moves the internal FabFilter Attack with matching time values. Together with the native-editor test, this establishes two-way Attack control and formatted time display on the hosting proof.
