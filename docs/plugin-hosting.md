@@ -75,3 +75,5 @@ Hosted-editor focus follow-up: user reported the plugin window disappears behind
 Floating build host result: user confirmed window behavior works and all four controls respond bidirectionally with matching value/unit displays. The prior pending focus check and four-control formatting/control checks now pass for this Pro-C 3 instance. Remaining audio/state/automation/latency/routing gates remain open.
 
 Audio host result: user reported compression responds to all four knobs during audio playback through the internal device. Basic stereo processing is user-verified. State persistence is the next implementation gate; latency, audio equivalence, automation and sidechain routing remain unverified.
+
+Set recall follow-up: user explicitly confirmed settings survive save/close/reopen, including Style changed only in the internal FabFilter editor. Record this Set test as passed without claiming all plugin state fields. No persistence code was introduced. The ordering of parameter-enabled vst~ state restoration versus the initialization plug command remains to be established; device-preset recall and duplicate independence remain open.

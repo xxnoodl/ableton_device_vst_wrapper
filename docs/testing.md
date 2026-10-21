@@ -47,3 +47,5 @@ Hosted Attack reverse-control result: user confirmed dragging the Studio Attack 
 Hosted four-control/floating result: user confirmed FabFilter stays visible while using the Studio panel and all four knobs respond in both directions with matching values/units. This covers Threshold, Ratio, Attack and Release on the internal Pro-C 3 proof. Audio processing, saved state, automation, latency and sidechains are not inferred.
 
 Internal Pro-C 3 audio result: user reported audible compression works with all test knobs during the requested audio playback check. This verifies basic stereo audio processing/control response, not measured latency, audio equivalence, sidechain support or saved sound state.
+
+Hosted Set state result: user explicitly confirmed saving, closing and reopening the Set restores internal Pro-C 3 settings, including native-editor-only Style. This is a user-verified Set recall result on the current prototype, not evidence for every state field, device-preset recall or independent duplicates. No persistence code changed; initialization/restoration ordering still needs investigation because the controller currently sends plug on initialization.

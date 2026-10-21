@@ -1,5 +1,11 @@
 # Progress
 
+## 2026-10-21 hosted Pro-C 3 Set state restored
+
+- User explicitly confirmed saving, closing and reopening the Set restores the internal Pro-C 3 settings, including Style changed only in the native FabFilter editor. This is user evidence for more than the four exposed test knob values on this Set. No persistence code was added for this result.
+- The prototype creates/reuses a parameter-enabled vst~ object and currently issues plug on initialization. Restoration ordering/mechanism is not established by this report; do not assume universal persistence or change initialization casually. Device-preset recall, duplicate-instance independence, stopped-playback state changes and clean-machine loading remain separate checks.
+- Basic internal hosting, floating editor, four-control two-way formatted feedback, audible processing and this Set reopen test pass. Automation lanes, measured latency compensation and sidechains remain unimplemented/unverified.
+
 ## 2026-10-21 internal Pro-C 3 audio processing passed
 
 - User played audio through the internal hosting proof and reported compression works with all test knobs. This establishes user-observed audible processing and control response for the stereo Pro-C 3 test path. It is not a null comparison, latency measurement or sidechain test.
