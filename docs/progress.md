@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 hosted duplicate Threshold independence passed
+
+- User duplicated the Studio hosting device, changed Threshold on the duplicate and confirmed the original retains its own value. This verifies independent parameter control for those two internal Pro-C 3 instances in the current session.
+- Independent duplicate state across Set reopen and device-preset recall remain separate checks. Automation lanes, latency compensation and sidechain routing remain open.
+
 ## 2026-10-21 hosted Pro-C 3 Set state restored
 
 - User explicitly confirmed saving, closing and reopening the Set restores the internal Pro-C 3 settings, including Style changed only in the native FabFilter editor. This is user evidence for more than the four exposed test knob values on this Set. No persistence code was added for this result.
