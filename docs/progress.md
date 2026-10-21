@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 core Live session discovery
+
+- Returned focus to the core choose/select/generate workflow; macro automation is deferred. Implemented a separate read-only session bridge, strict catalog protocol, ephemeral authenticated loopback endpoints and a Live session instance picker in the builder. No Node for Max, metadata files or parameter writes are involved in the bridge.
+- The helper traverses tracks, returns, main and nested rack chains in bounded scheduled tasks, then transfers actual exposed names/ranges/current values/quantization/enums. Refresh generations, stale callbacks, deletion, transfer/scan limits, network deadlines and server restart token renewal are handled. Omissions remain visible.
+- Choosing an instance and checking controls creates an automatic layout and ordinary generated wrapper through the generic Live runtime, with captured-current reset provenance. No hardcoded Morph/Motion adapter is needed for this path, and no SDK identities, transient Live IDs or track labels enter the project. Unexposed controls still need Configure; automatic exposure is not implemented.
+- All 135 tests pass, with 33-asset and endpoint guard smoke checks. Tests cover generic synth/effect metadata, rack nesting, refresh/deletion, no bridge writes, generic generated binding to a 0?100 Mix control, capability/body limits, native task scheduling, budget omissions, server restart and browser choose/check/helper-download handlers. Actual Max HTTP transport and Live session scanning remain unverified. A new ignored bridge bundle is prepared without changing any existing wrapper or Set.
+
 ## 2026-10-21 two-instance macro host check
 
 - User successfully bound Strings A and Strings B using delayed selection in Live. Energy moved Morph throughout its travel on the first Augmented Strings instance; Motion on the second stayed at zero until roughly 0.4 and then rose toward maximum, matching the declared staged curve.

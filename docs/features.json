@@ -84,6 +84,11 @@
       "name": "Cross-plugin performance macros",
       "status": "partially verified: two instances of Augmented Strings",
       "evidence": "User confirmed delayed binding for both slots and staged Energy control of Morph/Motion; lifecycle, automation and different plugin products remain pending. docs/progress.md; tests/performance.test.mjs"
+    },
+    {
+      "name": "Read-only Live session discovery and generic wrapper generation",
+      "status": "prototype; actual bridge host verification pending",
+      "evidence": "packages/live-session; max/runtime/session-bridge.js; scripts/live-bridge-*; tests/live-session.test.mjs and simulated studio choose/check/download flows. No SDK ID guesses or automatic Configure."
     }
   ]
 }

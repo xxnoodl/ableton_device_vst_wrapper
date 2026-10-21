@@ -17,3 +17,5 @@
 #graphs{display:grid;gap:12px}.graph-card{border:1px solid #3b414b;border-radius:8px;padding:18px;background:#171c21;margin:12px 0}.graph-card h3{font-size:14px;font-weight:500;margin:0 0 6px}.graph-card p{margin:0 0 12px}.graph-card svg{display:block;width:100%;height:auto;max-height:270px}.graph-card svg text{fill:#a6b2ac;font-family:Consolas,monospace;font-size:10px}.graph-grid{stroke:#333f38;stroke-width:.7}.graph-curve{stroke:#a4d8bb;stroke-width:2}.graph-error{color:#e9b29e;font-size:12px}
 
 #panel-art{position:absolute;inset:0;pointer-events:none;z-index:0}#widgets{position:absolute;inset:0;z-index:1}.canvas-actions label{margin-left:0;display:flex;gap:5px;align-items:center}.cable-row{display:grid;grid-template-columns:1fr 48px auto;gap:5px;align-items:center;margin:9px 0;font-size:11px}.cable-row input{width:48px;background:#24282e;color:inherit;border:1px solid #414853;padding:4px}.cable-row button{font-size:10px;padding:4px}.knob-unit:empty{display:none}
+
+.live-device{margin:12px 0}.live-device button{width:100%;text-align:left;overflow-wrap:anywhere;font-size:12px}.live-device .muted{margin:6px 0}

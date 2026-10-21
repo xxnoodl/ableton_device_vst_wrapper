@@ -13,6 +13,7 @@ import * as inventory from '../packages/inventory/index.ts';
 import * as exporter from '../packages/export/index.ts';
 import * as inspection from '../packages/plugin-inspection/index.ts';
 import * as performance from '../packages/performance/index.ts';
+import * as live from '../packages/live-session/index.ts';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 function harness(performancePage=false){
  let document;const ids=new Map();
@@ -46,7 +47,7 @@ function harness(performancePage=false){
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
  const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,...inspection,...performance,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,structuredClone,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{location:{},addEventListener(){}},fetch:async path=>{if(path==='/api/inventory')return {ok:true,json:async()=>({inventoryVersion:1,mode:'static-no-plugin-execution',plugins:[],diagnostics:[]})};const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,...inspection,...performance,...live,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,structuredClone,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{location:{},setInterval(){return 1;},addEventListener(){}},fetch:async path=>{if(path==='/api/live/session')return {ok:true,json:async()=>({connected:false,pending:true,catalog:null})};if(path==='/api/inventory')return {ok:true,json:async()=>({inventoryVersion:1,mode:'static-no-plugin-execution',plugins:[],diagnostics:[]})};const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
  vm.runInContext(read('apps/studio/graphs.js').replace(/^import .*;\r?\n/gm,'').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
  vm.runInContext(read(performancePage?'apps/studio/performance.js':'apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
@@ -72,6 +73,32 @@ test('installed plugin choice reads controls and checkboxes create the measured 
  assert.deepEqual(h.state().parameters.map(p=>p.id),['vst3-1','vst3-4']);
  h.ids.get('native-search').value='motion';h.ids.get('native-search').dispatch('input');assert.equal(h.ids.get('parameters').children.length,2);
  h.ids.get('undo').click();assert.equal(h.state().widgets.length,1);
+});
+
+function sessionCatalog(){return {catalogVersion:1,source:'live-session-exposed',diagnostics:[],devices:[{id:'device-101',label:'Bass / Example synth',pluginName:'Example synth',diagnostic:null,capture:{captureVersion:1,source:'live-exposed-parameters',pluginName:'Example synth',parameters:[{index:0,name:'Cutoff',min:20,max:20000,currentValue:900,quantized:false,enumLabels:[]},{index:1,name:'Mode',min:0,max:2,currentValue:1,quantized:true,enumLabels:['Low','Mid','High']}]}}]};}
+
+test('Live instance choice and checked controls generate a generic automatic layout without the native adapter',async()=>{
+ const h=harness();await ready();const original=h.c.fetch;h.c.fetch=async(path,options)=>path==='/api/live/session'?{ok:true,json:async()=>({connected:true,pending:false,catalog:sessionCatalog()})}:original(path,options);
+ await h.c.refreshLiveSession();h.ids.get('live-devices').children[0].children[0].click();assert.equal(h.state().plugin.name,'Example synth');assert.equal(h.state().widgets.length,0);
+ h.ids.get('parameters').children[0].children[0].checked=true;h.ids.get('parameters').children[0].children[0].dispatch('change');assert.equal(h.state().widgets.length,1);assert.equal(h.state().parameters[0].min,20);assert.equal(h.state().parameters[0].defaultValue,900);assert.equal(h.ids.get('export-max').disabled,false);
+ h.ids.get('native-search').value='Mode';h.ids.get('native-search').dispatch('input');assert.equal(h.ids.get('parameters').children.length,1);const checkbox=h.ids.get('parameters').children[0].children[0];checkbox.checked=true;checkbox.dispatch('change');assert.equal(h.state().widgets[1].stepCount,3);assert.equal(h.state().widgets[1].x-h.state().widgets[0].x,128);assert.equal(h.state().parameters[0].evidence,'host-captured');
+ h.ids.get('functions-none').click();assert.equal(h.state().widgets.length,0);h.ids.get('functions-all').click();assert.equal(h.state().widgets.length,2);
+});
+
+test('Live session refresh is capability-protected and stale catalogs cannot silently replace edited controls',async()=>{
+ const h=harness();await ready();const original=h.c.fetch,calls=[];let pending=false;
+ h.c.fetch=async(path,options)=>{calls.push([path,options]);if(path==='/api/live/config')return {ok:true,json:async()=>({token:'a'.repeat(64)})};if(path==='/api/live/refresh'){pending=true;return {ok:true};}if(path==='/api/live/session')return {ok:true,json:async()=>({connected:true,pending,catalog:sessionCatalog()})};return original(path,options);};
+ await h.c.refreshLiveSession();h.ids.get('live-devices').children[0].children[0].click();h.ids.get('functions-all').click();const before=h.state();await h.ids.get('refresh-live').onclick();assert.equal(calls.find(([p])=>p==='/api/live/refresh')[1].headers['X-Studio-Bridge'],'a'.repeat(64));assert.equal(h.ids.get('live-devices').children[0].children[0].disabled,true);assert.deepEqual(h.state(),before);
+});
+
+test('offline or empty Live instances remain visible with clear Configure guidance and no fake controls',async()=>{
+ const h=harness();await ready();const original=h.c.fetch,catalog=sessionCatalog();catalog.devices[0].capture=null;catalog.devices[0].diagnostic='Use Live Configure, then refresh.';
+ h.c.fetch=async path=>path==='/api/live/session'?{ok:true,json:async()=>({connected:true,pending:false,catalog})}:original(path);await h.c.refreshLiveSession();assert.equal(h.ids.get('live-devices').children[0].children[0].disabled,true);assert.match(h.ids.get('live-devices').children[0].children[1].textContent,/Configure/);
+});
+
+test('download bridge handler packages the read-only helper without a token or Node dependency',async()=>{
+ const h=harness();await ready();const payload=new TextEncoder().encode(JSON.stringify(exporter.runtimePatch(h.state()))+'\0'),shell=new Uint8Array(32+payload.length),v=new DataView(shell.buffer);for(const [offset,tag]of [[0,'ampf'],[8,'aaaa'],[12,'meta'],[24,'ptch']])shell.set(new TextEncoder().encode(tag),offset);for(const [offset,n]of [[4,4],[16,4],[20,1],[28,payload.length]])v.setUint32(offset,n,true);shell.set(payload,32);
+ const original=h.c.fetch,downloads=[];h.c.fetch=async path=>path==='/api/device-template'?{ok:true,arrayBuffer:async()=>shell.buffer}:original(path);h.c.URL={createObjectURL:blob=>{downloads.push(blob);return 'blob:test';},revokeObjectURL(){}};await h.ids.get('download-bridge').onclick();assert.equal(downloads.length,1);const text=new TextDecoder().decode(await downloads[0].arrayBuffer());assert.ok(text.includes('Live-Session-Bridge.amxd'));assert.ok(text.includes('XMLHttpRequest'));assert.ok(!text.includes('node.script'));assert.match(h.ids.get('status').textContent,/Bridge downloaded/);assert.equal(h.ids.get('download-bridge').disabled,false);
 });
 test('unverified installed controls remain available for design but clearly block device generation',async()=>{
  const h=harness();await ready();const {inventory,data}=installedDiscovery(false),original=h.c.fetch;

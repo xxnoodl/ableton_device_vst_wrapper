@@ -10,16 +10,18 @@ import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
 import {targetFromProject} from '/packages/performance/index.ts';
+import {validateLiveCatalog,projectFromLiveDevice,liveBridgeFiles} from '/packages/live-session/index.ts';
 const $=id=>document.getElementById(id);
 let graphViews=[],graphFrame=null;
 let selectedIds=new Set(),zoom=1;
 let project,selected=null,values=Object.create(null),past=[],future=[];
 let activeInspection=null;
+let activeLiveDevice=null,liveSession=null,sessionBusy=false;
 const status=message=>{$('status').textContent=message;};
 const run=fn=>{try{fn();}catch(error){status(error.message);}};
 $('send-to-rack').onclick=()=>run(()=>{targetFromProject(project,'check');localStorage.setItem('interface-studio.performance.pending',serializeProject(project));window.location.href='/apps/studio/performance.html';});
 function change(next){next=assertLayoutChange(project,validateProject(next));if(serializeProject(next)===serializeProject(project))return;past.push(serializeProject(project));if(past.length>100)past.shift();future=[];project=next;render();}
-function activate(next){project=validateProject(next);activeInspection=null;selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
+function activate(next){project=validateProject(next);activeInspection=null;activeLiveDevice=null;selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
 function render(){
  selectedIds=new Set([...selectedIds].filter(id=>project.widgets.some(w=>w.id===id)));
  if(!project.widgets.some(w=>w.id===selected))selected=[...selectedIds][0]||null;
@@ -32,17 +34,21 @@ function render(){
  $('undo').disabled=!past.length;$('redo').disabled=!future.length;
  $('snap-grid').checked=project.canvas.snapToGrid;$('snap-controls').checked=project.canvas.snapToControls;$('allow-overlap').checked=project.canvas.allowOverlap;$('panel-seams').value=project.canvas.seams;$('add-cable').disabled=selectedIds.size!==2;
  $('parameters').replaceChildren();
- $('native-search-label').hidden=!activeInspection;$('functions-all').disabled=!!activeInspection;
- if(activeInspection)renderNativeControls();else for(const p of project.parameters){
+ $('native-search-label').hidden=!activeInspection&&!activeLiveDevice;$('functions-all').disabled=!!activeInspection||!!(activeLiveDevice&&project.parameters.length>60);
+ if(activeInspection)renderNativeControls();else renderExposedControls();
+ renderWidgets();renderPanelArt(project);renderProperties();renderPresets();renderProjectSettings();renderDiagnostics();renderGraphs();
+}
+function renderExposedControls(){
+ $('parameters').replaceChildren();const query=activeLiveDevice?$('native-search').value.toLowerCase():'';
+ for(const p of project.parameters.filter(p=>p.name.toLowerCase().includes(query))){
   const label=document.createElement('label');label.className='function';
   const input=document.createElement('input');input.type='checkbox';input.checked=project.widgets.some(w=>w.parameterId===p.id);
   input.onchange=()=>{run(()=>{
    const ids=new Set(project.widgets.map(w=>w.parameterId));input.checked?ids.add(p.id):ids.delete(p.id);
-   change(exposeParameters(project,[...ids],()=>crypto.randomUUID()));
+   change(activeLiveDevice?projectFromLiveDevice(activeLiveDevice,[...ids]):exposeParameters(project,[...ids],()=>crypto.randomUUID()));
   });render();};
   label.append(input,document.createTextNode(p.name));$('parameters').append(label);
  }
- renderWidgets();renderPanelArt(project);renderProperties();renderPresets();renderProjectSettings();renderDiagnostics();renderGraphs();
 }
 function renderWidgets(){
  $('widgets').replaceChildren();
@@ -180,7 +186,28 @@ function renderNativeControls(){
   label.append(input,name);if(!verifiedLiveBinding(activeInspection,p)){const hint=document.createElement('small');hint.textContent='Preview only';label.append(hint);}container.append(label);
  }
 }
-$('native-search').oninput=renderNativeControls;
+
+function renderLiveSession(){
+ const list=$('live-devices');list.replaceChildren();if(!liveSession)return;
+ const catalog=liveSession.catalog,ready=liveSession.connected&&!liveSession.pending;
+ $('live-session-note').textContent=!liveSession.connected?'Session bridge not connected. Download it below and load it once in Live.':liveSession.pending?'Reading the Live session…':catalog.devices.length+' plugin instances. Choose one to see its exposed controls.';
+ if(!catalog)return;
+ for(const device of catalog.devices){const row=document.createElement('section');row.className='live-device';const choose=document.createElement('button');choose.textContent=device.label;choose.disabled=!ready||!device.capture;choose.onclick=()=>run(()=>{if(project&&!confirm('Choose this Live plugin? Save or export current changes first.'))return;activate(projectFromLiveDevice(device));activeLiveDevice=device;$('native-search').value='';render();status('Read '+device.capture.parameters.length+' exposed controls from '+device.label+'. Check the controls to generate. Preview values are local; reset uses captured current values.');});row.append(choose);
+  if(device.diagnostic){const note=document.createElement('p');note.className='muted small';note.textContent=device.diagnostic;row.append(note);}list.append(row);
+ }
+ for(const diagnostic of catalog.diagnostics){const note=document.createElement('p');note.className='muted small';note.textContent=diagnostic;list.append(note);}
+}
+async function refreshLiveSession(requestScan=false){
+ if(sessionBusy)return;sessionBusy=true;const button=$('refresh-live');button.disabled=true;
+ try{if(requestScan){const config=await fetch('/api/live/config');if(!config.ok)throw new Error('Bridge handshake unavailable');const {token}=await config.json();const refresh=await fetch('/api/live/refresh',{method:'POST',headers:{'Content-Type':'application/json','X-Studio-Bridge':token},body:'{}'});if(!refresh.ok)throw new Error('Could not request a fresh Live scan');}
+  const response=await fetch('/api/live/session');if(!response.ok)throw new Error('Live session API unavailable');const session=await response.json();
+  if(typeof session.connected!=='boolean'||typeof session.pending!=='boolean')throw new Error('Invalid session status');if(session.catalog!==null)session.catalog=validateLiveCatalog(session.catalog);liveSession=session;renderLiveSession();
+ }catch(error){$('live-session-note').textContent='Cannot read Live session: '+error.message;}finally{sessionBusy=false;button.disabled=false;}
+}
+$('refresh-live').onclick=()=>refreshLiveSession(true);
+$('download-bridge').onclick=async()=>{const button=$('download-bridge');button.disabled=true;try{const names=['session-bridge.js','session-bridge-renderer.js'],sources={};for(const name of names){const response=await fetch('/max/runtime/'+name);if(!response.ok)throw new Error('Bridge source unavailable');sources[name]=await response.text();}const response=await fetch('/api/device-template');if(!response.ok)throw new Error('No compatible local device shell');const files=liveBridgeFiles(sources,new Uint8Array(await response.arrayBuffer())),url=URL.createObjectURL(new Blob([zipFiles(files)],{type:'application/zip'})),link=document.createElement('a');link.href=url;link.download='live-session-bridge.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Bridge downloaded. Extract all files together and load Live-Session-Bridge.amxd once in Live. Then choose a plugin under Live session.');}catch(error){status('Bridge generation failed: '+error.message);}finally{button.disabled=false;}};
+refreshLiveSession();window.setInterval(()=>{if(document.visibilityState!=='hidden')refreshLiveSession();},2000);
+$('native-search').oninput=()=>activeInspection?renderNativeControls():renderExposedControls();
 async function chooseInstalledPlugin(plugin,container,button,classId){
  button.disabled=true;button.textContent='Reading controls...';status('Reading '+plugin.name+' controls...');
  try{const response=await fetch('/api/inspect-plugin?id='+encodeURIComponent(plugin.inventoryId)+(classId?'&classId='+encodeURIComponent(classId):'')),data=await response.json();if(!response.ok)throw new Error(data.error||'Cannot inspect plugin');
@@ -248,8 +275,8 @@ function renderPresets(){
   for(const preset of presets){const option=document.createElement('option');option.value=preset.id;option.textContent=preset.name;element.append(option);}element.value=presets.some(p=>p.id===value)?value:'';
  }
 }
-$('functions-all').onclick=()=>applyLayout(()=>exposeParameters(project,project.parameters.map(p=>p.id),()=>crypto.randomUUID()));
-$('functions-none').onclick=()=>applyLayout(()=>exposeParameters(project,[],()=>crypto.randomUUID()));
+$('functions-all').onclick=()=>applyLayout(()=>activeLiveDevice?projectFromLiveDevice(activeLiveDevice,project.parameters.map(p=>p.id)):exposeParameters(project,project.parameters.map(p=>p.id),()=>crypto.randomUUID()));
+$('functions-none').onclick=()=>applyLayout(()=>activeLiveDevice?projectFromLiveDevice(activeLiveDevice,[]):exposeParameters(project,[],()=>crypto.randomUUID()));
 $('save-functions').onclick=()=>run(()=>{change(saveFunctionalityPreset(project,crypto.randomUUID(),$('function-preset-name').value));$('function-preset-name').value='';status('Function preset saved in this project. Save locally or export JSON to keep it.');});
 $('save-layout').onclick=()=>run(()=>{change(saveLayoutPreset(project,crypto.randomUUID(),$('layout-preset-name').value));$('layout-preset-name').value='';status('Layout preset saved in this project. Save locally or export JSON to keep it.');});
 $('function-preset').onchange=()=>{if($('function-preset').value)applyLayout(()=>applyFunctionalityPreset(project,$('function-preset').value,()=>crypto.randomUUID()));};

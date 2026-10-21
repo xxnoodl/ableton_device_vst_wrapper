@@ -43,6 +43,11 @@
       "name": "Native VST3 discovery",
       "status": "partially verified",
       "evidence": "Actual Augmented Strings factory/controller inspection returned 2748 parameters; native crash/hang/multi-class fixtures and simulated studio selection tests pass; generic Live routing remains unverified"
+    },
+    {
+      "name": "Read-only Live session bridge",
+      "status": "prototype; host verification pending",
+      "evidence": "Legacy XMLHttpRequest and bounded LiveAPI reads tested under simulation and actual HTTP; generic generated control uses actual raw ranges. No new plugin product is claimed host-verified."
     }
   ]
 }

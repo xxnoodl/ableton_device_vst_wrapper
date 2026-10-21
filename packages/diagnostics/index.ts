@@ -10,7 +10,7 @@ export function diagnoseProject(input:Project):Diagnostic[]{
  if(p.plugin.format==='unknown')items.push({severity:'warning',code:'unknown-format',message:'Plugin format is unverified. Live capture alone does not identify VST3.'});
  if(parameters.some(p=>p.resetSource==='captured-current'))items.push({severity:'info',code:'capture-reset',message:'Double-click reset uses capture-time values, not factory defaults.'});
  if(p.graphs.length)items.push({severity:'warning',code:'graphs-preview-only',message:'Derived graphs are synthetic editor previews and are omitted from Max runtime export.'});
- items.push({severity:'info',code:'editor-disconnected',message:'Studio values are simulated. The browser editor has no Live connection.'});
+ items.push({severity:'info',code:'editor-disconnected',message:'Preview values are simulated and never write to Live. The optional session bridge reads metadata only.'});
  items.push({severity:'warning',code:'runtime-unverified',message:'Host compatibility remains plugin-specific. Passing schema checks does not verify every plugin or control.'});
  items.push({severity:'info',code:'native-parity',message:'Max uses native drawing approximations in its fixed-height panel. Browser pixel parity is not established.'});
  return items;
