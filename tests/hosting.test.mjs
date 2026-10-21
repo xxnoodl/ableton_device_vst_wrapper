@@ -2,19 +2,21 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {hostingAutomationPatch,hostingControls} from '../scripts/hosting-automation-bank.mjs';
 const read=name=>readFileSync(new URL('../max/hosting/'+name,import.meta.url),'utf8');
 const config={hostingProbeVersion:1,pluginName:'Pro-C 3',pluginPath:'C:/plugins/FabFilter Pro-C 3.vst3'};
 function probe({names=['Bypass','Ratio','Attack','Threshold','Release'],available=true,stream=true,createFailure=null,restoredPlugin='',restoredValues={}}={}){
  const events=[],messages=[],objects=[],links=[],tasks=[];let c;
  const defaults={1:[0,'Off'],2:[.3,'4:1'],3:[.2,'20 ms'],4:[.4,'-18 dB'],5:[.6,'300 ms']},values={...defaults,...restoredValues};
  function node(maxclass,varname=''){
-  const o={maxclass,varname,currentplug:restoredPlugin,getattr:key=>key==='currentplug'?o.currentplug:undefined,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
+  const o={maxclass,varname,currentplug:restoredPlugin,subpatcher:()=>maxclass==='hosting-automation'?{}:null,getattr:key=>key==='currentplug'?o.currentplug:undefined,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
    if(args[0]==='plug'){o.currentplug=args[1];Object.assign(values,defaults);}
    if(args[0]==='get'&&args[1]===-4)c.hostvalue(-4,available?names.length:0);
    if(args[0]==='params'&&stream)for(const name of names)c.hostname(name);
    if(args[0]==='get'&&args[1]===-10)c.hostvalue(-10,128);
    if(args[0]==='get'&&args[1]>0)c.hostvalue(args[1],...values[args[1]]);
-  }}};if(objects.length)objects.at(-1).nextobject=o;objects.push(o);return o;
+   if(args[0]==='list')values[args[1]]=[args[2],values[args[1]][1]];
+  }if(maxclass==='hosting-automation'&&args[0]==='gesture')c.automationvalue(args[1],args[2]);}};if(objects.length)objects.at(-1).nextobject=o;objects.push(o);return o;
  }
  const input=node('plugin~'),output=node('plugout~'),box=node('js'),ready=node('live.thisdevice');
  links.push([input,0,output,0],[input,1,output,1]);
@@ -55,6 +57,18 @@ test('reopened hosts retain separate native states and repeated initialization n
 });
 test('startup refuses a different saved plugin instead of silently replacing its sound',()=>{
  const s=probe({restoredPlugin:'Other compressor'});s.load();s.runAll();assert.equal(s.c.phase,'error');assert.ok(!s.messages.some(m=>m[1]==='plug'||m[1]==='list'));assert.ok(s.events.some(e=>String(e[1]).includes('another plugin')));
+});
+test('four static named automation parameters use silent sync and stored gesture paths with stable identifiers',()=>{
+ const p=hostingAutomationPatch().patcher,boxes=new Map(p.boxes.map(({box})=>[box.id,box])),dials=p.boxes.map(b=>b.box).filter(b=>b.maxclass==='live.dial');
+ assert.deepEqual(dials.map(d=>d.saved_attribute_attributes.valueof.parameter_longname),hostingControls);assert.equal(new Set(dials.map(d=>d.varname)).size,4);
+ const linked=(a,out,b)=>p.lines.some(({patchline:l})=>l.source[0]===a&&l.source[1]===out&&l.destination[0]===b);
+ for(let i=0;i<4;i++){const attrs=dials[i].saved_attribute_attributes.valueof;assert.equal(attrs.parameter_mmin,0);assert.equal(attrs.parameter_mmax,1);assert.equal(attrs.parameter_initial_enable,0);assert.equal(attrs.parameter_invisible,0);assert.equal(attrs.parameter_type,0);assert.ok(linked('sync',i,'silent-'+i));assert.equal(boxes.get('silent-'+i).text,'prepend set');assert.ok(linked('silent-'+i,0,'parameter-'+i));assert.ok(linked('gesture',i,'parameter-'+i));assert.ok(linked('parameter-'+i,0,'return-'+i));}
+ assert.ok(!/_parameter_(longname|type|range)/.test(read('controller.js')),'parameter definitions must not mutate at runtime');
+});
+test('automation playback writes the internal host without echoing parameter edits; restored defaults are ignored until ready',()=>{
+ const s=probe({restoredPlugin:'Pro-C 3',restoredValues:{4:[.2,'-30 dB']}});s.load();s.c.automationvalue(0,0);s.runAll();assert.equal(s.c.controls[0].value,.2);assert.equal(s.messages.filter(m=>m[1]==='list').length,0);
+ const syncs=s.messages.filter(m=>m[1]==='sync').length;s.c.automationvalue(0,.75);s.runAll();assert.equal(s.c.controls[0].value,.75);assert.deepEqual(s.messages.filter(m=>m[1]==='list').map(m=>m.slice(1)),[['list',4,.75]]);assert.equal(s.messages.filter(m=>m[1]==='sync').length,syncs);assert.equal(s.messages.filter(m=>m[1]==='gesture').length,0);
+ s.c.hostvalue(4,.35,'-22 dB');assert.deepEqual(s.messages.at(-1),['studio_probe_automation','sync',0,.35]);s.runAll();assert.equal(s.messages.filter(m=>m[1]==='list').length,1);
 });
 test('ambiguous or incomplete metadata refuses controls and keeps stereo dry; absent plugins time out without writes',()=>{
  for(const options of [{names:['Threshold','Ratio','Attack','Release','Ratio']},{stream:false},{available:false}]){

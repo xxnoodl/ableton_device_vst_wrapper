@@ -4,6 +4,7 @@ var settings=null,host=null,left=null,right=null,phase='idle',count=0,names=[],s
 var work=null,generation=0,writeTask=null,pending={},polls=0,scanPolls=0;
 var audioInput=null,audioOutput=null,audioReady=false;
 var wanted=['Threshold','Ratio','Attack','Release'];
+var automation=null,bankValues=[];
 function report(text){outlet(0,'status',String(text));outlet(1,String(text));}
 function view(){outlet(0,'hosting',JSON.stringify({phase:phase,controls:controls,latency:latency}));}
 function stopWork(){generation++;if(work){work.cancel();work=null;}if(writeTask){writeTask.cancel();writeTask=null;}pending={};}
@@ -19,6 +20,10 @@ function setup(){
  left=object('studio_probe_left','selector~',[2],20,215);right=object('studio_probe_right','selector~',[2],180,215);
  left.message(1);right.message(1);
  var np=object('studio_probe_names','prepend',['hostname'],350,170),vp=object('studio_probe_values','prepend',['hostvalue'],500,170);
+ automation=find('studio_probe_automation');
+ if(!automation){automation=this.patcher.newdefault(20,280,'hosting-automation');if(!automation)throw new Error('Missing hosting-automation.maxpat');automation.varname='studio_probe_automation';}
+ if(!automation.subpatcher())throw new Error('Cannot load hosting-automation.maxpat');
+ link(automation,0,this.box,0);bankValues=[];
  link(host,2,np,0);link(np,0,this.box,0);link(host,3,vp,0);link(vp,0,this.box,0);
  link(input,0,host,0);link(input,1,host,1);
  link(input,0,left,1);link(input,1,right,1);link(host,0,left,2);link(host,1,right,2);
@@ -64,7 +69,7 @@ function finishScan(){
   if(matches.length!==1)throw new Error(wanted[i]+': expected one parameter name, found '+matches.length);
   next.push({name:wanted[i],index:matches[0],value:null,text:'Waiting for plugin'});
  }
- controls=next;scanning=false;phase='ready';left.message(2);right.message(2);view();report('Internal '+settings.pluginName+' loaded. '+count+' parameters; four test controls. State/automation/latency compensation not verified.');readvalues();
+ controls=next;scanning=false;phase='ready';left.message(2);right.message(2);view();report('Internal '+settings.pluginName+' loaded. Four named automation parameters require a Max-saved device. Latency compensation not verified.');readvalues();
  }catch(e){fail(e.message);}
 }
 function hostvalue(){
@@ -77,12 +82,17 @@ function hostvalue(){
  if(phase!=='ready')return;
  if(index===-10){var samples=Number(a[1]);if(isFinite(samples)&&samples>=0&&Math.floor(samples)===samples){latency=samples;view();report('Hosted plugin reports '+samples+' latency samples. This probe does not forward compensation.');}return;}
  var value=Number(a[1]);if(!isFinite(value)||value<0||value>1)return;
- for(var i=0;i<controls.length;i++)if(controls[i].index===index){controls[i].value=value;controls[i].text=a.length>2?a.slice(2).join(' ').substring(0,256):'Unformatted '+value.toFixed(3);view();return;}
+ for(var i=0;i<controls.length;i++)if(controls[i].index===index){controls[i].value=value;controls[i].text=a.length>2?a.slice(2).join(' ').substring(0,256):'Unformatted '+value.toFixed(3);if(automation&&(typeof bankValues[i]!=='number'||Math.abs(bankValues[i]-value)>1e-6)){bankValues[i]=value;automation.message('sync',i,value);}view();return;}
 }
 function readvalues(){if(phase!=='ready')return;try{for(var i=0;i<controls.length;i++)host.message('get',controls[i].index);host.message('get',-10);}catch(e){fail(e.message);}}
 function openplugin(){if(phase!=='ready'){report('Wait for the internal plugin to load.');return;}try{host.message('floateditorwindow',1);host.message('open');}catch(e){fail(e.message);}}
 function setcontrol(slot,value){
  if(phase!=='ready'||typeof slot!=='number'||slot<0||slot>=controls.length||Math.floor(slot)!==slot||typeof value!=='number'||!isFinite(value)||controls[slot].value===null)return;
+ try{automation.message('gesture',slot,Math.max(0,Math.min(1,value)));}catch(e){fail('Automation gesture: '+e.message);}
+}
+function automationvalue(slot,value){
+ if(phase!=='ready'||typeof slot!=='number'||slot<0||slot>=controls.length||Math.floor(slot)!==slot||typeof value!=='number'||!isFinite(value))return;
+ value=Math.max(0,Math.min(1,value));bankValues[slot]=value;
  pending['$'+slot]={index:controls[slot].index,value:Math.max(0,Math.min(1,value))};
  if(!writeTask){var token=generation;writeTask=new Task(function(){writeTask=null;if(token!==generation||phase!=='ready')return;var batch=pending;pending={};try{for(var key in batch)if(Object.prototype.hasOwnProperty.call(batch,key)){host.message('list',batch[key].index,batch[key].value);host.message('get',batch[key].index);}}catch(e){fail(e.message);}},this);writeTask.schedule(33);}
 }

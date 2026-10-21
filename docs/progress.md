@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 hosted automation parameters implemented
+
+- User correctly noted custom JSUI knobs are absent from the automation chooser. Added a static four-parameter abstraction with fixed Threshold, Ratio, Attack and Release names, Float 0-1 ranges, Automated and Stored visibility, stable scripting IDs and no forced initial values. Parameter names/types are not changed in a running Live device.
+- Studio gestures pass through native live.dial parameters; their output and Live playback enter the bounded host write path. Native plugin feedback uses silent set updates; equal feedback within 1e-6 does not touch the bank. Early parameter-restoration output is ignored until native host metadata resolves.
+- Builder now reuses the preserved Max-authored Pro-C 3 host shell when available and packages hosting-automation.maxpat. No AMXD rewriting. New artifacts/pro-c3-internal-host-automation is verified against source, shell bytes and ZIP CRCs. One native Max Save As is required to include the bank before parameter registration; this is prototype authoring, not intended producer setup.
+- All 148 tests pass with no skips. Added bank contract and automation playback/feedback regressions. Actual chooser visibility, recording, playback/override and reopen remain pending in Live. Lanes currently use normalized values; plugin-formatted units remain on the panel. Latency and sidechains remain open.
+
 ## 2026-10-21 independent hosted Threshold recall passed
 
 - User saved the candidate from Max as Pro-C-3-Studio-State.amxd, loaded it twice, set Thresholds to -10 dB and -30 dB, then saved/closed/reopened the Set and confirmed both retain their own values. This passes the specific independent Threshold recall retest after the startup fix and native shell save.
