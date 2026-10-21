@@ -39,6 +39,15 @@ function controller(rack=fixture()){
 test('explicit target binding distinguishes identical plugin instances and never writes on load or bind',()=>{
  const s=controller();s.c.bindselected();assert.equal(s.writes.length,0);s.c.bindselected();assert.match(s.events.at(-1)[1],/already bound/);s.select(3);s.c.bindselected();assert.match(s.events.at(-1)[1],/All targets ready/);assert.equal(s.writes.length,0);
 });
+
+test('performance binding accepts host capitalization and surrounding whitespace while preserving exact instance assignment',()=>{
+ const s=controller();s.objects[1].name=' Augmented STRINGS ';s.objects[2].name=' morph ';s.objects[3].name='AUGMENTED STRINGS';s.bind();assert.match(s.events.at(-1)[1],/All targets ready/);assert.equal(s.writes.length,0);
+});
+
+test('wrong device errors identify the actual Live selection instead of only repeating the expected name',()=>{
+ const s=controller();s.objects[1].name='Other synth';s.c.bindselected();assert.match(s.events.at(-1)[1],/Live selected PluginDevice "Other synth"/);assert.equal(s.writes.length,0);
+ s.objects[1].type='MaxDevice';s.objects[1].name='Performance rack';s.c.bindselected();assert.match(s.events.at(-1)[1],/Live selected MaxDevice "Performance rack"/);assert.match(s.events.at(-1)[1],/Keep the Max editor open/);
+});
 test('one macro coalesces gestures and reaches distinct destination values through smoothing',()=>{
  const s=controller();s.bind();s.c.queuewrite('energy',.4);s.c.queuewrite('energy',1);assert.equal(s.tasks.length,1);assert.equal(s.writes.length,0);s.drain();assert.equal(s.objects[2].value,1);assert.equal(s.objects[4].value,1);assert.equal(s.tasks.length,3);assert.equal(s.writes.filter(w=>w[0]===2).length,2);assert.equal(s.writes.filter(w=>w[0]===4).length,3);
 });

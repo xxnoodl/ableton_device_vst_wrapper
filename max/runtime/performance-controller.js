@@ -5,6 +5,8 @@ var rack=null,slots={},pending={},task=null,serial=0,positions={},expected={},mi
 function report(message){outlet(0,'status',message);outlet(1,message);}
 function scalar(api,key){var v=api.get(key);if(Object.prototype.toString.call(v)==='[object Array]')v=v[0];if(v===null||typeof v==='undefined')throw new Error('Target unavailable');return v;}
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
+function normalizedName(value){return String(value).replace(/^\s+|\s+$/g,'').toLowerCase();}
+function selectedLabel(device){var name='';try{if(Number(device.id))name=String(scalar(device,'name'));}catch(e){}return String(device.type||'no device')+(name?' "'+name+'"':'');}
 function key(t,p){return '$'+JSON.stringify([t,p]);}
 function cancel(){if(task)task.cancel();task=null;pending={};}
 function release(id){var s=slots['$'+id];if(s){s.token=-1;for(var p in s.parameters)try{s.parameters[p].api.property='';}catch(e){}delete slots['$'+id];}cancel();}
@@ -13,10 +15,10 @@ function loadmanifest(raw){try{var next=PerformanceRouting.parse(raw);disconnect
 function read(path){var f=null;try{f=new File(path,'read');if(!f.isopen||f.eof>1000000)throw new Error('Cannot read rack manifest');var raw='';while(f.position<f.eof)raw+=f.readline()+'\n';loadmanifest(raw);}catch(e){report('Load error: '+e.message);}finally{if(f)f.close();}}
 function bindselected(){if(!rack)return report('Load a rack first');for(var i=0;i<rack.targets.length;i++)if(!slots['$'+rack.targets[i].id])return bindtarget(rack.targets[i].id);report('All targets bound. Use disconnect before assigning other instances.');}
 function ids(device){var raw=device.get('parameters'),result=[];if(Object.prototype.toString.call(raw)!=='[object Array]'||raw.length>1024)throw new Error('Parameter list unavailable or too large');for(var i=0;i<raw.length;i++)if(raw[i]==='id'&&Number(raw[i+1]))result.push(Number(raw[++i]));return result;}
-function match(api,p){return valid(api,'DeviceParameter')&&String(scalar(api,'name'))===p.name&&Number(scalar(api,'min'))===p.min&&Number(scalar(api,'max'))===p.max&&!!Number(scalar(api,'is_quantized'))===p.quantized;}
+function match(api,p){return valid(api,'DeviceParameter')&&normalizedName(scalar(api,'name'))===normalizedName(p.name)&&Number(scalar(api,'min'))===p.min&&Number(scalar(api,'max'))===p.max&&!!Number(scalar(api,'is_quantized'))===p.quantized;}
 function bindtarget(id){
  if(!rack)return report('Load a rack first');var definition=PerformanceRouting.find(rack.targets,id);if(!definition)return report('Unknown target slot');release(id);
- try{var device=new LiveAPI(null,'live_set view selected_track view selected_device');if(!valid(device,'PluginDevice')||String(scalar(device,'name'))!==definition.pluginName)throw new Error('Select '+definition.pluginName+' for '+definition.label);
+ try{var device=new LiveAPI(null,'live_set view selected_track view selected_device');if(!valid(device,'PluginDevice')||normalizedName(scalar(device,'name'))!==normalizedName(definition.pluginName))throw new Error('Select '+definition.pluginName+' for '+definition.label+'. Live selected '+selectedLabel(device)+'. Keep the Max editor open; select the synth in Live, then click bindselected in Max.');
   for(var existing in slots)if(Number(slots[existing].device.id)===Number(device.id))throw new Error('This instance is already bound to another target slot');
   var available=ids(device),slot={device:device,deviceId:Number(device.id),parameters:{},token:++serial};slots['$'+id]=slot;
   for(var i=0;i<definition.parameters.length;i++){var p=definition.parameters[i],matches=[];for(var j=0;j<available.length;j++){var candidate=new LiveAPI(null,'id '+available[j]);if(match(candidate,p))matches.push(available[j]);}if(matches.length!==1)throw new Error(p.name+': expected one exact name/range/quantization match');subscribe(slot,definition,p,matches[0]);}

@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 performance binding correction
+
+- User reported the first host binding attempt rejecting Strings A before parameter matching. Found the new controller compared plugin names case-sensitively, unlike the regular wrapper. Corrected plugin/parameter name matching to ignore capitalization and surrounding whitespace. Wrong-device errors now identify the actual selected device type/name.
+- Corrected cross-track test instructions: keep the separate Max editor open while selecting the synth in Live; returning to the wrapper in Live can change the selected device. Updated the generated test bundle in place without changing its Max shell. Successful host binding remains pending.
+
 ## 2026-10-21 performance macro prototype
 
 - Implemented a separate versioned rack contract and shared ES5 curve engine, browser performance workbench and multi-target Max controller. Energy controls Morph on one Strings instance and stages Motion on a second. These are exposed-parameter routes, not SDK ID guesses.
