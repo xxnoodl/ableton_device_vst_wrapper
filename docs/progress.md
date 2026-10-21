@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 internal Pro-C 3 editor opened in Live
+
+- User loaded the standalone Pro-C-3-Studio-Test device on the requested test track and confirmed Open plugin opens the internal FabFilter window. This passes the first real-host loading/editor check without an external plugin device or manual binding.
+- Four-control formatted readout accuracy, bidirectional control, audible processing, state persistence, automation, latency compensation and sidechain routing are not inferred from this result.
+
 ## 2026-10-21 internal Pro-C 3 hosting proof built
 
 - Added a separate internal vst~ controller and four-control native panel, plus an exclusive-output builder that copies the existing Max-authored shell unchanged. Pro-C 3 loads internally on initialization; Open plugin targets its own native editor. No external instance or binding, Node process, server or manual Max assembly is needed.
