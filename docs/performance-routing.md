@@ -1,6 +1,6 @@
 # Performance routing
 
-Status: first macro slice implemented as an experimental workbench and separate Max controller; actual Live verification pending. The regular wrapper still binds one plugin and its canvas cables remain visual decoration. XY, scenes, modulation and functional canvas sockets below remain proposals.
+Status: first macro slice implemented as an experimental workbench and separate Max controller; initial two-instance binding and staged macro control passed user tests in Live; lifecycle and automation checks remain pending. The regular wrapper still binds one plugin and its canvas cables remain visual decoration. XY, scenes, modulation and functional canvas sockets below remain proposals.
 
 The product should help shape a sound or transition across devices, rather than only reproduce a plugin's interface. Choosing and generating a normal wrapper remains the starting workflow. Advanced connections are optional.
 

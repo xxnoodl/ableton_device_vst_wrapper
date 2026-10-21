@@ -82,8 +82,8 @@
     },
     {
       "name": "Cross-plugin performance macros",
-      "status": "experimental; host verification pending",
-      "evidence": "apps/studio/performance.*; max/runtime/performance-controller.js; tests/performance.test.mjs; docs/performance-routing.md"
+      "status": "partially verified: two instances of Augmented Strings",
+      "evidence": "User confirmed delayed binding for both slots and staged Energy control of Morph/Motion; lifecycle, automation and different plugin products remain pending. docs/progress.md; tests/performance.test.mjs"
     }
   ]
 }

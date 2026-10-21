@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 two-instance macro host check
+
+- User successfully bound Strings A and Strings B using delayed selection in Live. Energy moved Morph throughout its travel on the first Augmented Strings instance; Motion on the second stayed at zero until roughly 0.4 and then rose toward maximum, matching the declared staged curve.
+- This establishes initial multi-instance control and staging for two instances of the same plugin. It does not establish compatibility between different plugin products, native undo, sustained timing, disconnect/reopen or performance-runtime automation behavior. Those host checks remain pending.
+
 ## 2026-10-21 delayed performance binding
 
 - The next host error identified the selected object as MaxDevice Wrapper. The separate-editor selection sequence still returned selection to the wrapper. Changed bindselected to arm a five-second task: click it first, select the intended synth in Live, then leave that synth selected until binding finishes.
