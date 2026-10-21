@@ -73,3 +73,5 @@ First host result: user confirmed the standalone test device and Open plugin ope
 Hosted-editor focus follow-up: user reported the plugin window disappears behind Live while editing Studio controls. The floating-window build enables vst~ floateditorwindow at creation and before every explicit Open plugin command. Focused simulated tests pass; actual floating behavior in Live is pending. The corrected bundle is artifacts/pro-c3-internal-host-floating.
 
 Floating build host result: user confirmed window behavior works and all four controls respond bidirectionally with matching value/unit displays. The prior pending focus check and four-control formatting/control checks now pass for this Pro-C 3 instance. Remaining audio/state/automation/latency/routing gates remain open.
+
+Audio host result: user reported compression responds to all four knobs during audio playback through the internal device. Basic stereo processing is user-verified. State persistence is the next implementation gate; latency, audio equivalence, automation and sidechain routing remain unverified.

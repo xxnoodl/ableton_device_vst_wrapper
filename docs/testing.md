@@ -45,3 +45,5 @@ Hosted Attack formatting: user changed Attack in the internal FabFilter editor a
 Hosted Attack reverse-control result: user confirmed dragging the Studio Attack knob moves the internal FabFilter Attack with matching time values. Together with the native-editor test, this establishes two-way Attack control and formatted time display on the hosting proof.
 
 Hosted four-control/floating result: user confirmed FabFilter stays visible while using the Studio panel and all four knobs respond in both directions with matching values/units. This covers Threshold, Ratio, Attack and Release on the internal Pro-C 3 proof. Audio processing, saved state, automation, latency and sidechains are not inferred.
+
+Internal Pro-C 3 audio result: user reported audible compression works with all test knobs during the requested audio playback check. This verifies basic stereo audio processing/control response, not measured latency, audio equivalence, sidechain support or saved sound state.

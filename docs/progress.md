@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 internal Pro-C 3 audio processing passed
+
+- User played audio through the internal hosting proof and reported compression works with all test knobs. This establishes user-observed audible processing and control response for the stereo Pro-C 3 test path. It is not a null comparison, latency measurement or sidechain test.
+- Loading/editor, floating window, four-control two-way formatted feedback and audible processing now pass. Full sound state persistence is the next implementation gate; automation, latency compensation and sidechains remain open.
+
 ## 2026-10-21 hosted four-control and floating editor checks passed
 
 - User confirmed the floating-editor build stays usable alongside the Studio panel and all four test knobs (Threshold, Ratio, Attack and Release) respond in both directions with matching value/unit displays. This extends the earlier Attack-only evidence to the entire four-control hosting panel.
