@@ -2,7 +2,7 @@
 
 Checked 2026-10-21 against official documentation and installed Max 9.0.9 reference XML. This is a feasibility decision, not a successful hosted-audio test. The working Live-hosted wrappers remain unchanged.
 
-Current state-recall gate: FAILED. Two hosted instances with distinct Threshold values both reopened at -16 dB. A startup-reload fix and a one-time native shell save are prepared for a new host check; the earlier single-instance report does not establish reliable persistence.
+Current state-recall evidence: the original duplicate test failed at -16 dB. After the startup fix and native Max shell save, user confirmed two instances retain separate -10 dB and -30 dB Threshold values across Set reopen. Independent native-editor-only settings and device-preset recall remain separate checks; the earlier single-instance report does not establish universal persistence.
 
 The product requirement is one reusable device: choose a plugin, choose controls, generate a usable panel, optionally edit, and save for reuse. Routine use must not require manual target binding, separate plugin/wrapper imports or Max patch editing. Correct plugin-defined value text, state, automation and access to the original editor are part of the requirement.
 
@@ -81,3 +81,5 @@ Audio host result: user reported compression responds to all four knobs during a
 Set recall follow-up: user explicitly confirmed settings survive save/close/reopen, including Style changed only in the internal FabFilter editor. Record this Set test as passed without claiming all plugin state fields. No persistence code was introduced. The ordering of parameter-enabled vst~ state restoration versus the initialization plug command remains to be established; device-preset recall and duplicate independence remain open.
 
 State candidate: controller reads vst~ currentplug and avoids plug when the configured product is already loaded. It rejects another product rather than overwriting it. Two added regressions preserve distinct restored values, native-editor-only state and repeated initialization without reload or parameter writes. All 146 tests pass. Build artifacts/pro-c3-internal-host-state, load its test device, then use Max Save As to author Pro-C-3-Studio-State.amxd in that same folder once. This must be a native Max save, not JSON renamed to AMXD. Test duplicates of that device with distinct Threshold and Style settings across reopen. Host persistence is still pending.
+
+Native saved hosting shell: user authored Pro-C-3-Studio-State.amxd in Max. Inspection confirms a static studio_probe_host vst~ with parameter_enable 1. The validated bytes are preserved unchanged at ignored max/templates/hosting-pro-c3.amxd for subsequent local build integration; no synthetic AMXD rewriting was performed.

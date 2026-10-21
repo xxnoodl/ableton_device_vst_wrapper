@@ -1,5 +1,11 @@
 # Progress
 
+## 2026-10-21 independent hosted Threshold recall passed
+
+- User saved the candidate from Max as Pro-C-3-Studio-State.amxd, loaded it twice, set Thresholds to -10 dB and -30 dB, then saved/closed/reopened the Set and confirmed both retain their own values. This passes the specific independent Threshold recall retest after the startup fix and native shell save.
+- Inspected the actual saved device: one studio_probe_host vst~ with parameter_enable 1. Validated the Max-authored container and preserved it byte-for-byte as ignored max/templates/hosting-pro-c3.amxd for future hosting builds. Existing test artifacts were not rewritten.
+- Earlier failure remains documented. Native-editor-only state independence, device-preset recall, automation lanes, latency compensation and sidechains are not established by this Threshold-only retest.
+
 ## 2026-10-21 hosted duplicate state failure and startup fix
 
 - User reports two devices with different Threshold values both reopen at -16 dB. This fails independent saved-state recall and supersedes the earlier single-instance recall report as evidence for reliable persistence. Current-session independence still passes.
