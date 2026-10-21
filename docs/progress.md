@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 Pro-C 3 automatic reconnect passed
+
+- Startup console included an older performance rack and a Pro-C 3 predecessor-type binding error. After placing the horizontal wrapper immediately after Pro-C 3, the user confirmed the save/reopen automatic connection check works.
+- Pro-C 3 now has user-confirmed horizontal presentation, two-way control and automatic reconnection with immediate predecessor placement. Earlier manual-binding failure remains documented below; no runtime code change was needed. Pro-C 3 automation is still a separate unverified check.
+
 ## 2026-10-21 Pro-C 3 reopen failure
 
 - User reports the horizontal Pro-C 3 wrapper requires manual binding after reopening the Set. Horizontal layout and two-way control pass; automatic reconnection does not pass for this plugin/session.

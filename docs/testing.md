@@ -31,3 +31,5 @@ Captured-registry persistence result: user saved and reopened the Set with the C
 Pro-C 3 host result: user selected all 11 exposed controls and confirmed two-way control. The initial generated layout was too small because controls stacked vertically and the copied drawing area stayed 220 pixels wide. Horizontal layout/resize regressions now pass in the Max simulation; user subsequently confirmed the corrected expanded layout works in Live with two-way control intact. Pro-C 3 automation and Set reopen remain unverified.
 
 Pro-C 3 reopen result: user reports manual binding is required after Set reopen. Automatic reconnection fails this host check; startup console diagnosis is pending. Earlier Augmented Strings reconnect success does not establish Pro-C 3 behavior.
+
+Pro-C 3 reconnect follow-up: after placing the new horizontal wrapper immediately after Pro-C 3, user confirmed the save/reopen automatic connection test works. The earlier failure is resolved by device placement; no runtime patch was needed. The immediate-predecessor requirement remains in force. Pro-C 3 automation is not yet verified.
