@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 Pro-C 3 reopen failure
+
+- User reports the horizontal Pro-C 3 wrapper requires manual binding after reopening the Set. Horizontal layout and two-way control pass; automatic reconnection does not pass for this plugin/session.
+- Generated manifest has autoBindPrevious enabled. Current startup logic attempts the immediate predecessor with bounded retries over 8.25 seconds. The exact console error and device placement are needed to distinguish restoration timing, chain placement, metadata matching and runtime file loading. No speculative routing change made.
+
 ## 2026-10-21 horizontal generated devices
 
 - User confirmed all 11 exposed Pro-C 3 controls work in both directions in Live. This adds a second plugin product to the captured-registry evidence. Automation and reopen are not inferred.
