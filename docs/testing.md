@@ -1,6 +1,6 @@
 # Test evidence and remaining checks
 
-Run `npm test` with Node 24. This machine passes 138 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
+Run `npm test` with Node 24. This machine passes 144 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
 
 The native fixtures exercise metadata, enum labels, invalid defaults, class choice, an actual child-process crash and a hang, followed by a successful inspection. They contain no audio DSP and do not count as a complete audio-plugin fixture. Node process tests also check malformed output, output overflow and wall deadlines. The helper applies a Windows resource job; filesystem/network security sandboxing is not established.
 
@@ -35,3 +35,5 @@ Pro-C 3 reopen result: user reports manual binding is required after Set reopen.
 Pro-C 3 reconnect follow-up: after placing the new horizontal wrapper immediately after Pro-C 3, user confirmed the save/reopen automatic connection test works. The earlier failure is resolved by device placement; no runtime patch was needed. The immediate-predecessor requirement remains in force. Pro-C 3 automation is not yet verified.
 
 Pro-C 3 automation follow-up: user confirmed the wrapper follows Threshold automation during playback without a wrapper gesture. This covers incoming Threshold automation only, not every parameter or recording automation from the wrapper.
+
+Internal hosting proof: six simulated-host tests cover local graph creation/reuse, unique index resolution, plugin-formatted readouts, feedback without writes, explicit/coalesced gestures, dry/wet exclusivity, timeout/error recovery, stop cancellation and editor-button dispatch. They do not load a plugin into Max. First host check is the separate Pro-C-3-Studio-Test.amxd in artifacts/pro-c3-internal-host: load it alone on an audio track and open its internal editor. No automation lanes, guaranteed preset state, latency compensation or external sidechain are supplied by this proof.

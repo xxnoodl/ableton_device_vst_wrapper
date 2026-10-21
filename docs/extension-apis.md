@@ -1,5 +1,7 @@
 # Extension boundaries
 
+- `max/hosting`: separate experimental internal vst~ host. Legacy JS constructs only its local Max audio/metadata graph; no LiveAPI target binding, Node process or server connection is involved. Keep it outside the regular runtime until plugin-hosting.md adoption gates pass. Its current four-control proof has no automation lanes, guaranteed saved sound, latency compensation or sidechain support.
+
 - `packages/schema`: strict project v2, v1 migration, numeric transforms and serialization. Breaking changes require explicit migration. Unknown executable expressions are rejected.
 - `packages/layout-engine`: pure validated commands. Preserve group bounds, locks and immutable history.
 - `packages/presets`: function selection and layout appearance are distinct. Named presets are never silently replaced.

@@ -1,5 +1,11 @@
 # Progress
 
+## 2026-10-21 internal Pro-C 3 hosting proof built
+
+- Added a separate internal vst~ controller and four-control native panel, plus an exclusive-output builder that copies the existing Max-authored shell unchanged. Pro-C 3 loads internally on initialization; Open plugin targets its own native editor. No external instance or binding, Node process, server or manual Max assembly is needed.
+- Probe preserves plugin-provided formatted text for Threshold, Ratio, Attack and Release, resolves exact unique parameter names and coalesces only explicit gestures. Dry audio is retained until metadata resolves and on failure; load/scan work is bounded and cancelled on stop.
+- All 144 tests pass with no skips, including six new simulated-host tests. Built artifacts/pro-c3-internal-host for the next user check. Real plugin audio/editor/value formatting remain unverified. Automation lanes, sound persistence, latency compensation, sidechains and instruments remain later gates.
+
 ## 2026-10-21 single-device hosting investigation
 
 - Investigated the requested one-device workflow using official Max/Live/VST3 documentation and installed Max 9.0.9 vst~ reference XML. Compared companion wrappers, saved Racks, internal Max hosting and a dedicated VST3 host.
