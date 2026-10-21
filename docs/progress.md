@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 delayed performance binding
+
+- The next host error identified the selected object as MaxDevice Wrapper. The separate-editor selection sequence still returned selection to the wrapper. Changed bindselected to arm a five-second task: click it first, select the intended synth in Live, then leave that synth selected until binding finishes.
+- Target selection is read at timer completion, never at the wrapper click. Repeated clicks, disconnect, manifest reload and direct slot binding cancel stale timers. Added simulated regression cases for wrapper-to-synth selection changes and timer cancellation. All 115 tests pass and the updated ZIP was checked against the current controller and unchanged shell. Host success remains pending.
+
 ## 2026-10-21 performance binding correction
 
 - User reported the first host binding attempt rejecting Strings A before parameter matching. Found the new controller compared plugin names case-sensitively, unlike the regular wrapper. Corrected plugin/parameter name matching to ignore capitalization and surrounding whitespace. Wrong-device errors now identify the actual selected device type/name.

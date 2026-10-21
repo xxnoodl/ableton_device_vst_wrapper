@@ -2,6 +2,7 @@
 autowatch=1;inlets=1;outlets=3;
 include('performance-core.js');
 var rack=null,slots={},pending={},task=null,serial=0,positions={},expected={},mixed={};
+var bindingTask=null,bindingEpoch=0;
 function report(message){outlet(0,'status',message);outlet(1,message);}
 function scalar(api,key){var v=api.get(key);if(Object.prototype.toString.call(v)==='[object Array]')v=v[0];if(v===null||typeof v==='undefined')throw new Error('Target unavailable');return v;}
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
@@ -9,20 +10,28 @@ function normalizedName(value){return String(value).replace(/^\s+|\s+$/g,'').toL
 function selectedLabel(device){var name='';try{if(Number(device.id))name=String(scalar(device,'name'));}catch(e){}return String(device.type||'no device')+(name?' "'+name+'"':'');}
 function key(t,p){return '$'+JSON.stringify([t,p]);}
 function cancel(){if(task)task.cancel();task=null;pending={};}
+function cancelBinding(){bindingEpoch++;if(bindingTask)bindingTask.cancel();bindingTask=null;}
 function release(id){var s=slots['$'+id];if(s){s.token=-1;for(var p in s.parameters)try{s.parameters[p].api.property='';}catch(e){}delete slots['$'+id];}cancel();}
-function disconnect(){cancel();for(var id in slots)release(id.slice(1));slots={};expected={};report('Disconnected. Select the first target plugin, then bindselected.');}
-function loadmanifest(raw){try{var next=PerformanceRouting.parse(raw);disconnect();rack=next;positions={};mixed={};for(var i=0;i<rack.macros.length;i++)positions['$'+rack.macros[i].id]=rack.macros[i].value;outlet(0,'manifest',JSON.stringify(PerformanceRouting.display(rack)));report('Loaded performance rack. Select '+rack.targets[0].label+' in Live, then bindselected. No automatic binding.');}catch(e){disconnect();rack=null;report('Load error: '+e.message);}}
-function read(path){var f=null;try{f=new File(path,'read');if(!f.isopen||f.eof>1000000)throw new Error('Cannot read rack manifest');var raw='';while(f.position<f.eof)raw+=f.readline()+'\n';loadmanifest(raw);}catch(e){report('Load error: '+e.message);}finally{if(f)f.close();}}
-function bindselected(){if(!rack)return report('Load a rack first');for(var i=0;i<rack.targets.length;i++)if(!slots['$'+rack.targets[i].id])return bindtarget(rack.targets[i].id);report('All targets bound. Use disconnect before assigning other instances.');}
+function disconnect(){cancelBinding();cancel();for(var id in slots)release(id.slice(1));slots={};expected={};report('Disconnected. Click bindselected, then select the first target plugin within 5 seconds.');}
+function loadmanifest(raw){try{var next=PerformanceRouting.parse(raw);disconnect();rack=next;positions={};mixed={};for(var i=0;i<rack.macros.length;i++)positions['$'+rack.macros[i].id]=rack.macros[i].value;outlet(0,'manifest',JSON.stringify(PerformanceRouting.display(rack)));report('Loaded performance rack. Click bindselected, then select '+rack.targets[0].label+' in Live within 5 seconds.');}catch(e){disconnect();rack=null;report('Load error: '+e.message);}}
+function read(path){cancelBinding();var f=null;try{f=new File(path,'read');if(!f.isopen||f.eof>1000000)throw new Error('Cannot read rack manifest');var raw='';while(f.position<f.eof)raw+=f.readline()+'\n';loadmanifest(raw);}catch(e){report('Load error: '+e.message);}finally{if(f)f.close();}}
+function bindselected(){
+ cancelBinding();if(!rack)return report('Load a rack first');var target=null;
+ for(var i=0;i<rack.targets.length;i++)if(!slots['$'+rack.targets[i].id]){target=rack.targets[i];break;}
+ if(!target)return report('All targets bound. Use disconnect before assigning other instances.');
+ var token=bindingEpoch,id=target.id;
+ report('Binding '+target.label+' in 5 seconds. NOW select its '+target.pluginName+' title bar in Live and leave it selected.');
+ bindingTask=new Task(function(){if(token!==bindingEpoch)return;bindingTask=null;bindtarget(id);},this);bindingTask.schedule(5000);
+}
 function ids(device){var raw=device.get('parameters'),result=[];if(Object.prototype.toString.call(raw)!=='[object Array]'||raw.length>1024)throw new Error('Parameter list unavailable or too large');for(var i=0;i<raw.length;i++)if(raw[i]==='id'&&Number(raw[i+1]))result.push(Number(raw[++i]));return result;}
 function match(api,p){return valid(api,'DeviceParameter')&&normalizedName(scalar(api,'name'))===normalizedName(p.name)&&Number(scalar(api,'min'))===p.min&&Number(scalar(api,'max'))===p.max&&!!Number(scalar(api,'is_quantized'))===p.quantized;}
 function bindtarget(id){
- if(!rack)return report('Load a rack first');var definition=PerformanceRouting.find(rack.targets,id);if(!definition)return report('Unknown target slot');release(id);
- try{var device=new LiveAPI(null,'live_set view selected_track view selected_device');if(!valid(device,'PluginDevice')||normalizedName(scalar(device,'name'))!==normalizedName(definition.pluginName))throw new Error('Select '+definition.pluginName+' for '+definition.label+'. Live selected '+selectedLabel(device)+'. Keep the Max editor open; select the synth in Live, then click bindselected in Max.');
+ cancelBinding();if(!rack)return report('Load a rack first');var definition=PerformanceRouting.find(rack.targets,id);if(!definition)return report('Unknown target slot');release(id);
+ try{var device=new LiveAPI(null,'live_set view selected_track view selected_device');if(!valid(device,'PluginDevice')||normalizedName(scalar(device,'name'))!==normalizedName(definition.pluginName))throw new Error('Select '+definition.pluginName+' for '+definition.label+'. Live selected '+selectedLabel(device)+'. Click bindselected FIRST, then select the synth in Live within 5 seconds and leave it selected.');
   for(var existing in slots)if(Number(slots[existing].device.id)===Number(device.id))throw new Error('This instance is already bound to another target slot');
   var available=ids(device),slot={device:device,deviceId:Number(device.id),parameters:{},token:++serial};slots['$'+id]=slot;
   for(var i=0;i<definition.parameters.length;i++){var p=definition.parameters[i],matches=[];for(var j=0;j<available.length;j++){var candidate=new LiveAPI(null,'id '+available[j]);if(match(candidate,p))matches.push(available[j]);}if(matches.length!==1)throw new Error(p.name+': expected one exact name/range/quantization match');subscribe(slot,definition,p,matches[0]);}
-  var next=null;for(i=0;i<rack.targets.length;i++)if(!slots['$'+rack.targets[i].id]){next=rack.targets[i];break;}report('Bound '+definition.label+'. '+(next?'Select '+next.label+' next, then bindselected.':'All targets ready. Macro gestures override destination automation.'));
+  var next=null;for(i=0;i<rack.targets.length;i++)if(!slots['$'+rack.targets[i].id]){next=rack.targets[i];break;}report('Bound '+definition.label+'. '+(next?'Click bindselected, then select '+next.label+' within 5 seconds.':'All targets ready. Macro gestures override destination automation.'));
  }catch(e){release(id);report('Binding error: '+e.message);}
 }
 function subscribe(slot,target,p,id){var token=slot.token,api=new LiveAPI(function(args){if(slot.token!==token||slots['$'+target.id]!==slot||args[0]!=='value')return;var v=Number(args[1]);if(!isFinite(v))return;observed(target.id,p.id,v);},'id '+id);slot.parameters['$'+p.id]={api:api,id:id,definition:p};api.property='value';var value=Number(scalar(api,'value'));if(!isFinite(value)||value<p.min||value>p.max)throw new Error('Invalid current parameter value');observed(target.id,p.id,value);}

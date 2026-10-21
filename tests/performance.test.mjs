@@ -32,12 +32,24 @@ function controller(rack=fixture()){
  const events=[],writes=[],instances=[],tasks=[];let selected=1;
  const objects={1:{type:'PluginDevice',name:'Augmented Strings',parameters:['id',2]},2:{type:'DeviceParameter',name:'Morph',min:0,max:1,value:.3,is_enabled:1,is_quantized:0},3:{type:'PluginDevice',name:'Augmented Strings',parameters:['id',4]},4:{type:'DeviceParameter',name:'Motion',min:0,max:1,value:.2,is_enabled:1,is_quantized:0}};
  function LiveAPI(callback,path){this.id=path==='live_set view selected_track view selected_device'?selected:Number(path.split(' ')[1]);this.callback=callback;Object.defineProperty(this,'type',{get:()=>objects[this.id]?.type||''});this.get=key=>{if(!objects[this.id])throw new Error('Missing target');const value=objects[this.id][key];return Array.isArray(value)?value:[value];};this.set=(key,value)=>{writes.push([this.id,key,value]);objects[this.id][key]=value;for(const i of instances)if(i.id===this.id&&i.property===key)i.callback?.([key,value]);};instances.push(this);}
- function Task(fn){this.cancelled=false;this.schedule=ms=>{assert.equal(ms,33);tasks.push(this);};this.cancel=()=>{this.cancelled=true;};this.run=()=>{if(!this.cancelled)fn();};}
+ function Task(fn){this.cancelled=false;this.schedule=ms=>{assert.ok([33,5000].includes(ms));this.delay=ms;tasks.push(this);};this.cancel=()=>{this.cancelled=true;};this.run=()=>{if(!this.cancelled)fn();};}
  const c=vm.createContext({LiveAPI,Task,outlet:(...a)=>events.push(a)});c.include=name=>vm.runInContext(read('max/runtime/'+name),c);vm.runInContext(read('max/runtime/performance-controller.js'),c);c.loadmanifest(JSON.stringify(rack));
- return {c,rack,events,writes,instances,tasks,objects,select:id=>{selected=id;},bind(){c.bindselected();selected=3;c.bindselected();},drain(){for(let i=0;i<tasks.length;i++){assert.ok(i<200);tasks[i].run();}}};
+ function bindNow(){const next=rack.targets.find(t=>!c.slots['$'+t.id]);if(next)c.bindtarget(next.id);else c.bindselected();}
+ return {c,rack,events,writes,instances,tasks,objects,bindNow,select:id=>{selected=id;},bind(){bindNow();selected=3;bindNow();},drain(){for(let i=0;i<tasks.length;i++){assert.ok(i<200);tasks[i].run();}}};
 }
 test('explicit target binding distinguishes identical plugin instances and never writes on load or bind',()=>{
- const s=controller();s.c.bindselected();assert.equal(s.writes.length,0);s.c.bindselected();assert.match(s.events.at(-1)[1],/already bound/);s.select(3);s.c.bindselected();assert.match(s.events.at(-1)[1],/All targets ready/);assert.equal(s.writes.length,0);
+ const s=controller();s.bindNow();assert.equal(s.writes.length,0);s.bindNow();assert.match(s.events.at(-1)[1],/already bound/);s.select(3);s.bindNow();assert.match(s.events.at(-1)[1],/All targets ready/);assert.equal(s.writes.length,0);
+});
+
+test('binding button reads selection after its five-second delay rather than the wrapper selected at click time',()=>{
+ const s=controller();s.objects[9]={type:'MaxDevice',name:'Wrapper'};s.select(9);s.c.bindselected();assert.equal(s.tasks[0].delay,5000);assert.equal(s.instances.length,0);assert.equal(s.writes.length,0);
+ s.select(1);s.tasks[0].run();assert.match(s.events.at(-1)[1],/Bound Strings A/);
+ s.select(9);s.c.bindselected();s.select(3);s.tasks[1].run();assert.match(s.events.at(-1)[1],/All targets ready/);assert.equal(s.writes.length,0);
+});
+
+test('disconnect, reload, direct binding and repeated clicks cancel obsolete selection timers',()=>{
+ for(const action of [s=>s.c.disconnect(),s=>s.c.loadmanifest(JSON.stringify(s.rack)),s=>s.c.bindtarget('strings-a')]){const s=controller();s.c.bindselected();action(s);const count=s.events.length;s.tasks[0].run();assert.equal(s.events.length,count);assert.equal(s.writes.length,0);}
+ const s=controller();s.c.bindselected();s.c.bindselected();s.tasks[0].run();assert.equal(Object.keys(s.c.slots).length,0);s.tasks[1].run();assert.equal(Object.keys(s.c.slots).length,1);
 });
 
 test('performance binding accepts host capitalization and surrounding whitespace while preserving exact instance assignment',()=>{
@@ -45,8 +57,8 @@ test('performance binding accepts host capitalization and surrounding whitespace
 });
 
 test('wrong device errors identify the actual Live selection instead of only repeating the expected name',()=>{
- const s=controller();s.objects[1].name='Other synth';s.c.bindselected();assert.match(s.events.at(-1)[1],/Live selected PluginDevice "Other synth"/);assert.equal(s.writes.length,0);
- s.objects[1].type='MaxDevice';s.objects[1].name='Performance rack';s.c.bindselected();assert.match(s.events.at(-1)[1],/Live selected MaxDevice "Performance rack"/);assert.match(s.events.at(-1)[1],/Keep the Max editor open/);
+ const s=controller();s.objects[1].name='Other synth';s.bindNow();assert.match(s.events.at(-1)[1],/Live selected PluginDevice "Other synth"/);assert.equal(s.writes.length,0);
+ s.objects[1].type='MaxDevice';s.objects[1].name='Performance rack';s.bindNow();assert.match(s.events.at(-1)[1],/Live selected MaxDevice "Performance rack"/);assert.match(s.events.at(-1)[1],/Click bindselected FIRST/);
 });
 test('one macro coalesces gestures and reaches distinct destination values through smoothing',()=>{
  const s=controller();s.bind();s.c.queuewrite('energy',.4);s.c.queuewrite('energy',1);assert.equal(s.tasks.length,1);assert.equal(s.writes.length,0);s.drain();assert.equal(s.objects[2].value,1);assert.equal(s.objects[4].value,1);assert.equal(s.tasks.length,3);assert.equal(s.writes.filter(w=>w[0]===2).length,2);assert.equal(s.writes.filter(w=>w[0]===4).length,3);
@@ -59,12 +71,12 @@ test('cross-plugin routing uses each destination range rather than a shared norm
 
 test('parameter aliases and non-finite host values cannot become competing or invalid writes',()=>{
  const r=fixture();r.targets[0].parameters.push({...r.targets[0].parameters[0],id:'alias'});assert.throws(()=>validateRack(r),/alias/);
- const s=controller();s.objects[2].value=NaN;s.c.bindselected();assert.match(s.events.at(-1)[1],/Invalid current/);assert.equal(s.writes.length,0);
+ const s=controller();s.objects[2].value=NaN;s.bindNow();assert.match(s.events.at(-1)[1],/Invalid current/);assert.equal(s.writes.length,0);
  const t=controller();t.bind();t.objects[4].value=Infinity;t.c.queuewrite('energy',1);assert.equal(t.tasks.length,0);assert.equal(t.writes.length,0);
 });
 test('unbound or missing target refuses the whole gesture and deletion cancels queued writes',()=>{
- const s=controller();s.c.bindselected();s.c.queuewrite('energy',1);assert.equal(s.tasks.length,0);assert.equal(s.writes.length,0);
- s.select(3);s.c.bindselected();s.c.queuewrite('energy',1);delete s.objects[3];s.drain();assert.equal(s.writes.length,0);assert.match(s.events.at(-1)[1],/Target unavailable/);
+ const s=controller();s.bindNow();s.c.queuewrite('energy',1);assert.equal(s.tasks.length,0);assert.equal(s.writes.length,0);
+ s.select(3);s.bindNow();s.c.queuewrite('energy',1);delete s.objects[3];s.drain();assert.equal(s.writes.length,0);assert.match(s.events.at(-1)[1],/Target unavailable/);
 });
 test('disconnect and reload cancel writes and obsolete observers cannot affect a new binding',()=>{
  const s=controller();s.bind();const observer=s.instances.find(i=>i.id===2&&i.property==='value');s.c.queuewrite('energy',1);s.c.disconnect();s.drain();assert.equal(s.writes.length,0);const count=s.events.length;observer.callback(['value',.9]);assert.equal(s.events.length,count);
@@ -80,7 +92,7 @@ test('automation observations before the first tick do not prevent deliberate ma
  const s=controller();s.bind();s.c.queuewrite('energy',1);s.objects[2].value=.4;s.instances.find(i=>i.id===2&&i.property==='value').callback(['value',.4]);s.drain();assert.equal(s.objects[2].value,1);assert.equal(s.objects[4].value,1);
 });
 test('binding rejects ambiguous parameters, range/quantization mismatch and disabled writes',()=>{
- for(const mutation of [s=>{s.objects[2].max=100;},s=>{s.objects[2].is_quantized=1;},s=>{s.objects[5]={...s.objects[2]};s.objects[1].parameters.push('id',5);}]){const s=controller();mutation(s);s.c.bindselected();assert.match(s.events.at(-1)[1],/Binding error/);assert.equal(s.writes.length,0);}
+ for(const mutation of [s=>{s.objects[2].max=100;},s=>{s.objects[2].is_quantized=1;},s=>{s.objects[5]={...s.objects[2]};s.objects[1].parameters.push('id',5);}]){const s=controller();mutation(s);s.bindNow();assert.match(s.events.at(-1)[1],/Binding error/);assert.equal(s.writes.length,0);}
  const s=controller();s.bind();s.objects[4].is_enabled=0;s.c.queuewrite('energy',1);assert.equal(s.tasks.length,0);assert.equal(s.writes.length,0);
 });
 test('parameter removal within a surviving plugin invalidates the binding before any write',()=>{
