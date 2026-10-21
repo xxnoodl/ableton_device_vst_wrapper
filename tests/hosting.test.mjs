@@ -41,7 +41,8 @@ test('native plugin edits preserve formatted text and never echo a write; only c
  const s=probe();s.load();s.runAll();s.c.hostvalue(3,.55,'Auto','(tempo)');assert.equal(s.c.controls[2].text,'Auto (tempo)');assert.equal(s.messages.filter(m=>m[1]==='list').length,0);
  s.c.setcontrol(0,.2);s.c.setcontrol(0,.8);s.c.setcontrol(2,9);s.c.setcontrol(2,NaN);s.c.setcontrol(9,.2);s.runAll();
  assert.deepEqual(s.messages.filter(m=>m[1]==='list').map(m=>m.slice(1)),[['list',4,.8],['list',3,1]]);
- const before=s.messages.length;s.c.loadplugin();assert.equal(s.messages.length,before,'Retry must not reload a working sound');s.c.openplugin();assert.deepEqual(s.messages.at(-1),['studio_probe_host','open']);
+ const before=s.messages.length;s.c.loadplugin();assert.equal(s.messages.length,before,'Retry must not reload a working sound');s.c.openplugin();assert.deepEqual(s.messages.slice(-2),[['studio_probe_host','floateditorwindow',1],['studio_probe_host','open']]);
+ assert.ok(s.c.host.args.includes('@floateditorwindow'));assert.equal(s.c.host.args[s.c.host.args.indexOf('@floateditorwindow')+1],1);
 });
 test('ambiguous or incomplete metadata refuses controls and keeps stereo dry; absent plugins time out without writes',()=>{
  for(const options of [{names:['Threshold','Ratio','Attack','Release','Ratio']},{stream:false},{available:false}]){

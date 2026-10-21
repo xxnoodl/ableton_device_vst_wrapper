@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 hosted editor floating window fix
+
+- User reported the internal plugin window disappears behind Live when clicking Studio controls. Enabled documented vst~ floateditorwindow at host creation and immediately before opening its editor, including reused host objects. No focus polling or repeated open calls during gestures.
+- Six focused hosting tests pass, including floating-mode command order before Open plugin. Built and verified a separate artifacts/pro-c3-internal-host-floating bundle; prior loaded bundle preserved. Actual window persistence while interacting with Live remains pending user confirmation.
+
 ## 2026-10-21 hosted Attack two-way control passed
 
 - User dragged the Studio Attack knob and confirmed the internally hosted FabFilter Attack moves with matching time values in both interfaces. Combined with the previous native-editor check, Attack now has real-host evidence for two-way control and formatted time display.

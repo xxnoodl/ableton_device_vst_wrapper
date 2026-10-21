@@ -15,7 +15,7 @@ function link(a,out,b,input){this.patcher.disconnect(a,out,b,input);this.patcher
 function setup(){
  var input=typed('plugin~'),output=typed('plugout~');
  audioInput=input;audioOutput=output;audioReady=false;
- host=object('studio_probe_host','vst~',[2,2,'@valuemode',2,'@parameter_enable',1],20,170);
+ host=object('studio_probe_host','vst~',[2,2,'@valuemode',2,'@parameter_enable',1,'@floateditorwindow',1],20,170);
  left=object('studio_probe_left','selector~',[2],20,215);right=object('studio_probe_right','selector~',[2],180,215);
  left.message(1);right.message(1);
  var np=object('studio_probe_names','prepend',['hostname'],350,170),vp=object('studio_probe_values','prepend',['hostvalue'],500,170);
@@ -71,7 +71,7 @@ function hostvalue(){
  for(var i=0;i<controls.length;i++)if(controls[i].index===index){controls[i].value=value;controls[i].text=a.length>2?a.slice(2).join(' ').substring(0,256):'Unformatted '+value.toFixed(3);view();return;}
 }
 function readvalues(){if(phase!=='ready')return;try{for(var i=0;i<controls.length;i++)host.message('get',controls[i].index);host.message('get',-10);}catch(e){fail(e.message);}}
-function openplugin(){if(phase!=='ready'){report('Wait for the internal plugin to load.');return;}try{host.message('open');}catch(e){fail(e.message);}}
+function openplugin(){if(phase!=='ready'){report('Wait for the internal plugin to load.');return;}try{host.message('floateditorwindow',1);host.message('open');}catch(e){fail(e.message);}}
 function setcontrol(slot,value){
  if(phase!=='ready'||typeof slot!=='number'||slot<0||slot>=controls.length||Math.floor(slot)!==slot||typeof value!=='number'||!isFinite(value)||controls[slot].value===null)return;
  pending['$'+slot]={index:controls[slot].index,value:Math.max(0,Math.min(1,value))};
