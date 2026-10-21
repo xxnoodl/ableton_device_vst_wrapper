@@ -28,4 +28,4 @@ Actual session-path host result: user verified both Strings instances in the bro
 
 Captured-registry persistence result: user saved and reopened the Set with the Color wrapper folder unchanged and confirmed control without bindselected. Color automatic predecessor restoration passes for the tested configuration. Different plugin products and Color automation remain pending.
 
-Pro-C 3 host result: user selected all 11 exposed controls and confirmed two-way control. The initial generated layout was too small because controls stacked vertically and the copied drawing area stayed 220 pixels wide. Horizontal layout/resize regressions now pass in the Max simulation; expanded width still needs a Live check.
+Pro-C 3 host result: user selected all 11 exposed controls and confirmed two-way control. The initial generated layout was too small because controls stacked vertically and the copied drawing area stayed 220 pixels wide. Horizontal layout/resize regressions now pass in the Max simulation; user subsequently confirmed the corrected expanded layout works in Live with two-way control intact. Pro-C 3 automation and Set reopen remain unverified.

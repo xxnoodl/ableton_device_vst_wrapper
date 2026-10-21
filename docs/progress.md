@@ -5,7 +5,7 @@
 - User confirmed all 11 exposed Pro-C 3 controls work in both directions in Live. This adds a second plugin product to the captured-registry evidence. Automation and reopen are not inferred.
 - Fixed automatic Live/native selection layouts to generate a horizontal row instead of stacked rows. Canvas width now supports 8192 pixels for up to 60 controls. Existing authored layouts retain their arrangement.
 - Native renderer sizes its drawing area and sends live.thisdevice setwidth on each manifest load. Labels retain an effective 11 pixel size. The Max-authored shell remains byte-for-byte unchanged.
-- All 138 tests pass, including 11-control width/hit-testing, repeat initialization and layout-size parity; HTTP smoke passes. Corrected Pro-C 3 bundle built under artifacts/pro-c3-horizontal. Actual expanded width in Live remains pending user verification.
+- All 138 tests pass, including 11-control width/hit-testing, repeat initialization and layout-size parity; HTTP smoke passes. Corrected Pro-C 3 bundle built under artifacts/pro-c3-horizontal. User subsequently confirmed the corrected horizontal wrapper works in Live and control still works in both directions. Pro-C 3 automation and Set reopen remain separate checks.
 
 ## 2026-10-21 captured Color wrapper reopen
 
