@@ -4,11 +4,12 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const read=name=>readFileSync(new URL('../max/hosting/'+name,import.meta.url),'utf8');
 const config={hostingProbeVersion:1,pluginName:'Pro-C 3',pluginPath:'C:/plugins/FabFilter Pro-C 3.vst3'};
-function probe({names=['Bypass','Ratio','Attack','Threshold','Release'],available=true,stream=true,createFailure=null}={}){
+function probe({names=['Bypass','Ratio','Attack','Threshold','Release'],available=true,stream=true,createFailure=null,restoredPlugin='',restoredValues={}}={}){
  const events=[],messages=[],objects=[],links=[],tasks=[];let c;
- const values={1:[0,'Off'],2:[.3,'4:1'],3:[.2,'20 ms'],4:[.4,'-18 dB'],5:[.6,'300 ms']};
+ const defaults={1:[0,'Off'],2:[.3,'4:1'],3:[.2,'20 ms'],4:[.4,'-18 dB'],5:[.6,'300 ms']},values={...defaults,...restoredValues};
  function node(maxclass,varname=''){
-  const o={maxclass,varname,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
+  const o={maxclass,varname,currentplug:restoredPlugin,getattr:key=>key==='currentplug'?o.currentplug:undefined,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
+   if(args[0]==='plug'){o.currentplug=args[1];Object.assign(values,defaults);}
    if(args[0]==='get'&&args[1]===-4)c.hostvalue(-4,available?names.length:0);
    if(args[0]==='params'&&stream)for(const name of names)c.hostname(name);
    if(args[0]==='get'&&args[1]===-10)c.hostvalue(-10,128);
@@ -43,6 +44,17 @@ test('native plugin edits preserve formatted text and never echo a write; only c
  assert.deepEqual(s.messages.filter(m=>m[1]==='list').map(m=>m.slice(1)),[['list',4,.8],['list',3,1]]);
  const before=s.messages.length;s.c.loadplugin();assert.equal(s.messages.length,before,'Retry must not reload a working sound');s.c.openplugin();assert.deepEqual(s.messages.slice(-2),[['studio_probe_host','floateditorwindow',1],['studio_probe_host','open']]);
  assert.ok(s.c.host.args.includes('@floateditorwindow'));assert.equal(s.c.host.args[s.c.host.args.indexOf('@floateditorwindow')+1],1);
+});
+test('reopened hosts retain separate native states and repeated initialization never reloads a restored plugin',()=>{
+ const a=probe({restoredPlugin:'C74_VST3:/FabFilter Pro-C 3',restoredValues:{4:[.2,'-30 dB'],3:[.8,'100 ms']}}),b=probe({restoredPlugin:'Pro-C 3',restoredValues:{4:[.7,'-5 dB']}});
+ for(const s of [a,b]){s.load();s.runAll();assert.equal(s.c.phase,'ready');assert.ok(!s.messages.some(m=>m[1]==='plug'||m[1]==='list'));}
+ assert.equal(a.c.controls[0].text,'-30 dB');assert.equal(b.c.controls[0].text,'-5 dB');assert.equal(a.c.controls[2].text,'100 ms');
+ a.load();a.runAll();assert.equal(a.c.controls[0].text,'-30 dB');assert.ok(!a.messages.some(m=>m[1]==='plug'));
+ // A native-editor-only value is left entirely untouched, not reconstructed from four knobs.
+ a.values[99]=[.8,'Punch'];a.load();a.runAll();assert.deepEqual(a.values[99],[.8,'Punch']);
+});
+test('startup refuses a different saved plugin instead of silently replacing its sound',()=>{
+ const s=probe({restoredPlugin:'Other compressor'});s.load();s.runAll();assert.equal(s.c.phase,'error');assert.ok(!s.messages.some(m=>m[1]==='plug'||m[1]==='list'));assert.ok(s.events.some(e=>String(e[1]).includes('another plugin')));
 });
 test('ambiguous or incomplete metadata refuses controls and keeps stereo dry; absent plugins time out without writes',()=>{
  for(const options of [{names:['Threshold','Ratio','Attack','Release','Ratio']},{stream:false},{available:false}]){

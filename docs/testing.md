@@ -1,6 +1,6 @@
 # Test evidence and remaining checks
 
-Run `npm test` with Node 24. This machine passes 144 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
+Run `npm test` with Node 24. This machine passes 146 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
 
 The native fixtures exercise metadata, enum labels, invalid defaults, class choice, an actual child-process crash and a hang, followed by a successful inspection. They contain no audio DSP and do not count as a complete audio-plugin fixture. Node process tests also check malformed output, output overflow and wall deadlines. The helper applies a Windows resource job; filesystem/network security sandboxing is not established.
 
@@ -51,3 +51,5 @@ Internal Pro-C 3 audio result: user reported audible compression works with all 
 Hosted Set state result: user explicitly confirmed saving, closing and reopening the Set restores internal Pro-C 3 settings, including native-editor-only Style. This is a user-verified Set recall result on the current prototype, not evidence for every state field, device-preset recall or independent duplicates. No persistence code changed; initialization/restoration ordering still needs investigation because the controller currently sends plug on initialization.
 
 Hosted duplicate result: user duplicated the Studio device and confirmed changing Threshold on the duplicate does not change the original. This verifies current-session instance independence for that control; independent duplicate states across reopen are not inferred.
+
+Independent hosted recall FAILED: user reports both duplicated instances reset to -16 dB after reopening rather than keeping their different Thresholds. Startup sent plug unconditionally. Candidate now reuses the current matching plugin, loads only an empty host and rejects a different saved product. Two new regressions pass; 146 total tests pass. Native one-time shell authoring and two-instance recall remain pending in Live. Earlier single-instance recall evidence is superseded for persistence claims.

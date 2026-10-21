@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 hosted duplicate state failure and startup fix
+
+- User reports two devices with different Threshold values both reopen at -16 dB. This fails independent saved-state recall and supersedes the earlier single-instance recall report as evidence for reliable persistence. Current-session independence still passes.
+- Found unconditional plug on every initialization. Controller now reads installed/documented vst~ currentplug, reuses a recognized loaded product without plug or parameter writes, loads only an empty host and refuses a different loaded product. Repeated initialization/native-editor-only settings are covered by regressions.
+- All 146 tests pass with no skips. Built and verified artifacts/pro-c3-internal-host-state. Candidate includes one-time Max Save As instructions so the parameter-enabled host exists in the Max-authored device before Live state restoration. This is prototype shell authoring, not intended producer setup. No AMXD rewriting, shared state file or four-knob-only reconstruction.
+- Real two-instance recall after native shell save is pending. Do not mark persistence fixed from simulations or assume dynamically created objects register early enough in Live.
+
 ## 2026-10-21 hosted duplicate Threshold independence passed
 
 - User duplicated the Studio hosting device, changed Threshold on the duplicate and confirmed the original retains its own value. This verifies independent parameter control for those two internal Pro-C 3 instances in the current session.

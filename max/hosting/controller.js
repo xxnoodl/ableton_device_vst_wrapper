@@ -33,11 +33,20 @@ function read(path){var f=null;try{
 function fail(message){stopWork();scanning=false;phase='error';if(left)left.message(1);if(right)right.message(1);
  if(!audioReady&&audioInput&&audioOutput){try{if(left)this.patcher.disconnect(left,0,audioOutput,0);if(right)this.patcher.disconnect(right,0,audioOutput,1);link(audioInput,0,audioOutput,0);link(audioInput,1,audioOutput,1);}catch(e){report('Audio setup error: '+e.message);}}
  view();report('Hosting error: '+String(message)+'. Dry audio remains active.');}
+function pluginKey(text){return String(text).replace(/\\/g,'/').split('/').pop().replace(/\.vst3$/i,'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function loadedPlugin(){
+ var value=host.getattr('currentplug');if(Object.prototype.toString.call(value)==='[object Array]')value=value.length===1?value[0]:value.join(' ');
+ if(value===null||typeof value==='undefined'||value===0||value==='0'||value==='')return '';
+ if(typeof value!=='string')throw new Error('Cannot identify the loaded plugin');return value;
+}
 function loadplugin(){
  if(!settings||!host){report('Hosting settings are not loaded.');return;}
  if(phase==='loading'||phase==='ready'){report(phase==='ready'?'Internal plugin already loaded.':'Internal plugin is loading.');return;}
  try{stopWork();phase='loading';count=0;names=[];controls=[];latency=null;scanning=false;polls=0;view();report('Loading internal '+settings.pluginName+'...');
- host.message('plug',settings.pluginPath);checkLoad();}catch(e){fail(e.message);}
+ var current=loadedPlugin();host.message('valuemode',2);host.message('floateditorwindow',1);
+ if(current){var key=pluginKey(current);if(key!==pluginKey(settings.pluginPath)&&key!==pluginKey(settings.pluginName))throw new Error('Saved host contains another plugin: '+current);report('Reusing internal '+settings.pluginName+' without reloading its sound.');}
+ else host.message('plug',settings.pluginPath);
+ checkLoad();}catch(e){fail(e.message);}
 }
 function checkLoad(){
  if(phase!=='loading'||scanning)return;
