@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 hosted Attack readout passed
+
+- User changed Attack in the internally hosted FabFilter editor and confirmed the Studio readout follows with the same time value, including ms. This verifies incoming Attack feedback and plugin-formatted time text on the real hosting path.
+- Reverse control, other formatted parameters, audio, persistence, automation, latency compensation and sidechains remain separate checks.
+
 ## 2026-10-21 internal Pro-C 3 editor opened in Live
 
 - User loaded the standalone Pro-C-3-Studio-Test device on the requested test track and confirmed Open plugin opens the internal FabFilter window. This passes the first real-host loading/editor check without an external plugin device or manual binding.
