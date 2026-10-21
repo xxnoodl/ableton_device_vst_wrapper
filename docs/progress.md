@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-21 Pro-C 3 Threshold automation passed
+
+- User confirmed the horizontal wrapper follows a Threshold automation passage during playback without touching its knob. This verifies observation of that automated parameter; it does not establish every Pro-C 3 parameter or automation recording from the wrapper.
+- Core Pro-C 3 host checks now cover horizontal layout, two-way manual control, automatic Set reopen connection with immediate predecessor placement, and Threshold automation following.
+
 ## 2026-10-21 Pro-C 3 automatic reconnect passed
 
 - Startup console included an older performance rack and a Pro-C 3 predecessor-type binding error. After placing the horizontal wrapper immediately after Pro-C 3, the user confirmed the save/reopen automatic connection check works.

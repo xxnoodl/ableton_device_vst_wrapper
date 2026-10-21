@@ -33,3 +33,5 @@ Pro-C 3 host result: user selected all 11 exposed controls and confirmed two-way
 Pro-C 3 reopen result: user reports manual binding is required after Set reopen. Automatic reconnection fails this host check; startup console diagnosis is pending. Earlier Augmented Strings reconnect success does not establish Pro-C 3 behavior.
 
 Pro-C 3 reconnect follow-up: after placing the new horizontal wrapper immediately after Pro-C 3, user confirmed the save/reopen automatic connection test works. The earlier failure is resolved by device placement; no runtime patch was needed. The immediate-predecessor requirement remains in force. Pro-C 3 automation is not yet verified.
+
+Pro-C 3 automation follow-up: user confirmed the wrapper follows Threshold automation during playback without a wrapper gesture. This covers incoming Threshold automation only, not every parameter or recording automation from the wrapper.
