@@ -1,6 +1,7 @@
 import {parseHostCapture,projectFromCapture,type HostCapture} from '../host-capture/index.ts';
 import {validateProject,type Project} from '../schema/index.ts';
 import {validateDeviceTemplate} from '../export/index.ts';
+import {controlStripLayout} from '../layout-engine/index.ts';
 export type LiveDevice={id:string;label:string;pluginName:string;capture:HostCapture|null;diagnostic:string|null};
 export type LiveCatalog={catalogVersion:1;source:'live-session-exposed';devices:LiveDevice[];diagnostics:string[]};
 function fields(o:unknown,keys:string[]):Record<string,unknown>{if(!o||typeof o!=='object'||Array.isArray(o)||Object.keys(o).some(k=>!keys.includes(k))||keys.some(k=>!Object.hasOwn(o,k)))throw new Error('Invalid Live session fields');return o as Record<string,unknown>;}
@@ -22,8 +23,8 @@ export function projectFromLiveDevice(input:LiveDevice,selectedIds:string[]=[]):
  if(!device.capture)throw new Error('No exposed controls. Use Live Configure, then refresh the session.');
  const base=projectFromCapture(device.capture),selected=new Set(selectedIds);
  if(!Array.isArray(selectedIds)||selected.size!==selectedIds.length||selected.size>60||selectedIds.some(id=>!base.parameters.some(p=>p.id===id)))throw new Error('Choose at most 60 available controls');
- const parameters=base.parameters.filter(p=>selected.has(p.id)),columns=Math.min(12,Math.max(2,Math.ceil(parameters.length/5))),rows=Math.max(1,Math.ceil(parameters.length/columns));
- return validateProject({...base,parameters:base.parameters,target:{...base.target,reconnect:'previous-on-load'},panel:{width:Math.max(320,columns*128+16),height:rows*168+56,grid:8},widgets:parameters.map((p,i)=>({id:'knob-'+p.id,type:'knob',parameterId:p.id,label:p.name,x:8+(i%columns)*128,y:48+Math.floor(i/columns)*168,width:120,height:160,design:'monitor',accent:'mint',stepCount:p.quantized&&p.enumLabels.length>1&&p.enumLabels.length<=128&&p.min===0&&p.max===p.enumLabels.length-1?p.enumLabels.length:0,stepValues:[]}))});
+ const parameters=base.parameters.filter(p=>selected.has(p.id)),layout=controlStripLayout(parameters.length);
+ return validateProject({...base,parameters:base.parameters,target:{...base.target,reconnect:'previous-on-load'},panel:layout.panel,widgets:parameters.map((p,i)=>({id:'knob-'+p.id,type:'knob',parameterId:p.id,label:p.name,...layout.positions[i],design:'monitor',accent:'mint',stepCount:p.quantized&&p.enumLabels.length>1&&p.enumLabels.length<=128&&p.min===0&&p.max===p.enumLabels.length-1?p.enumLabels.length:0,stepValues:[]}))});
 }
 export function liveBridgeFiles(sources:Record<string,string>,template:Uint8Array):Record<string,string|Uint8Array>{
  validateDeviceTemplate(template);for(const name of ['session-bridge.js','session-bridge-renderer.js'])if(typeof sources[name]!=='string'||!sources[name].trim())throw new Error('Missing bridge source: '+name);

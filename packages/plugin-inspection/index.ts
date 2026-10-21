@@ -1,4 +1,5 @@
 import {validateProject,type Project} from '../schema/index.ts';
+import {controlStripLayout} from '../layout-engine/index.ts';
 export type NativeParameter={id:number;index:number;name:string;shortName:string;unit:string;stepCount:number;defaultNormalized:number|null;metadataValid:boolean;reportedDefaultNormalized:number|null;defaultDisplay:string|null;plainMin:number|null;plainMax:number|null;unitId:number;flags:number;enumLabels:(string|null)[]};
 type Base={inspectionVersion:1;inventoryId:string;fingerprint:string;format:'VST3';source:'vst3-controller';bindingStatus:'not-verified-in-live';vendor:string};
 export type PluginInspection=Base&({status:'choose-class';classes:{classId:string;name:string}[]}|{status:'ok';name:string;classId:string;parameters:NativeParameter[]});
@@ -43,8 +44,8 @@ export function projectFromInspection(input:PluginInspection,selectedIds:number[
  if(!Array.isArray(selectedIds)||new Set(selectedIds).size!==selectedIds.length||selectedIds.length>60)throw new Error('Choose at most 60 controls for one panel');
  const ids=new Set(selectedIds),selected=inspection.parameters.filter(p=>ids.has(p.id));
  if(selected.length!==ids.size||selected.some(p=>!selectableParameter(p)))throw new Error('Selected parameter is unavailable or read-only');
- const columns=Math.min(12,Math.max(2,Math.ceil(selected.length/5))),rows=Math.max(1,Math.ceil(selected.length/columns));
+ const layout=controlStripLayout(selected.length);
  const parameters=selected.map(p=>{const binding=verifiedLiveBinding(inspection,p);return {id:'vst3-'+p.id,name:p.name.replace(/[\x00-\x1f]/g,' ').trim()||'Parameter '+p.id,min:binding?binding.min:0,max:binding?binding.max:1,defaultValue:p.defaultNormalized as number,unit:'',evidence:binding?'user-reported':'native-inspected',resetSource:'project-default',quantized:p.stepCount>0,enumLabels:[]};});
  return validateProject({schemaVersion:2,id:'plugin-'+inspection.classId.toLowerCase(),name:inspection.name,plugin:{vendor:inspection.vendor||'Unknown vendor',name:inspection.name,format:'VST3',classId:inspection.classId},target:{kind:'live-exposed',liveVersion:'unverified',maxVersion:'unverified',reconnect:'previous-on-load'},parameters,
-  widgets:selected.map((p,i)=>({id:'knob-'+p.id,type:'knob',parameterId:'vst3-'+p.id,label:parameters[i].name,x:8+(i%columns)*128,y:48+Math.floor(i/columns)*168,width:120,height:160,design:'monitor',accent:'mint',stepCount:p.stepCount>0&&p.stepCount<128?p.stepCount+1:0,stepValues:[]})),panel:{width:Math.max(320,columns*128+16),height:rows*168+56,grid:8},theme:'dark',dataSource:'demo-only'});
+  widgets:selected.map((p,i)=>({id:'knob-'+p.id,type:'knob',parameterId:'vst3-'+p.id,label:parameters[i].name,...layout.positions[i],design:'monitor',accent:'mint',stepCount:p.stepCount>0&&p.stepCount<128?p.stepCount+1:0,stepValues:[]})),panel:layout.panel,theme:'dark',dataSource:'demo-only'});
 }

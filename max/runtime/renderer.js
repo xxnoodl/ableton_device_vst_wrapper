@@ -4,7 +4,16 @@ include('runtime-core.js');
 mgraphics.init();mgraphics.relative_coords=0;mgraphics.autofill=0;
 var project=null,values={},message='Load a layout. No target connected.',drag=null,selected=-1;
 function status(text){message=String(text);if(message.indexOf('Disconnected')===0||message.indexOf('error:')>=0||message.indexOf('Error:')>=0){drag=null;}mgraphics.redraw();}
-function manifest(source){try{project=RuntimeCore.parse(source);values={};drag=null;selected=-1;for(var i=0;i<project.parameters.length;i++)values['$'+project.parameters[i].id]=project.parameters[i].defaultValue;message=project.demoOnly?'Demo only. Synthetic data.':'Disconnected. Bind explicitly.';mgraphics.redraw();}catch(e){status('Load error: '+e.message);}}
+function manifest(source){try{project=RuntimeCore.parse(source);values={};drag=null;selected=-1;for(var i=0;i<project.parameters.length;i++)values['$'+project.parameters[i].id]=project.parameters[i].defaultValue;message=project.demoOnly?'Demo only. Synthetic data.':'Disconnected. Bind explicitly.';resizePanel();mgraphics.redraw();}catch(e){status('Load error: '+e.message);}}
+function resizePanel(){
+ if(!this.box||!this.patcher)return;var layout=RuntimeCore.devicePanel(project),device=null;
+ try{
+  for(var o=this.patcher.firstobject,count=0;o&&count<1024;o=o.nextobject,count++)if(o.maxclass==='live.thisdevice'){device=o;break;}
+  if(!device)throw new Error('Missing live.thisdevice width controller');
+  this.box.message('presentation_rect',0,30,layout.width,139);this.box.message('size',layout.width,139);
+  device.message('setwidth',layout.width);
+ }catch(e){message='Layout error: '+e.message;outlet(0,'layout_error',e.message);}
+}
 function value(id,next){if(!project||!isFinite(Number(next)))return;var p;try{p=RuntimeCore.parameter(project,id);}catch(e){return;}values['$'+id]=RuntimeCore.clamp(Number(next),p.min,p.max);mgraphics.redraw();}
 function color(r,g,b,a){mgraphics.set_source_rgba(r,g,b,typeof a==='number'?a:1);}
 function circle(x,y,r){mgraphics.ellipse(x-r,y-r,r*2,r*2);mgraphics.fill();}
@@ -12,12 +21,8 @@ function line(x1,y1,x2,y2,width){mgraphics.set_line_width(width);mgraphics.move_
 function centered(text,x,y){var width=mgraphics.text_measure(String(text))[0];mgraphics.move_to(x-width/2,y);mgraphics.show_text(String(text));}
 function frame(){
  if(!project||!project.widgets.length)return {scale:1,x:0,y:0};
- var left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity;
- for(var i=0;i<project.widgets.length;i++){var w=project.widgets[i];left=Math.min(left,w.x);top=Math.min(top,w.y);right=Math.max(right,w.x+w.width);bottom=Math.max(bottom,w.y+w.height);}
- if(project.panelStyle&&project.panelStyle.seams!=='none'){left-=5;top-=5;right+=5;bottom+=5;}
- for(var j=0;j<(project.connections||[]).length;j++){var g=RuntimeCore.connectionGeometry(project,project.connections[j]);for(var key in g){left=Math.min(left,g[key].x-5);top=Math.min(top,g[key].y-5);right=Math.max(right,g[key].x+5);bottom=Math.max(bottom,g[key].y+5);}}
- var scale=Math.min(Math.max(1,mgraphics.size[0]-16)/(right-left),Math.max(1,mgraphics.size[1]-28)/(bottom-top));
- return {scale:scale,x:(mgraphics.size[0]-(right-left)*scale)/2-left*scale,y:3-top*scale};
+ var layout=RuntimeCore.devicePanel(project),scale=Math.min(1,Math.max(1,mgraphics.size[0]-16)/(layout.right-layout.left),Math.max(1,mgraphics.size[1]-28)/(layout.bottom-layout.top));
+ return {scale:scale,x:(mgraphics.size[0]-(layout.right-layout.left)*scale)/2-layout.left*scale,y:3-layout.top*scale};
 }
 function paint(){
  var light=project&&project.theme==='light';color(light ? 0.81 : 0.10,light ? 0.85 : 0.12,light ? 0.82 : 0.14);mgraphics.paint();
@@ -25,7 +30,7 @@ function paint(){
  if(project){
   var view=frame();mgraphics.save();mgraphics.translate(view.x,view.y);mgraphics.scale(view.scale,view.scale);
   drawPanelArt(light);
-  for(var i=0;i<project.widgets.length;i++)drawWidget(project.widgets[i],i===selected,light);
+  for(var i=0;i<project.widgets.length;i++)drawWidget(project.widgets[i],i===selected,light,view.scale);
   mgraphics.restore();
  }
  color(.08,.10,.11);mgraphics.rectangle(0,mgraphics.size[1]-22,mgraphics.size[0],22);mgraphics.fill();
@@ -40,12 +45,12 @@ function drawPanelArt(light){
   var points=[g.start,g.end];for(var k=0;k<points.length;k++){color(.06,.08,.09);circle(points[k].x,points[k].y,5);color(accent[0],accent[1],accent[2]);circle(points[k].x,points[k].y,2);}
  }
 }
-function drawWidget(w,active,light){
+function drawWidget(w,active,light,scale){
  var p=RuntimeCore.parameter(project,w.parameterId),current=values['$'+p.id],pos=RuntimeCore.position(current,p,w),angle=(-135+pos*270)*Math.PI/180;
  var x=w.x+w.width/2,y=w.y+56,r=Math.max(18,Math.min(w.width*.29,(w.height-70)/2,55));
  var accents={mint:[.64,.78,.69],amber:[.95,.67,.26],cyan:[.30,.80,.92],red:[.92,.39,.37]},accent=accents[w.accent];
  if(active){color(.64,.78,.69,.3);mgraphics.rectangle(w.x,w.y,w.width,w.height);mgraphics.set_line_width(1);mgraphics.stroke();}
- color(light ? 0.10 : 0.86,light ? 0.17 : 0.89,light ? 0.13 : 0.87);mgraphics.set_font_size(11);centered(w.label,w.x+w.width/2,w.y+16);
+ color(light ? 0.10 : 0.86,light ? 0.17 : 0.89,light ? 0.13 : 0.87);mgraphics.set_font_size(11/scale);var title=w.label,maxWidth=Math.max(1,w.width-8/scale);if(mgraphics.text_measure(title)[0]>maxWidth){while(title.length&&mgraphics.text_measure(title+'...')[0]>maxWidth)title=title.substring(0,title.length-1);title+='...';}centered(title,w.x+w.width/2,w.y+16);
  if(w.design==='monitor'){
   color(.55,.62,.57,.12);circle(x-1,y-2,r+9);color(.02,.03,.03,.5);circle(x+2,y+6,r+3);color(.14,.18,.16);circle(x,y+3,r);color(.025,.035,.03);circle(x,y,r);
  }else{
@@ -64,7 +69,7 @@ function drawWidget(w,active,light){
   line(x+Math.sin(angle)*r*.52,y-Math.cos(angle)*r*.52,x+Math.sin(angle)*r*.86,y-Math.cos(angle)*r*.86,w.design==='monitor'?1:2);
  }
  var decimals=Math.max(0,Math.min(8,3-Math.floor(Math.log(p.max-p.min)/Math.LN10)));
- color(light ? 0.15 : 0.78,light ? 0.22 : 0.83,light ? 0.18 : 0.80);mgraphics.select_font_face('Courier New');mgraphics.set_font_size(11);centered(current.toFixed(decimals)+' '+p.unit,x,w.y+w.height-17);mgraphics.select_font_face('Arial');
+ color(light ? 0.15 : 0.78,light ? 0.22 : 0.83,light ? 0.18 : 0.80);mgraphics.select_font_face('Courier New');mgraphics.set_font_size(11/scale);centered(current.toFixed(decimals)+' '+p.unit,x,w.y+w.height-17);mgraphics.select_font_face('Arial');
 }
 function hit(x,y){if(!project||y>=mgraphics.size[1]-22)return -1;var view=frame();x=(x-view.x)/view.scale;y=(y-view.y)/view.scale;for(var i=project.widgets.length-1;i>=0;i--){var w=project.widgets[i];if(x>=w.x&&x<=w.x+w.width&&y>=w.y&&y<=w.y+w.height)return i;}return -1;}
 function emit(w,next){var p=RuntimeCore.parameter(project,w.parameterId);next=RuntimeCore.snap(next,p,w);if(project.demoOnly){values['$'+p.id]=next;mgraphics.redraw();}else outlet(0,'queuewrite',p.id,next);}

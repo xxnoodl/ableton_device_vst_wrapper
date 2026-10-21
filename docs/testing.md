@@ -1,6 +1,6 @@
 # Test evidence and remaining checks
 
-Run `npm test` with Node 24. This machine passes 135 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
+Run `npm test` with Node 24. This machine passes 138 tests covering schema/storage, layout/presets, studio wiring under a simulated DOM, Max contracts, device packaging, native metadata validation and original compiled ABI fixtures. Native compiled-fixture cases are explicitly skipped when the helper/fixtures have not been built; run `npm run build:inspector` on Windows with installed Visual Studio C++ tools to include them.
 
 The native fixtures exercise metadata, enum labels, invalid defaults, class choice, an actual child-process crash and a hang, followed by a successful inspection. They contain no audio DSP and do not count as a complete audio-plugin fixture. Node process tests also check malformed output, output overflow and wall deadlines. The helper applies a Windows resource job; filesystem/network security sandboxing is not established.
 
@@ -27,3 +27,5 @@ Live session bridge: tests cover strict catalog and capture provenance, automati
 Actual session-path host result: user verified both Strings instances in the browser, discovered newly exposed Color after refresh, generated a Color-only wrapper and confirmed both wrapper-to-synth writes and synth-to-wrapper observation. This is a real control outside the native Morph/Motion adapter. Captured-registry reopen/automation checks and other plugin products remain pending.
 
 Captured-registry persistence result: user saved and reopened the Set with the Color wrapper folder unchanged and confirmed control without bindselected. Color automatic predecessor restoration passes for the tested configuration. Different plugin products and Color automation remain pending.
+
+Pro-C 3 host result: user selected all 11 exposed controls and confirmed two-way control. The initial generated layout was too small because controls stacked vertically and the copied drawing area stayed 220 pixels wide. Horizontal layout/resize regressions now pass in the Max simulation; expanded width still needs a Live check.

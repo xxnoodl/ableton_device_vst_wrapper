@@ -46,7 +46,7 @@ export function validateProject(input: unknown): Project {
     if (typeof p.unit !== 'string' || p.unit.length > 32) throw new Error('Invalid parameter unit');
     return {id:text(p.id,'parameter.id'),name:text(p.name,'parameter.name'),min,max,defaultValue:number(p.defaultValue,min,max,'parameter.defaultValue'),unit:p.unit,evidence:choice(p.evidence,['synthetic','user-reported','host-captured','native-inspected'],'parameter.evidence'),resetSource:choice(p.resetSource===undefined?'project-default':p.resetSource,['project-default','captured-current'],'parameter.resetSource'),quantized:p.quantized===undefined||p.quantized===null?null:typeof p.quantized==='boolean'?p.quantized:(()=>{throw new Error('Invalid quantization flag');})(),enumLabels:p.enumLabels===undefined?[]:list(p.enumLabels,'enumLabels').map(v=>text(v,'enum label'))};
   });
-  const width = number(panel.width,320,1600,'panel.width');
+  const width = number(panel.width,320,8192,'panel.width');
   const height = number(panel.height,160,900,'panel.height');
   const ids = new Set(parameters.map(p => p.id));
   if (ids.size !== parameters.length) throw new Error('Duplicate parameter IDs');

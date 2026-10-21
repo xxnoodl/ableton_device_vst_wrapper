@@ -1,4 +1,15 @@
 import {validateProject,type Project,type Widget} from '../schema/index.ts';
+export function controlStripLayout(count:number){
+ if(!Number.isInteger(count)||count<0||count>60)throw new Error('Choose at most 60 controls');
+ return {panel:{width:Math.max(320,count*128+16),height:224,grid:8},positions:Array.from({length:count},(_,i)=>({x:8+i*128,y:48,width:120,height:160}))};
+}
+export function devicePanelSize(project:Project){
+ if(!project.widgets.length)return {width:220,height:139};
+ let left=Math.min(...project.widgets.map(w=>w.x)),top=Math.min(...project.widgets.map(w=>w.y)),right=Math.max(...project.widgets.map(w=>w.x+w.width)),bottom=Math.max(...project.widgets.map(w=>w.y+w.height));
+ if(project.canvas.seams!=='none'){left-=5;top-=5;right+=5;bottom+=5;}
+ for(const connection of project.connections)for(const p of Object.values(cableGeometry(project,connection))){left=Math.min(left,p.x-5);top=Math.min(top,p.y-5);right=Math.max(right,p.x+5);bottom=Math.max(bottom,p.y+5);}
+ return {width:Math.max(220,Math.min(8192,Math.ceil((right-left)*Math.min(1,111/(bottom-top)))+16)),height:139};
+}
 export function rectanglesOverlap(a:Pick<Widget,'x'|'y'|'width'|'height'>,b:Pick<Widget,'x'|'y'|'width'|'height'>,gap=0){return a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;}
 export function cableGeometry(project:Pick<Project,'widgets'|'panel'>,c:Project['connections'][number]){
  const a=project.widgets.find(w=>w.id===c.fromWidgetId)!,b=project.widgets.find(w=>w.id===c.toWidgetId)!;

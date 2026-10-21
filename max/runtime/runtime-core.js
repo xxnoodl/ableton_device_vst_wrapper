@@ -19,7 +19,7 @@ var RuntimeCore = (function () {
         if (!text(manifest.projectId) || !text(manifest.name) || !text(manifest.pluginName)) fail('Invalid project identity');
         if (['dark','light'].indexOf(manifest.theme) < 0 || typeof manifest.demoOnly !== 'boolean') fail('Invalid theme or provenance');
         keys(manifest.panel,['width','height']);
-        if (!finite(manifest.panel.width) || manifest.panel.width < 320 || manifest.panel.width > 1600 || !finite(manifest.panel.height) || manifest.panel.height < 160 || manifest.panel.height > 900) fail('Invalid panel bounds');
+        if (!finite(manifest.panel.width) || manifest.panel.width < 320 || manifest.panel.width > 8192 || !finite(manifest.panel.height) || manifest.panel.height < 160 || manifest.panel.height > 900) fail('Invalid panel bounds');
         if (!array(manifest.parameters) || !array(manifest.widgets) || manifest.parameters.length > 256 || manifest.widgets.length > 256) fail('Invalid parameter/widget lists');
         var seen = {}, widgets = {}, i, p, w;
         function has(o,k) { return Object.prototype.hasOwnProperty.call(o,'$'+k); }
@@ -61,5 +61,13 @@ var RuntimeCore = (function () {
         var c1=point(horizontal?{x:start.x+direction*reach,y:start.y+c.slack}:{x:start.x+c.slack,y:start.y+direction*reach});
         var c2=point(horizontal?{x:end.x-direction*reach,y:end.y+c.slack}:{x:end.x+c.slack,y:end.y-direction*reach});return {start:start,end:end,c1:c1,c2:c2};
     }
-    return {validate:validate,parse:parse,parameter:parameter,stops:stops,snap:snap,position:position,at:at,clamp:clamp,matches:matches,normalizedName:normalizedName,connectionGeometry:connectionGeometry};
+    function devicePanel(project){
+        if(!project.widgets.length)return {left:0,top:0,right:0,bottom:0,width:220,height:139,scale:1};
+        var left=Infinity,top=Infinity,right=-Infinity,bottom=-Infinity,i;
+        for(i=0;i<project.widgets.length;i++){var w=project.widgets[i];left=Math.min(left,w.x);top=Math.min(top,w.y);right=Math.max(right,w.x+w.width);bottom=Math.max(bottom,w.y+w.height);}
+        if(project.panelStyle&&project.panelStyle.seams!=='none'){left-=5;top-=5;right+=5;bottom+=5;}
+        for(i=0;i<(project.connections||[]).length;i++){var points=connectionGeometry(project,project.connections[i]);for(var k in points){var p=points[k];left=Math.min(left,p.x-5);top=Math.min(top,p.y-5);right=Math.max(right,p.x+5);bottom=Math.max(bottom,p.y+5);}}
+        var scale=Math.min(1,111/(bottom-top));return {left:left,top:top,right:right,bottom:bottom,width:Math.max(220,Math.min(8192,Math.ceil((right-left)*scale)+16)),height:139,scale:scale};
+    }
+    return {validate:validate,parse:parse,parameter:parameter,stops:stops,snap:snap,position:position,at:at,clamp:clamp,matches:matches,normalizedName:normalizedName,connectionGeometry:connectionGeometry,devicePanel:devicePanel};
 }());

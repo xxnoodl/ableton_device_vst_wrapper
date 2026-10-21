@@ -4,9 +4,32 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {parseProject} from '../packages/schema/index.ts';
 import {runtimeManifest,runtimePatch,exportFiles,zipFiles,runtimeFiles} from '../packages/export/index.ts';
+import {controlStripLayout,devicePanelSize} from '../packages/layout-engine/index.ts';
 const source=name=>readFileSync(new URL('../max/runtime/'+name,import.meta.url),'utf8');
 const project=()=>parseProject(readFileSync(new URL('../fixtures/morph.project.json',import.meta.url),'utf8'));
 const plain=x=>JSON.parse(JSON.stringify(x));
+function strip(count){const p=project(),layout=controlStripLayout(count),parameter=p.parameters[0],widget=p.widgets[0];p.panel=layout.panel;p.parameters=layout.positions.map((_,i)=>({...parameter,id:'control-'+i,name:'Control '+i}));p.widgets=layout.positions.map((pos,i)=>({...widget,...pos,id:'widget-'+i,parameterId:'control-'+i,label:'Control '+i}));return p;}
+
+test('eleven controls expand the copied 220px shell without shrinking controls or text; hit testing reaches the last control',()=>{
+ const events=[],widths=[],texts=[],rects=[],stack=[];let scale=1,font=11;
+ const graphics=new Proxy({size:[220,139],init(){},redraw(){},save(){stack.push(scale);},restore(){scale=stack.pop();},scale(x){scale*=x;},set_font_size(n){font=n;},text_measure:t=>[String(t).length*font*.6,font],show_text(text){texts.push({text,size:font*scale});}},{get:(o,k)=>k in o?o[k]:()=>{}});
+ const ready={maxclass:'live.thisdevice',message:(...args)=>widths.push(args)},first={maxclass:'comment',nextobject:ready},box={message:(name,...args)=>{rects.push([name,...args]);if(name==='size')graphics.size=[args[0],args[1]];}};
+ const c=vm.createContext({mgraphics:graphics,box,patcher:{firstobject:first},outlet:(...a)=>events.push(a)});c.include=name=>vm.runInContext(source(name),c);vm.runInContext(source('renderer.js'),c);
+ c.manifest(JSON.stringify(runtimeManifest(strip(1))));const singleScale=c.frame().scale;
+ const p=strip(11);c.manifest(JSON.stringify(runtimeManifest(p)));assert.deepEqual(widths.at(-1),['setwidth',devicePanelSize(p).width]);assert.ok(widths.at(-1)[1]>900);assert.equal(graphics.size[1],139);assert.deepEqual(rects.at(-2),['presentation_rect',0,30,graphics.size[0],139]);assert.equal(c.frame().scale,singleScale);assert.equal(events.length,0);
+ c.paint();assert.equal(texts.filter(t=>/^Control /.test(t.text)).length,11);assert.ok(texts.filter(t=>/^Control /.test(t.text)).every(t=>Math.abs(t.size-11)<1e-8));
+ const view=c.frame(),w=p.widgets[10],x=view.x+(w.x+w.width/2)*view.scale,y=view.y+(w.y+w.height/2)*view.scale;assert.ok(x>220&&x<graphics.size[0]);assert.equal(c.hit(x,y),10);c.onclick(x,y,1,0,0);c.ondrag(x,y-20,1,0,0);assert.equal(events.at(-1)[1],'queuewrite');assert.equal(events.at(-1)[2],'control-10');
+ c.manifest(JSON.stringify(runtimeManifest(p)));assert.equal(widths.length,3);assert.equal(widths[2][1],widths[1][1]);
+});
+
+test('native and export widths agree for wide strips, custom rows and decorated layouts',()=>{
+ const c=core();for(const count of [1,2,11,60]){const p=strip(count),m=runtimeManifest(p),size=c.devicePanel(m);assert.deepEqual({width:size.width,height:size.height},devicePanelSize(p));assert.equal(runtimePatch(p).patcher.boxes.find(b=>b.box.id==='ui').box.presentation_rect[2],size.width);}
+ const p=strip(3);p.canvas.seams='groove';p.connections=[{id:'cable',kind:'visual',fromWidgetId:p.widgets[0].id,toWidgetId:p.widgets[2].id,accent:'mint',slack:18}];p.widgets[2].y=220;p.panel.height=400;const size=c.devicePanel(runtimeManifest(p));assert.deepEqual({width:size.width,height:size.height},devicePanelSize(p));assert.equal(p.widgets[2].y,220);
+});
+
+test('missing native width controller reports a layout error instead of silently fitting everything into 220px',()=>{
+ const events=[],c=vm.createContext({mgraphics:{size:[220,139],init(){},redraw(){}},box:{message(){}},patcher:{firstobject:null},outlet:(...a)=>events.push(a)});c.include=name=>vm.runInContext(source(name),c);vm.runInContext(source('renderer.js'),c);c.manifest(JSON.stringify(runtimeManifest(strip(11))));assert.equal(events.at(-1)[1],'layout_error');
+});
 test('device presentation fits Live height and scaled knob hit testing matches its drawing',()=>{
  const p=project(),patch=runtimePatch(p).patcher;
  for(const {box} of patch.boxes.filter(({box})=>box.presentation)){

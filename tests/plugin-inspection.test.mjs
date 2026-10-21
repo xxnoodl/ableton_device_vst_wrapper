@@ -33,6 +33,6 @@ test('measured adapter is limited to matching binary identity, SDK IDs and names
 });
 test('automatic native selection layout fits sixty controls and refuses overflow without dropping selections',()=>{
  const r=inspection();r.parameters=Array.from({length:61},(_,i)=>parameter(i+1,'Control '+i));
- const p=projectFromInspection(r,Array.from({length:60},(_,i)=>i+1));assert.equal(p.widgets.length,60);assert.ok(p.widgets.every(w=>w.x+w.width<=p.panel.width&&w.y+w.height<=p.panel.height));
+ const p=projectFromInspection(r,Array.from({length:60},(_,i)=>i+1));assert.equal(p.widgets.length,60);assert.ok(p.widgets.every(w=>w.x+w.width<=p.panel.width&&w.y+w.height<=p.panel.height));assert.equal(new Set(p.widgets.map(w=>w.y)).size,1);assert.ok(p.panel.width>1600);
  assert.throws(()=>projectFromInspection(r,r.parameters.map(p=>p.id)),/at most 60/);
 });

@@ -1,5 +1,6 @@
 import {diagnoseProject} from '../diagnostics/index.ts';
 import {validateProject,serializeProject, type Project} from '../schema/index.ts';
+import {devicePanelSize} from '../layout-engine/index.ts';
 export const runtimeFiles = ['runtime-core.js','controller.js','renderer.js','capture-file.cjs','capture-writer.cjs'] as const;
 export function runtimeManifest(input: Project) {
  const project=validateProject(input);
@@ -11,10 +12,7 @@ export function runtimeManifest(input: Project) {
 }
 export function runtimePatch(project: Project) {
  project=validateProject(project);
- const left=Math.min(...project.widgets.map(w=>w.x)),top=Math.min(...project.widgets.map(w=>w.y));
- const contentWidth=Math.max(...project.widgets.map(w=>w.x+w.width))-left;
- const contentHeight=Math.max(...project.widgets.map(w=>w.y+w.height))-top;
- const deviceWidth=Math.max(220,Math.ceil(contentWidth*Math.min(1,111/contentHeight))+16);
+ const deviceWidth=devicePanelSize(project).width;
  const boxes: object[]=[];const lines: object[]=[];
  function box(id:string,maxclass:string,rect:number[],text?:string,extra:object={}){boxes.push({box:{id,maxclass,patching_rect:rect,...(text?{text}:{}),...extra}});}
  function line(a:string,outlet:number,b:string,inlet:number){lines.push({patchline:{source:[a,outlet],destination:[b,inlet]}});}

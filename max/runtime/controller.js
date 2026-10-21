@@ -4,6 +4,7 @@ include('runtime-core.js');
 var manifest=null,bindings={},epoch=0,currentDevice=null,pendingWrites={},writeTask=null,lastCapture=null;
 var automaticTask=null,automaticEpoch=0;
 function report(message){outlet(0,'status',message);outlet(1,message);}
+function layout_error(message){report('Layout error: '+String(message));}
 function scalar(api,key){var v=api.get(key);if(v===null||typeof v==='undefined'||(Object.prototype.toString.call(v)==='[object Array]'&&!v.length))throw new Error('Target unavailable');return Object.prototype.toString.call(v)==='[object Array]'?v[0]:v;}
 function valid(api,type){return api&&Number(api.id)&&api.type===type;}
 function cancelAutomatic(){automaticEpoch++;if(automaticTask){automaticTask.cancel();automaticTask=null;}}
