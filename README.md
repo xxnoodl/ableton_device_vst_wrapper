@@ -4,17 +4,20 @@ Local-first tools for designing Max for Live controls for original VST3 plugins.
 
 ## Current state
 
-The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. Reopening requires manual rebinding. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
+The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph parameter on Live 12.3.2 with bundled Max 9.0.9. User-guided tests confirmed two-way control, automation recording/playback, explicit target switching, track movement, disconnect and delete/restore recovery. The original probe uses manual rebinding; generated Morph/Motion wrappers passed automatic load and reopen checks. Manual writes override automation until re-enabled. These results do not establish support for every plugin.
 
 The intended workflow is choose a plugin, check the controls to show, generate a wrapper with a sensible default layout, and optionally customize it. Manual Max assembly is not a product requirement.
 
-The browser studio provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob designs, multi-selection, layout tools, separate presets, properties, undo/redo and panel themes. Generate device now creates a ZIP containing a locally supplied Max-saved device shell, selected-control manifest and runtime dependencies. Extract together and drag Wrapper.amxd into Live; no patch copying or positioning is required by this path. The shell is copied unchanged, not encoded or rewritten. The first generated Morph/Motion bundle loaded and worked in Live after explicit binding. Automatic connection to the immediate preceding plugin is now implemented with automated tests; its host check is pending. A public release needs an approved distributable shell; plugin metadata discovery remains unfinished. The preview itself has no Live connection.
+The browser studio provides a validated project format, local saves with backups, JSON import/export, function selection, interactive knob designs, multi-selection, layout tools, separate presets, properties, undo/redo and panel themes. Generate device now creates a ZIP containing a locally supplied Max-saved device shell, selected-control manifest and runtime dependencies. Extract together and drag Wrapper.amxd into Live; no patch copying or positioning is required by this path. The shell is copied unchanged, not encoded or rewritten. The first generated Morph/Motion bundle loaded and worked in Live after explicit binding. Automatic connection and reconnection after reopening passed user tests for the Morph/Motion configuration. A public release needs an approved distributable shell; generic native-to-Live routing remains unfinished. The preview itself has no Live connection.
 
 Morph and Motion passed independent two-way control, simultaneous automation and compact in-Live visibility in user tests. Capture reading works; Node-for-Max capture saving is suspended after two native host crashes and is excluded from generated bundles. See [device generation](docs/device-generation.md).
 
+
+Native Windows x64 discovery now reads real plugin controls in an isolated C++ helper. Installed Augmented Strings returned 2,748 parameters. In the studio, choose it from Installed plugins and check Morph and Motion; their measured mappings can generate a wrapper. Other native controls are currently Preview only until Live routing is verified. No manual parameter list or Max editing is needed for the measured pair. See [native inspection](docs/native-inspection.md).
+
 ## Run
 
-Requires Node 24 or later. No package installation needed.
+Requires Node 24 or later. No npm packages are required. Native discovery also needs the locally built C++ helper; development setup uses `npm run build:inspector` with installed Visual Studio C++ Build Tools. This is developer setup, not the intended producer onboarding.
 
 ```sh
 npm start
@@ -28,7 +31,7 @@ npm test
 
 With the server running, `npm run smoke` checks local asset delivery and request guards. `npm run inventory` prints a static Windows VST3 inventory. Neither command loads plugin code.
 
-Seventy-one automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
+Eighty-three automated tests cover Max contracts, schema validation, round trips, range transforms, layout bounds and local save backup recovery, isolated-worker failures and simulated-DOM studio workflows. The user confirmed the initial canvas arrangement works. Updated knob interactions, visual/accessibility checks and performance measurements remain pending. TypeScript is stripped at runtime; static typechecking is not configured yet.
 
 ## Try the studio
 

@@ -1,13 +1,11 @@
-# Open risks
+# Current risks and boundaries
 
-- Host parameter list may require Live Configure and may expose only a subset; SDK IDs and Live parameter indices are different namespaces.
-- Device indices can silently identify a different device after reorder/reload. M0 requires explicit rebinding; persistent identity is unsolved.
-- Direct set may override automation. Recording, undo and gesture behavior require measurement; no production automation guarantee.
-- Installed host/plugin licenses are unknown. No SDK or commercial assets redistributed.
-- Proprietary gain reduction unavailable; future meter must show unavailable until verified telemetry exists.
-- No native sandbox, discovery worker, packaged desktop or actual amxd yet.
-- Website terms do not establish Max redistribution rights. Verify installed EULA and asset licenses before packaging.
-
-## Studio slice limitations
-
-Browser local saves can be cleared by browser policy or storage exhaustion; export JSON for durable backups. The current schema is a deliberately limited v1 subset and does not encode full runtime mappings. UI smoke checks and TypeScript static checking are pending. Localhost preview does not inspect or load plugins. Same-machine copied-device success does not prove that Max ignored its cached original dependency path.
+- VST3 discovery is not Live exposure. Unknown native mappings are visibly preview-only and block generation. Only the measured Morph/Motion adapter enables generation from inspection today. Automatic Configure or universal SDK-to-Live mapping has not been implemented.
+- The C++ child has job memory/CPU/process limits and supervised time/output bounds, but not a restricted-token filesystem/network sandbox. Plugin constructors may manage licensing UI or settings. No plugin code loads in the server and no DSP or editor is requested.
+- Invalid native metadata is preserved diagnostically; defaults are not silently clamped. Factory metadata can vary by plugin version/state; the measured adapter requires the exact binary SHA-256, component ID and parameter signature.
+- Generated devices copy a locally authored Max-saved shell unchanged. Public distribution needs an approved shell; binary dependencies and SDK test modules stay in ignored artifacts. Max software and third-party plugin binaries/assets are not redistributed. Required SDK MIT notices are included.
+- Saved device references and cached Max dependency paths can point to older bundles. The reopen mismatch was diagnosed from the actual Set path and fixed in place; distinct packaging/reference behavior and clean-machine portability remain open.
+- Manual writes override automation normally. Undo grouping and long-session/performance behavior are unmeasured. Browser values remain simulation; only the wrapper controls Live.
+- Node-for-Max capture saving is suspended after two native Max crashes. It is excluded from new generated devices; old saved test devices retain their original objects.
+- Desktop packaging, other operating systems/architectures, VST2, proprietary telemetry and a complete redistributable audio-plugin DSP fixture remain unsupported. The original ABI fixtures test native integration only.
+- Local browser saves can be cleared. Explicit project JSON and device bundles are the portable copies; neither compiler success nor automated tests imply broad host compatibility.

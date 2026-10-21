@@ -4,6 +4,7 @@ import {parseHostCapture,projectFromCapture} from '/packages/host-capture/index.
 import {saveFunctionalityPreset,saveLayoutPreset,applyFunctionalityPreset,applyLayoutPreset,exposeParameters} from '/packages/presets/index.ts';
 import {selection,moveSelection,resizeWidget,alignWidgets,distributeWidgets,duplicateWidgets,groupWidgets,lockWidgets,reorderWidgets,deleteWidgets} from '/packages/layout-engine/index.ts';
 import {validateInventory} from '/packages/inventory/index.ts';
+import {validatePluginInspection,projectFromInspection,selectableParameter,verifiedLiveBinding} from '/packages/plugin-inspection/index.ts';
 import {deviceFiles,exportFiles,zipFiles,runtimeFiles} from '/packages/export/index.ts';
 import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject} from '/packages/schema/index.ts';
@@ -12,10 +13,11 @@ const $=id=>document.getElementById(id);
 let graphViews=[],graphFrame=null;
 let selectedIds=new Set(),zoom=1;
 let project,selected=null,values=Object.create(null),past=[],future=[];
+let activeInspection=null;
 const status=message=>{$('status').textContent=message;};
 const run=fn=>{try{fn();}catch(error){status(error.message);}};
 function change(next){next=validateProject(next);if(serializeProject(next)===serializeProject(project))return;past.push(serializeProject(project));if(past.length>100)past.shift();future=[];project=next;render();}
-function activate(next){project=validateProject(next);selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
+function activate(next){project=validateProject(next);activeInspection=null;selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
 function render(){
  selectedIds=new Set([...selectedIds].filter(id=>project.widgets.some(w=>w.id===id)));
  if(!project.widgets.some(w=>w.id===selected))selected=[...selectedIds][0]||null;
@@ -27,7 +29,8 @@ function render(){
  $('dimensions').textContent=project.panel.width+' x '+project.panel.height+' / '+project.panel.grid+' px grid';
  $('undo').disabled=!past.length;$('redo').disabled=!future.length;
  $('parameters').replaceChildren();
- for(const p of project.parameters){
+ $('native-search-label').hidden=!activeInspection;$('functions-all').disabled=!!activeInspection;
+ if(activeInspection)renderNativeControls();else for(const p of project.parameters){
   const label=document.createElement('label');label.className='function';
   const input=document.createElement('input');input.type='checkbox';input.checked=project.widgets.some(w=>w.parameterId===p.id);
   input.onchange=()=>{run(()=>{
@@ -138,15 +141,41 @@ $('export-max').onclick=async()=>{
 };
 
 let inventory=null;
+function renderNativeControls(){
+ const container=$('parameters');container.replaceChildren();if(!activeInspection)return;
+ const query=$('native-search').value.toLowerCase(),matches=activeInspection.parameters.filter(p=>(p.name+' '+p.unit).toLowerCase().includes(query));
+ const eligible=matches.filter(selectableParameter),visible=eligible.slice(0,100),checked=new Set(project.widgets.map(w=>w.parameterId));
+ const note=document.createElement('p');note.className='muted small';note.textContent=checked.size+' selected. Showing '+visible.length+' of '+eligible.length+' matching editable controls. Search to narrow the list.';container.append(note);
+ for(const p of visible){
+  const label=document.createElement('label');label.className='function';const input=document.createElement('input');input.type='checkbox';input.checked=checked.has('vst3-'+p.id);
+  input.onchange=()=>{run(()=>{const ids=new Set(activeInspection.parameters.filter(item=>checked.has('vst3-'+item.id)).map(item=>item.id));input.checked?ids.add(p.id):ids.delete(p.id);change(projectFromInspection(activeInspection,[...ids]));status(project.parameters.some(p=>p.evidence==='native-inspected')?'Layout created. Live routing is not supported for this selection yet.':'Layout created. Generate your device, or customize it first.');});render();};
+  const name=document.createElement('span');name.textContent=p.name||'Parameter '+p.id;
+  label.title=(p.defaultDisplay===null?'Default unavailable':'Default: '+p.defaultDisplay)+(p.unit?' '+p.unit:'')+' / '+(p.stepCount?'Stepped':'Continuous')+' / '+(verifiedLiveBinding(activeInspection,p)?'Live mapping checked':'Live mapping not yet checked');
+  label.append(input,name);if(!verifiedLiveBinding(activeInspection,p)){const hint=document.createElement('small');hint.textContent='Preview only';label.append(hint);}container.append(label);
+ }
+}
+$('native-search').oninput=renderNativeControls;
+async function chooseInstalledPlugin(plugin,container,button,classId){
+ button.disabled=true;button.textContent='Reading controls...';status('Reading '+plugin.name+' controls...');
+ try{const response=await fetch('/api/inspect-plugin?id='+encodeURIComponent(plugin.inventoryId)+(classId?'&classId='+encodeURIComponent(classId):'')),data=await response.json();if(!response.ok)throw new Error(data.error||'Cannot inspect plugin');
+  const result=validatePluginInspection(data);
+  if(result.status==='choose-class'){container.replaceChildren();for(const item of result.classes){const choice=document.createElement('button');choice.textContent=item.name;choice.onclick=()=>chooseInstalledPlugin(plugin,container,choice,item.classId);container.append(choice);}status('Choose the component you want to use.');return;}
+  activate(projectFromInspection(result,[]));activeInspection=result;$('native-search').value='';render();
+  status('Choose the controls to show. Their layout is created automatically; you can edit it afterward.');
+ }catch(error){status('Cannot read plugin controls: '+error.message);}finally{button.disabled=false;button.textContent=classId?'Choose component':plugin.name;}
+}
 function renderInventory(){
  const container=$('inventory');container.replaceChildren();if(!inventory)return;
  const query=$('plugin-search').value.toLowerCase();const matches=inventory.plugins.filter(p=>(p.name+' '+p.architecture).toLowerCase().includes(query));
- for(const plugin of matches){const details=document.createElement('details');details.className='inventory-item';const summary=document.createElement('summary');summary.textContent=plugin.name+' / '+plugin.architecture;
- const info=document.createElement('p');info.className='muted small';info.textContent='Inventory only. Parameters not inspected. '+plugin.installedPath;details.append(summary,info);container.append(details);}
- $('inventory-note').textContent=matches.length+' of '+inventory.plugins.length+' plugins. '+inventory.diagnostics.length+' diagnostics. No code loaded, fingerprints computed or parameter access verified.';
+ for(const plugin of matches){const details=document.createElement('section');details.className='inventory-item';
+ const info=document.createElement('p');info.className='muted small';info.textContent=plugin.architecture+' / VST3';
+ const choose=document.createElement('button');choose.textContent=plugin.name;choose.title=plugin.installedPath;choose.disabled=plugin.architecture!=='x64';const components=document.createElement('div');choose.onclick=()=>chooseInstalledPlugin(plugin,components,choose);
+ details.append(choose,info,components);container.append(details);}
+ $('inventory-note').textContent=matches.length+' of '+inventory.plugins.length+' installed plugins. Choose one to see its controls.';
 }
 $('plugin-search').oninput=renderInventory;
-$('scan-plugins').onclick=async()=>{const button=$('scan-plugins');button.disabled=true;button.textContent='Reading folders...';try{const response=await fetch('/api/inventory');const result=await response.json();if(!response.ok)throw new Error(result.error||'Inventory failed');inventory=validateInventory(result);renderInventory();status('Read-only inventory complete. Plugin parameters are still uninspected.');}catch(error){status('Inventory failed: '+error.message);}finally{button.disabled=false;button.textContent='Read VST3 folders';}};
+$('scan-plugins').onclick=async()=>{const button=$('scan-plugins');button.disabled=true;button.textContent='Finding plugins...';try{const response=await fetch('/api/inventory');const result=await response.json();if(!response.ok)throw new Error(result.error||'Inventory failed');inventory=validateInventory(result);renderInventory();}catch(error){$('inventory-note').textContent='Could not find installed plugins: '+error.message;}finally{button.disabled=false;button.textContent='Refresh plugins';}};
+$('scan-plugins').onclick();
 
 function applyLayout(action){run(()=>{change(action());status('Layout updated.');});}
 $('select-all').onclick=()=>{selectedIds=new Set(project.widgets.map(w=>w.id));selected=project.widgets[0]?.id||null;render();};
@@ -210,7 +239,7 @@ function renderProjectSettings(){
 }
 $('project-settings').onsubmit=event=>{event.preventDefault();run(()=>{change({...project,name:$('project-name').value,plugin:{...project.plugin,name:$('plugin-name').value,format:$('plugin-format').value},panel:{width:Number($('panel-width').value),height:Number($('panel-height').value),grid:Number($('panel-grid').value)},target:{...project.target,liveVersion:$('live-version').value,maxVersion:$('max-version').value}});status('Project settings applied. Panel dimensions are design choices, not measured Live limits.');});};
 function renderDiagnostics(){
- const items=diagnoseProject(project),errors=items.filter(d=>d.severity==='error').length;$('diagnostic-count').textContent=errors?errors+' blocking issues':'No schema mapping blockers';$('export-max').disabled=errors>0;$('diagnostics').replaceChildren();
+ const items=diagnoseProject(project),errors=items.filter(d=>d.severity==='error').length;$('diagnostic-count').textContent=errors?errors+' blocking issues':'No schema mapping blockers';$('export-max').disabled=errors>0;$('export-max').title=items.find(d=>d.severity==='error')?.message||'Generate your wrapper';$('diagnostics').replaceChildren();
  for(const item of items){const row=document.createElement('p');row.className='diagnostic '+item.severity;row.textContent=item.severity.toUpperCase()+': '+item.message;$('diagnostics').append(row);}
 }
 

@@ -1,0 +1,87 @@
+{
+  "repository": "steinbergmedia/vst3_pluginterfaces",
+  "ref": "master",
+  "retrieved": "2026-10-21",
+  "files": [
+    {
+      "path": "base/ipluginbase.h",
+      "sha": "859424bfc7f14b61df4b209a85c09d413513127a"
+    },
+    {
+      "path": "vst/ivstcomponent.h",
+      "sha": "e20ef5f429349bdccf55367d45051fcdb0ff97c5"
+    },
+    {
+      "path": "vst/ivsteditcontroller.h",
+      "sha": "889ae6e04a20dc8481d228299a902bebf4f742af"
+    },
+    {
+      "path": "vst/ivsthostapplication.h",
+      "sha": "1818efe85a6674bf706fd8f8040e28cb329fbe27"
+    },
+    {
+      "path": "base/ibstream.h",
+      "sha": "f25fd78bd296db33002e1918f33e17f5d13d7fe8"
+    },
+    {
+      "path": "base/funknown.cpp",
+      "sha": "d796780e2c958bef790b0769abc10c92077b4bf8"
+    },
+    {
+      "path": "LICENSE.txt",
+      "sha": "abfd1b721d2c9f3b8065ddff01b565a6be21cc73"
+    },
+    {
+      "path": "base/funknown.h",
+      "sha": "3f6de83b104484e09097411417b37bcd28a46a1c"
+    },
+    {
+      "path": "base/fstrdefs.h",
+      "sha": "42bb0b91d50fcc28bf7192cf32ef9f2a21232658"
+    },
+    {
+      "path": "vst/vsttypes.h",
+      "sha": "ec4ff4021a4afd960d061d5e0ba32e0618136a9f"
+    },
+    {
+      "path": "base/falignpush.h",
+      "sha": "6a2b37263d75465a8e6e97bc6af1d85a0423bd2c"
+    },
+    {
+      "path": "base/falignpop.h",
+      "sha": "d8b9e7c291e8babe6a18558f58549e6de79d530a"
+    },
+    {
+      "path": "vst/ivstmessage.h",
+      "sha": "ca3a6674af45f4c52000641aab5929c8ebaeac5c"
+    },
+    {
+      "path": "base/fplatform.h",
+      "sha": "45937b8fbb169a3b594ab84aecd95e041c760945"
+    },
+    {
+      "path": "base/ftypes.h",
+      "sha": "8568fae8b2df00f2eac4869bbaef1d003494e266"
+    },
+    {
+      "path": "base/smartpointer.h",
+      "sha": "ca64ae8f6260abc4225869bcb55ef6b27f3f3abf"
+    },
+    {
+      "path": "base/conststringtable.h",
+      "sha": "f9450222ba7add303f4bcf91f9f41962538eaa36"
+    },
+    {
+      "path": "vst/ivstattributes.h",
+      "sha": "e8097e92319095580f5f540d97fbab50ee105216"
+    },
+    {
+      "path": "base/ustring.h",
+      "sha": "2d890eec9e0d9598a207c3bfa3df26d7c174e416"
+    },
+    {
+      "path": "vst/vstpresetkeys.h",
+      "sha": "46b2292fa9e46cfea668ad126449e803a2c33264"
+    }
+  ]
+}

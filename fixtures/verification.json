@@ -154,5 +154,20 @@
       "result": "Exported runtime disconnect stops control and observation; rebinding restores control. Synth deletion reports Disconnected and Write error: Target unavailable; bind explicitly. Undo and explicit rebind restore Morph control",
       "limits": "One plugin and parameter; no general target-lifecycle compatibility claim"
     }
-  ]
+  ],
+  "nativeInspection": {
+    "date": "2026-10-21",
+    "source": "Actual compiled helper and loopback HTTP API against installed plugin",
+    "pluginName": "Augmented STRINGS",
+    "classId": "41727475415649534153747250726F63",
+    "binarySha256": "132f6b1a0e290c43c48ddab7f01b816f09470952b8e5d4eb0127b7aeada42e21",
+    "parameterCount": 2748,
+    "editableWithValidMetadata": 580,
+    "invalidDefaults": 2080,
+    "verifiedSdkIds": {
+      "Morph": 1,
+      "Motion": 4
+    },
+    "limits": "SDK metadata is not generic Live routing. Only prior measured Morph/Motion mappings enable generation; other controls are preview-only. New discovered-ID bundle awaits direct Live test."
+  }
 }

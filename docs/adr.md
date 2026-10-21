@@ -1,5 +1,9 @@
 # ADR log
 
+## 005 - Native discovery with explicit Live routing provenance (accepted 2026-10-21)
+
+Use installed MSVC/CMake and a minimal licensed official VST3 interface subset for an isolated Windows x64 metadata helper. Apply job resource limits and bounded supervision; do not process audio. Native discovery and Live control are separate: unverified routing blocks generation rather than guessing from SDK names/endpoints. A fingerprint-bound adapter covers the two measured Augmented Strings controls. Plugin choice plus checked controls creates the layout; editing is optional. No alternative DSP host is implied.
+
 ## 001 — Start with Live API (accepted 2026-10-20)
 Narrowest documented path keeps plugin audio, routing and state in Live. Separate host remains deferred until evidence demonstrates need and user accepts changed routing.
 

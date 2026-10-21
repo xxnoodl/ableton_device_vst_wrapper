@@ -1,6 +1,6 @@
 export const knobDesigns = ['studio','graphite','silver','selector','halo','stepped','pointer','recessed','gloss','monitor'] as const;
 export const knobAccents = ['mint','amber','cyan','red'] as const;
-export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' | 'host-captured';resetSource:'project-default'|'captured-current';quantized:boolean|null;enumLabels:string[] };
+export type Parameter = { id: string; name: string; min: number; max: number; defaultValue: number; unit: string; evidence: 'synthetic' | 'user-reported' | 'host-captured' | 'native-inspected';resetSource:'project-default'|'captured-current';quantized:boolean|null;enumLabels:string[] };
 export type Widget = { id: string; type: 'knob' | 'slider'; label: string; parameterId: string; x: number; y: number; width: number; height: number; design: typeof knobDesigns[number]; accent: typeof knobAccents[number]; stepCount: number; stepValues: number[]; locked: boolean; groupId: string | null };
 export type FunctionalityPreset = {id:string;name:string;parameterIds:string[]};
 export type LayoutPreset = {id:string;name:string;widgets:Widget[];panel:{width:number;height:number;grid:number};theme:'dark'|'light'};
@@ -42,7 +42,7 @@ export function validateProject(input: unknown): Project {
     const max = number(p.max,min,1e9,'parameter.max');
     if (min === max) throw new Error('Parameter range must be nonzero');
     if (typeof p.unit !== 'string' || p.unit.length > 32) throw new Error('Invalid parameter unit');
-    return {id:text(p.id,'parameter.id'),name:text(p.name,'parameter.name'),min,max,defaultValue:number(p.defaultValue,min,max,'parameter.defaultValue'),unit:p.unit,evidence:choice(p.evidence,['synthetic','user-reported','host-captured'],'parameter.evidence'),resetSource:choice(p.resetSource===undefined?'project-default':p.resetSource,['project-default','captured-current'],'parameter.resetSource'),quantized:p.quantized===undefined||p.quantized===null?null:typeof p.quantized==='boolean'?p.quantized:(()=>{throw new Error('Invalid quantization flag');})(),enumLabels:p.enumLabels===undefined?[]:list(p.enumLabels,'enumLabels').map(v=>text(v,'enum label'))};
+    return {id:text(p.id,'parameter.id'),name:text(p.name,'parameter.name'),min,max,defaultValue:number(p.defaultValue,min,max,'parameter.defaultValue'),unit:p.unit,evidence:choice(p.evidence,['synthetic','user-reported','host-captured','native-inspected'],'parameter.evidence'),resetSource:choice(p.resetSource===undefined?'project-default':p.resetSource,['project-default','captured-current'],'parameter.resetSource'),quantized:p.quantized===undefined||p.quantized===null?null:typeof p.quantized==='boolean'?p.quantized:(()=>{throw new Error('Invalid quantization flag');})(),enumLabels:p.enumLabels===undefined?[]:list(p.enumLabels,'enumLabels').map(v=>text(v,'enum label'))};
   });
   const width = number(panel.width,320,1600,'panel.width');
   const height = number(panel.height,160,900,'panel.height');

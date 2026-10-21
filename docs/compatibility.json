@@ -1,11 +1,48 @@
 {
-  "platform": {"os":"Windows build 26200","architecture":"x64","live":"12.3.2","max":"9.0.9","node":"24.16.0"},
+  "platform": {
+    "os": "Windows build 26200",
+    "architecture": "x64",
+    "live": "12.3.2",
+    "max": "9.0.9",
+    "node": "24.16.0",
+    "msvc": "19.51",
+    "windowsSdk": "10.0.26100.0"
+  },
   "components": [
-    {"name":"Original Morph probe","status":"partially verified","evidence":"User-guided Live tests; one plugin parameter; explicit reconnection"},
-    {"name":"New native runtime and capture writer","status":"prototype","evidence":"Simulated host/drawing tests and Node filesystem tests; actual Live execution pending"},
-    {"name":"Studio","status":"partially verified","evidence":"Initial arrangement user-tested; expanded workflows tested under simulated DOM; browser visuals/accessibility/performance pending"},
-    {"name":"Static VST3 inventory","status":"partially verified","evidence":"69 accessible entries and one permission diagnostic; no plugin loading or parameter discovery"},
-    {"name":"Other OS, CPU and host versions","status":"unsupported","evidence":"Not tested"},
-    {"name":"VST2 and proprietary telemetry","status":"unsupported","evidence":"No implementation"}
+    {
+      "name": "Original Morph probe",
+      "status": "partially verified",
+      "evidence": "User-guided Live tests; one plugin parameter; explicit reconnection"
+    },
+    {
+      "name": "Generated native runtime",
+      "status": "partially verified",
+      "evidence": "User-tested Morph/Motion control, simultaneous automation, direct device loading and automatic connection/reopen; capture saving suspended after Node-for-Max crashes"
+    },
+    {
+      "name": "Studio",
+      "status": "partially verified",
+      "evidence": "Initial arrangement user-tested; expanded workflows tested under simulated DOM; browser visuals/accessibility/performance pending"
+    },
+    {
+      "name": "Static VST3 inventory",
+      "status": "partially verified",
+      "evidence": "69 accessible entries and one permission diagnostic; no plugin loading or parameter discovery"
+    },
+    {
+      "name": "Other OS, CPU and host versions",
+      "status": "unsupported",
+      "evidence": "Not tested"
+    },
+    {
+      "name": "VST2 and proprietary telemetry",
+      "status": "unsupported",
+      "evidence": "No implementation"
+    },
+    {
+      "name": "Native VST3 discovery",
+      "status": "partially verified",
+      "evidence": "Actual Augmented Strings factory/controller inspection returned 2748 parameters; native crash/hang/multi-class fixtures and simulated studio selection tests pass; generic Live routing remains unverified"
+    }
   ]
 }

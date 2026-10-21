@@ -1,5 +1,14 @@
 # Progress
 
+## 2026-10-21 native discovery
+
+- Found installed Visual Studio Build Tools 2026/MSVC 19.51 and CMake through vswhere outside PATH. Fetched the official MIT-licensed VST3 interface subset via the read-only GitHub connector after direct git network failure; vendored the required notice and recorded upstream file blob SHAs.
+- Built a disposable Windows x64 controller inspector with real SHA-256 fingerprints, component choice, native IDs/defaults/units/steps/flags/enums and strict result validation. Native execution uses job memory/CPU/process limits plus supervised deadlines/output limits. This is process isolation, not a restricted-token security sandbox. No DSP processing, editor request, preset writing or plugin binary modification is implemented.
+- Actual Augmented Strings SDK/HTTP discovery returned 2,748 parameters, 580 editable with valid metadata. Preserved 2,080 invalid -1 defaults as diagnostics. SDK IDs are Morph=1 and Motion=4, with defaults 0.5 and 0. Their class ID agrees with Live's log.
+- Studio automatically inventories installed plugins; choosing one reads controls. Searchable checkboxes create the layout, with optional editing afterward. A fingerprint-bound adapter maps only the two independently user-tested Live controls. Other native controls are labeled Preview only and block generation until routing is verified. Native inspection does not mean arbitrary native parameters are Live-exposed.
+- Generated a Morph/Motion project and device bundle from the real inspected registry under ignored artifacts. No manual list entry was used. Browser visuals and the newly discovered-ID bundle still need user review; previous generated wrappers remain preserved.
+- Eighty-three tests pass on this machine, including compiled original SDK-ABI metadata/class-choice/crash/hang fixtures and recovery, payload/provenance checks and simulated installed-plugin choose/search/check flows. Fixtures have no audio DSP and do not substitute for a complete redistributable audio plugin. Actual HTTP guards rejected arbitrary paths, unknown IDs, cross-origin and write requests.
+
 ## 2026-10-20
 
 - Created the M0 repository, architecture, research, risks and manual test plan.

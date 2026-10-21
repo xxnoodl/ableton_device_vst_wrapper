@@ -11,6 +11,7 @@ import * as store from '../packages/project-store/index.ts';
 import * as layout from '../packages/layout-engine/index.ts';
 import * as inventory from '../packages/inventory/index.ts';
 import * as exporter from '../packages/export/index.ts';
+import * as inspection from '../packages/plugin-inspection/index.ts';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 function harness(){
  let document;const ids=new Map();
@@ -44,7 +45,7 @@ function harness(){
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
  const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{addEventListener(){}},fetch:async path=>{const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,...inspection,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{addEventListener(){}},fetch:async path=>{if(path==='/api/inventory')return {ok:true,json:async()=>({inventoryVersion:1,mode:'static-no-plugin-execution',plugins:[],diagnostics:[]})};const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
  vm.runInContext(read('apps/studio/graphs.js').replace(/^import .*;\r?\n/gm,'').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
@@ -52,6 +53,32 @@ function harness(){
  return {c,document,ids,state,docListeners,localStorage};
 }
 const ready=()=>new Promise(resolve=>setImmediate(resolve));
+
+function installedDiscovery(verified=true){
+ const id='a'.repeat(24),name=verified?'Augmented STRINGS':'Unverified effect';
+ const inventory={inventoryVersion:1,mode:'static-no-plugin-execution',diagnostics:[],plugins:[{inventoryId:id,name,format:'VST3',installedPath:'C:/fixtures/effect.vst3',binaryPath:'C:/fixtures/effect.vst3',architecture:'x64',fingerprint:null,parameterStatus:'not-inspected',health:'inventory-only',capabilities:{nativeLoading:false,parameterDiscovery:false,guiCapture:false}}]};
+ const data={inspectionVersion:1,status:'ok',inventoryId:id,name,vendor:'Test fixture',classId:verified?'41727475415649534153747250726F63':'1'.repeat(32),fingerprint:verified?'132f6b1a0e290c43c48ddab7f01b816f09470952b8e5d4eb0127b7aeada42e21':'b'.repeat(64),format:'VST3',source:'vst3-controller',bindingStatus:'not-verified-in-live',parameters:[1,4].map((id,index)=>({id,index,name:index?'Motion':'Morph',shortName:'',unit:'',stepCount:0,defaultNormalized:index?0:.5,reportedDefaultNormalized:index?0:.5,metadataValid:true,defaultDisplay:index?'0.0':'0.5',plainMin:0,plainMax:1,unitId:0,flags:1,enumLabels:[]}))};
+ return {inventory,data};
+}
+test('installed plugin choice reads controls and checkboxes create the measured two-knob layout',async()=>{
+ const h=harness();await ready();const {inventory,data}=installedDiscovery(),original=h.c.fetch;
+ h.c.fetch=async path=>path==='/api/inventory'?{ok:true,json:async()=>inventory}:path.startsWith('/api/inspect-plugin?')?{ok:true,json:async()=>data}:original(path);
+ await h.ids.get('scan-plugins').onclick();assert.equal(h.ids.get('inventory').children.length,1);
+ await h.ids.get('inventory').children[0].children[0].onclick();assert.equal(h.state().widgets.length,0);assert.equal(h.ids.get('native-search-label').hidden,false);
+ h.ids.get('parameters').children[1].children[0].checked=true;h.ids.get('parameters').children[1].children[0].dispatch('change');
+ h.ids.get('parameters').children[2].children[0].checked=true;h.ids.get('parameters').children[2].children[0].dispatch('change');
+ assert.deepEqual(h.state().widgets.map(w=>w.label),['Morph','Motion']);assert.equal(h.ids.get('export-max').disabled,false);
+ assert.deepEqual(h.state().parameters.map(p=>p.id),['vst3-1','vst3-4']);
+ h.ids.get('native-search').value='motion';h.ids.get('native-search').dispatch('input');assert.equal(h.ids.get('parameters').children.length,2);
+ h.ids.get('undo').click();assert.equal(h.state().widgets.length,1);
+});
+test('unverified installed controls remain available for design but clearly block device generation',async()=>{
+ const h=harness();await ready();const {inventory,data}=installedDiscovery(false),original=h.c.fetch;
+ h.c.fetch=async path=>path==='/api/inventory'?{ok:true,json:async()=>inventory}:path.startsWith('/api/inspect-plugin?')?{ok:true,json:async()=>data}:original(path);
+ await h.ids.get('scan-plugins').onclick();await h.ids.get('inventory').children[0].children[0].onclick();
+ h.ids.get('parameters').children[1].children[0].checked=true;h.ids.get('parameters').children[1].children[0].dispatch('change');
+ assert.equal(h.state().widgets.length,1);assert.equal(h.ids.get('export-max').disabled,true);assert.match(h.ids.get('export-max').title,/routing is not verified/);assert.match(h.ids.get('status').textContent,/not supported/);
+});
 
 test('Generate device packages checked controls through the actual studio handler',async()=>{
  const h=harness();await ready();h.ids.get('morph-motion').click();await ready();

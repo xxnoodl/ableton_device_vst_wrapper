@@ -1,15 +1,19 @@
 import {scanPluginDirectories} from '../native/plugin-inspector/supervisor.mjs';
 import {validateInventory} from '../packages/inventory/index.ts';
 import {validateDeviceTemplate} from '../packages/export/index.ts';
+import {inspectPlugin} from '../native/plugin-inspector/native-supervisor.mjs';
+import {validatePluginInspection} from '../packages/plugin-inspection/index.ts';
 import http from 'node:http';
 import {readFile, realpath} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 import {stripTypeScriptTypes} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
-const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/packages/export/','/packages/diagnostics/','/packages/analysis/','/packages/layout-engine/','/packages/presets/','/packages/host-capture/','/packages/inventory/','/max/runtime/','/fixtures/'];
+const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/packages/export/','/packages/diagnostics/','/packages/analysis/','/packages/layout-engine/','/packages/presets/','/packages/host-capture/','/packages/inventory/','/packages/plugin-inspection/','/max/runtime/','/fixtures/'];
 const mime={'.html':'text/html','.js':'text/javascript','.cjs':'text/javascript','.ts':'text/javascript','.css':'text/css','.json':'application/json'};
 let inventoryPromise=null;let inventoryTime=0;
+let inspectionBusy=false;
+function getInventory(){if(!inventoryPromise||Date.now()-inventoryTime>30000){inventoryTime=Date.now();inventoryPromise=scanPluginDirectories(['C:\\Program Files\\Common Files\\VST3']).then(validateInventory).catch(error=>{inventoryPromise=null;throw error;});}return inventoryPromise;}
 const server=http.createServer(async(req,res)=>{
  try {
   if(req.method!=='GET') {res.writeHead(405);res.end();return;}
@@ -18,10 +22,18 @@ const server=http.createServer(async(req,res)=>{
    try{const bytes=await readFile(resolve(root,'max/templates/wrapper.amxd'));validateDeviceTemplate(bytes);res.writeHead(200,{'Content-Type':'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(bytes);}
    catch{res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'A compatible Max-saved device shell has not been configured for this installation.'}));}return;
   }
+  if(req.url.startsWith('/api/inspect-plugin?')){
+   const query=new URL(req.url,'http://localhost').searchParams,id=query.get('id'),classId=query.get('classId');
+   if(!id||!/^[a-f0-9]{24}$/.test(id)||[...query.keys()].some(k=>!['id','classId'].includes(k))||(classId&&!/^[A-Fa-f0-9]{32}$/.test(classId))){res.writeHead(400);res.end('Invalid plugin identity');return;}
+   if(inspectionBusy){res.writeHead(429,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Another plugin is being inspected. Try again when it finishes.'}));return;}
+   inspectionBusy=true;
+   try{const inventory=await getInventory(),plugin=inventory.plugins.find(p=>p.inventoryId===id);if(!plugin){res.writeHead(404,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Plugin is not in the installed inventory'}));return;}
+    const result=validatePluginInspection(await inspectPlugin(plugin,{...(classId?{classId}:{})}));res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(result));
+   }catch(error){res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:error.message}));}finally{inspectionBusy=false;}return;
+  }
   if(req.url==='/api/inventory'){
    if(process.platform!=='win32'){res.writeHead(501,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Default inventory is Windows-only; use the CLI with explicit roots.'}));return;}
-   try{if(!inventoryPromise||Date.now()-inventoryTime>30000){inventoryTime=Date.now();inventoryPromise=scanPluginDirectories(['C:\\Program Files\\Common Files\\VST3']).then(validateInventory).catch(error=>{inventoryPromise=null;throw error;});}
-   const result=await inventoryPromise;res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(result));}
+   try{const result=await getInventory();res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(result));}
    catch(error){res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:error.message}));}return;
   }
   let path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);

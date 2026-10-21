@@ -8,12 +8,12 @@
     {
       "name": "Real VST3 bidirectional control",
       "status": "partially verified",
-      "evidence": "User confirmed two-way Augmented Strings Morph control, 2026-10-20; docs/progress.md. Automation and reload pending."
+      "evidence": "User confirmed Morph/Motion independent two-way control and simultaneous automation; docs/progress.md"
     },
     {
       "name": "Automatic target restoration",
-      "status": "unsupported",
-      "evidence": "explicit bind required"
+      "status": "partially verified",
+      "evidence": "Generated wrapper automatic predecessor connection and Set reopen passed for measured Augmented Strings configuration"
     },
     {
       "name": "Browser studio shell",
@@ -22,8 +22,8 @@
     },
     {
       "name": "Native plugin inspection",
-      "status": "unsupported",
-      "evidence": "not implemented"
+      "status": "partially verified",
+      "evidence": "Compiled SDK helper; actual 2748-parameter Arturia scan; native crash/hang/class-choice tests; no generic Live mapping"
     },
     {
       "name": "Plugin telemetry",
@@ -33,7 +33,7 @@
     {
       "name": "Project schema and local storage subset",
       "status": "partially verified",
-      "evidence": "tests/schema.test.mjs; strict v1 subset, 5 automated tests; full IR and migrations pending"
+      "evidence": "Strict schema v2, native provenance, v1 migration and bounded backup-protected storage"
     },
     {
       "name": "Same-machine copied device load",
@@ -42,13 +42,13 @@
     },
     {
       "name": "Reusable native Max runtime source",
-      "status": "prototype",
-      "evidence": "max/runtime; tests/runtime.test.mjs; real host execution pending"
+      "status": "partially verified",
+      "evidence": "User-tested two controls, automation and compact panel; clean-machine compatibility unverified"
     },
     {
       "name": "Deterministic Max source export",
       "status": "partially verified",
-      "evidence": "packages/export; automated ZIP tests and independent Python CRC check; no amxd generated"
+      "evidence": "Source ZIP plus unchanged Max-saved-shell device bundles; original generated bundle passed direct Live load"
     },
     {
       "name": "Static VST3 inventory",
@@ -57,8 +57,8 @@
     },
     {
       "name": "Live-exposed registry capture/import",
-      "status": "prototype",
-      "evidence": "max/runtime/controller.js; packages/host-capture; tests; real host execution pending"
+      "status": "partially verified",
+      "evidence": "Capture read confirmed in Live; file saving suspended after native Node-for-Max crashes"
     },
     {
       "name": "Canvas layout tools and presets",
@@ -74,6 +74,11 @@
       "name": "Schema v1 to v2 migration",
       "status": "partially verified",
       "evidence": "tests/presets.test.mjs; deterministic round trips and backup-protected local saves"
+    },
+    {
+      "name": "Installed-plugin choice and automatic control layout",
+      "status": "partially verified",
+      "evidence": "Real HTTP native discovery and simulated DOM choose/search/check flows; measured Morph/Motion mappings enable generation; unverified mappings block generation"
     }
   ]
 }
