@@ -1,5 +1,9 @@
 # ADR log
 
+## 006 - Investigate an internally hosted Max device (proposed 2026-10-21)
+
+The user requested investigation of a single reusable device instead of separate plugin/wrapper imports and manual binding. Official vst~ documentation and the installed Max reference establish a viable API candidate: internal VST3 loading, parameter enumeration, normalized plus formatted value output and original-editor access. Prefer an isolated Max-hosting proof next; a saved Live Rack is a fallback that preserves Live's DSP ownership. A dedicated VST3 host is a larger alternative and does not itself provide a custom inline Live device panel. Adoption is gated on actual state restoration, stable automation, latency compensation, sidechain/multichannel routing and compatibility tests. No audio-host change or migration is accepted by this investigation alone. See plugin-hosting.md for sources, distinctions and gates.
+
 ## 005 - Native discovery with explicit Live routing provenance (accepted 2026-10-21)
 
 Use installed MSVC/CMake and a minimal licensed official VST3 interface subset for an isolated Windows x64 metadata helper. Apply job resource limits and bounded supervision; do not process audio. Native discovery and Live control are separate: unverified routing blocks generation rather than guessing from SDK names/endpoints. A fingerprint-bound adapter covers the two measured Augmented Strings controls. Plugin choice plus checked controls creates the layout; editing is optional. No alternative DSP host is implied.

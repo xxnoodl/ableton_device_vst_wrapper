@@ -35,3 +35,7 @@ Derived synthetic EQ model: checked the W3C Audio EQ Cookbook, Working Group Not
 ## Native inspection sources (2026-10-21)
 
 Verified official interfaces and current MIT license at https://github.com/steinbergmedia/vst3_pluginterfaces (base/ipluginbase.h, vst/ivstcomponent.h, vst/ivsteditcontroller.h, vst/ivsthostapplication.h, LICENSE.txt). Consulted https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/API%2BDocumentation/Index.html and the official hosting/plugprovider.cpp implementation for initialization/connection requirements. Vendored only required interfaces and funknown.cpp; file Git blob SHAs are recorded in native/plugin-inspector/vendor/source-manifest.json. The current license is MIT, copyright 2026 Steinberg Media Technologies GmbH. Compiler/CMake discovery through vswhere found installed tools outside PATH; direct git network access failed but read-only GitHub connector retrieval worked. No JUCE or third-party plugin binary was added.
+
+## Single-device hosting research (2026-10-21)
+
+See [plugin-hosting.md](plugin-hosting.md) for the official-source comparison and adoption gates. Installed Max 9.0.9 reference XML confirms vst~ VST3 loading, formatted output, transport, snapshots and latency queries. No hosted plugin audio was executed for this investigation; current 138-test runtime evidence does not establish hosting. The existing Live API also documents str_for_value for formatted readouts.

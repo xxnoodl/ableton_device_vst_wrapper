@@ -8,6 +8,8 @@ The M0 feasibility gate passed for Arturia Augmented Strings' exposed Morph para
 
 The intended workflow is choose a plugin, check the controls to show, generate a wrapper with a sensible default layout, and optionally customize it. Manual Max assembly is not a product requirement.
 
+The [single-device hosting investigation](docs/plugin-hosting.md) evaluates putting the VST3 inside a Max device so the producer can load one reusable device with a generated panel and an Open plugin button. Max documents the needed hosting primitives; real state, automation, latency and sidechain tests are adoption gates. This architecture is not implemented yet; current wrappers still control a separately Live-hosted plugin.
+
 The new **Live session** path reads actual plugin instances and their exposed controls through a read-only Max bridge. Choose an instance, check controls and generate an automatically arranged wrapper without a plugin-specific SDK adapter or JSON handoff. The user verified real session discovery, refresh after exposing Color, and a generated Color wrapper with two-way control in Live. Automatic reconnection after reopening the Set also passed for Color. Color automation and broader plugin coverage remain pending. Controls not exposed by Live still require Configure. See [Live session discovery](docs/live-session.md).
 
 Canvas editing includes absolute grid snapping, nearby alignment guides, overlap protection with an explicit override, panel seams and visual cables. Layout presets retain the panel styling and cables. Numeric readouts no longer carry a redundant VALUE caption. Visual cables do not route parameters; the planned cross-plugin macro, XY and scene system is described in [performance routing](docs/performance-routing.md).

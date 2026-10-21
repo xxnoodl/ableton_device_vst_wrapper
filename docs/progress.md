@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 single-device hosting investigation
+
+- Investigated the requested one-device workflow using official Max/Live/VST3 documentation and installed Max 9.0.9 vst~ reference XML. Compared companion wrappers, saved Racks, internal Max hosting and a dedicated VST3 host.
+- Recommended a separate vst~ feasibility prototype: documented VST3 loading, parameter enumeration, numeric plus symbolic value output, snapshots and original-editor access match the requested inline panel. No production host change or claimed audio test.
+- Corrected the earlier assumption that meaningful units always require plugin adapters: Live DeviceParameter.str_for_value can provide formatted text on the existing path; installed-version/plugin execution remains unverified. Typed physical-value conversion is a separate requirement.
+- Recorded mandatory gates for full state, stable automation, dynamic latency, sidechains, instruments/MIDI and clean-machine packaging. Research and proposed ADR 006 are in docs/plugin-hosting.md and docs/adr.md.
+
 ## 2026-10-21 Pro-C 3 Threshold automation passed
 
 - User confirmed the horizontal wrapper follows a Threshold automation passage during playback without touching its knob. This verifies observation of that automated parameter; it does not establish every Pro-C 3 parameter or automation recording from the wrapper.
