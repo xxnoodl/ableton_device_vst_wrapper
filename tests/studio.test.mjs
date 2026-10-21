@@ -12,8 +12,9 @@ import * as layout from '../packages/layout-engine/index.ts';
 import * as inventory from '../packages/inventory/index.ts';
 import * as exporter from '../packages/export/index.ts';
 import * as inspection from '../packages/plugin-inspection/index.ts';
+import * as performance from '../packages/performance/index.ts';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-function harness(){
+function harness(performancePage=false){
  let document;const ids=new Map();
  class Element{
   constructor(tag){this.tagName=tag.toUpperCase();this.children=[];this.parentElement=null;this.attributes={};this.dataset={};this.value='';this.className='';this.listeners={};this.style={setProperty:(k,v)=>this.style[k]=v};this.namespaceURI='http://www.w3.org/2000/svg';this.classList={add:(...names)=>{this.className=[...new Set([...this.className.split(' '),...names])].filter(Boolean).join(' ');},remove:(...names)=>{this.className=this.className.split(' ').filter(n=>!names.includes(n)).join(' ');},contains:name=>this.className.split(' ').includes(name),toggle:(name,on)=>{const add=on??!this.classList.contains(name);add?this.classList.add(name):this.classList.remove(name);}};}
@@ -35,7 +36,7 @@ function harness(){
   get valueAsNumber(){return this.value===''?NaN:Number(this.value);}
  }
  const root=new Element('root'),stack=[root];
- const html=read('apps/studio/index.html');
+ const html=read(performancePage?'apps/studio/performance.html':'apps/studio/index.html');
  for(const token of html.match(/<[^>]+>/g)){
   if(token.startsWith('<!'))continue;
   if(token.startsWith('</')){if(stack.length>1)stack.pop();continue;}
@@ -44,12 +45,12 @@ function harness(){
   stack.at(-1).append(element);if(!['meta','link','input','hr','br'].includes(tag))stack.push(element);
  }
  const docListeners={};document={activeElement:null,getElementById:id=>ids.get(id),createElement:tag=>new Element(tag),createElementNS:(ns,tag)=>new Element(tag),createTextNode:text=>{const e=new Element('text');e.textContent=text;return e;},addEventListener:(type,fn)=>{(docListeners[type]??=[]).push(fn);}};
- const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),key:i=>[...data.keys()][i]};
- const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,...inspection,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{addEventListener(){}},fetch:async path=>{if(path==='/api/inventory')return {ok:true,json:async()=>({inventoryVersion:1,mode:'static-no-plugin-execution',plugins:[],diagnostics:[]})};const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
+ const data=new Map();const localStorage={get length(){return data.size;},getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k),key:i=>[...data.keys()][i]};
+ const c=vm.createContext({...schema,...store,...layout,...presets,...captures,...diagnostics,...analysis,...inventory,...exporter,...inspection,...performance,document,localStorage,crypto:{randomUUID:()=>crypto.randomUUID()},confirm:()=>true,structuredClone,setTimeout,requestAnimationFrame:fn=>{setImmediate(fn);return 1;},Blob,URL,window:{location:{},addEventListener(){}},fetch:async path=>{if(path==='/api/inventory')return {ok:true,json:async()=>({inventoryVersion:1,mode:'static-no-plugin-execution',plugins:[],diagnostics:[]})};const source=read(path.replace(/^\//,''));return {ok:true,text:async()=>source,json:async()=>JSON.parse(source)};}});
  vm.runInContext(read('apps/studio/graphs.js').replace(/^import .*;\r?\n/gm,'').replaceAll('export ',''),c);
  vm.runInContext(read('apps/studio/knob.js').replaceAll('export ',''),c);
- vm.runInContext(read('apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
- const state=()=>schema.validateProject(JSON.parse(JSON.stringify(vm.runInContext('project',c))));
+ vm.runInContext(read(performancePage?'apps/studio/performance.js':'apps/studio/app.js').replace(/^import .*;\r?\n/gm,''),c);
+ const state=()=>performancePage?performance.validateRack(JSON.parse(JSON.stringify(vm.runInContext('rack',c)))):schema.validateProject(JSON.parse(JSON.stringify(vm.runInContext('project',c))));
  return {c,document,ids,state,docListeners,localStorage};
 }
 const ready=()=>new Promise(resolve=>setImmediate(resolve));
@@ -169,4 +170,46 @@ test('canvas policy and decorative cable controls save through actual studio han
  h.ids.get('panel-seams').value='groove';h.ids.get('panel-seams').dispatch('change');assert.equal(h.state().canvas.seams,'groove');
  h.ids.get('snap-grid').checked=false;h.ids.get('snap-grid').dispatch('change');assert.equal(h.state().canvas.snapToGrid,false);
  assert.ok(h.ids.get('panel-art').children.length>0);
+});
+
+test('performance workbench previews a macro across targets and saves the rack through handlers',async()=>{
+ const h=harness(true);await ready();assert.equal(h.state().targets.length,2);assert.equal(h.state().routes.length,2);
+ h.ids.get('rack-macros').children[0].querySelector('[role="slider"]').dispatch('keydown',{key:'End'});
+ assert.equal(h.state().macros[0].value,1);assert.equal(h.ids.get('rack-values').children[0].children[1].textContent,'1');assert.equal(h.ids.get('rack-values').children[1].children[1].textContent,'1');
+ h.ids.get('save-rack').click();h.ids.get('add-macro').click();assert.equal(h.state().macros.length,2);h.ids.get('restore-rack').click();assert.equal(h.state().macros.length,1);assert.equal(h.state().macros[0].value,1);
+ assert.equal(h.ids.get('routing-graph').children.length,2);
+});
+
+test('performance route forms apply curves and reject colliding or out-of-range changes transactionally',async()=>{
+ const h=harness(true);await ready();let form=h.ids.get('rack-routes').children[1].children[1];
+ form.children.find(el=>el.textContent==='Curve · 1 is linear').children[0].value='3';form.dispatch('submit');assert.equal(h.state().routes[0].curve,3);
+ form=h.ids.get('rack-routes').children[1].children[1];const grid=form.children.find(el=>el.className==='property-grid'&&el.children[0].textContent==='First output');grid.children[1].children[0].value='2';form.dispatch('submit');assert.equal(h.state().routes[0].outputMax,1);assert.match(h.ids.get('rack-status').textContent,/range/);
+ h.ids.get('add-route').click();assert.equal(h.state().routes.length,2);assert.match(h.ids.get('rack-status').textContent,/All destinations/);
+});
+
+test('checked wrapper controls transfer to the performance rack and synthetic projects cannot transfer',async()=>{
+ const h=harness();await ready();h.ids.get('morph-motion').click();await ready();h.ids.get('send-to-rack').click();
+ assert.equal(h.c.window.location.href,'/apps/studio/performance.html');assert.ok(h.localStorage.getItem('interface-studio.performance.pending'));
+ h.c.window.location.href='';h.ids.get('compressor').click();await ready();h.ids.get('send-to-rack').click();assert.equal(h.c.window.location.href,'');assert.match(h.ids.get('status').textContent,/No checked Live controls/);
+});
+
+test('performance handoff creates a target slot and an editable route without manual JSON assembly',async()=>{
+ const h=harness(true);await ready();h.localStorage.setItem('interface-studio.performance.pending',read('fixtures/morph-motion.project.json'));await h.c.boot();
+ assert.equal(h.state().targets.length,1);assert.deepEqual(h.state().targets[0].parameters.map(p=>p.name),['Motion']);assert.equal(h.state().routes.length,0);
+ h.ids.get('add-route').click();assert.equal(h.state().routes.length,1);assert.equal(h.localStorage.getItem('interface-studio.performance.pending'),null);
+});
+
+test('discrete destinations can be configured in the workbench without editing JSON',async()=>{
+ const h=harness(true);await ready();const rack=h.state();rack.targets[0].parameters[0].quantized=true;rack.routes=[];h.c.change(rack);
+ h.ids.get('add-route').click();assert.equal(h.ids.get('discrete-route').hidden,false);assert.equal(h.state().routes.length,0);
+ h.ids.get('new-route-stops').value='0, 0.25, 1';h.ids.get('discrete-route').dispatch('submit');assert.deepEqual(h.state().routes[0].steps,[0,.25,1]);assert.equal(h.ids.get('discrete-route').hidden,true);
+});
+
+test('performance Generate handler packages routing runtime and reports missing shell failures',async()=>{
+ const h=harness(true);await ready();const patch=exporter.runtimePatch(schema.parseProject(read('fixtures/morph-motion.project.json'))),payload=new TextEncoder().encode(JSON.stringify(patch)+'\0'),shell=new Uint8Array(32+payload.length),view=new DataView(shell.buffer);
+ for(const [offset,tag] of [[0,'ampf'],[8,'aaaa'],[12,'meta'],[24,'ptch']])shell.set(new TextEncoder().encode(tag),offset);
+ for(const [offset,n]of [[4,4],[16,4],[20,1],[28,payload.length]])view.setUint32(offset,n,true);shell.set(payload,32);
+ const original=h.c.fetch,downloads=[];h.c.fetch=async path=>path==='/api/device-template'?{ok:true,arrayBuffer:async()=>shell.buffer}:original(path);h.c.URL={createObjectURL:blob=>{downloads.push(blob);return 'blob:test';},revokeObjectURL(){}};
+ await h.ids.get('generate-rack').onclick();assert.equal(downloads.length,1);const text=new TextDecoder().decode(await downloads[0].arrayBuffer());assert.ok(text.includes('performance-core.js'));assert.ok(text.includes('Strings A'));assert.equal(h.ids.get('generate-rack').disabled,false);
+ h.c.fetch=async path=>path==='/api/device-template'?{ok:false}:original(path);await h.ids.get('generate-rack').onclick();assert.equal(downloads.length,1);assert.match(h.ids.get('rack-status').textContent,/No compatible local device shell/);
 });

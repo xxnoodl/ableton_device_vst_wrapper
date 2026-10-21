@@ -9,7 +9,7 @@ import {resolve,extname,sep} from 'node:path';
 import {stripTypeScriptTypes} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
-const routes=['/apps/studio/','/packages/schema/','/packages/project-store/','/packages/export/','/packages/diagnostics/','/packages/analysis/','/packages/layout-engine/','/packages/presets/','/packages/host-capture/','/packages/inventory/','/packages/plugin-inspection/','/max/runtime/','/fixtures/'];
+const routes=['/apps/studio/','/packages/performance/','/packages/schema/','/packages/project-store/','/packages/export/','/packages/diagnostics/','/packages/analysis/','/packages/layout-engine/','/packages/presets/','/packages/host-capture/','/packages/inventory/','/packages/plugin-inspection/','/max/runtime/','/fixtures/'];
 const mime={'.html':'text/html','.js':'text/javascript','.cjs':'text/javascript','.ts':'text/javascript','.css':'text/css','.json':'application/json'};
 let inventoryPromise=null;let inventoryTime=0;
 let inspectionBusy=false;

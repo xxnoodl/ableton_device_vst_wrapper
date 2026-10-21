@@ -79,6 +79,11 @@
       "name": "Installed-plugin choice and automatic control layout",
       "status": "partially verified",
       "evidence": "Real HTTP native discovery and simulated DOM choose/search/check flows; measured Morph/Motion mappings enable generation; unverified mappings block generation"
+    },
+    {
+      "name": "Cross-plugin performance macros",
+      "status": "experimental; host verification pending",
+      "evidence": "apps/studio/performance.*; max/runtime/performance-controller.js; tests/performance.test.mjs; docs/performance-routing.md"
     }
   ]
 }

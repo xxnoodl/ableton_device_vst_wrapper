@@ -1,5 +1,7 @@
 # Current risks and boundaries
 
+- Performance racks have a separate experimental Max controller. Multi-instance routing, first-tick automation takeover, mixed-state interruption and packaging pass simulated host tests, not actual Live tests. Slots require explicit rebinding after reopen. Host writes across plugins are sequential, not atomic; a native failure mid-tick can leave partial changes. Macro automation lanes, undo grouping, large-layout usability and sustained timing are unfinished or unmeasured. The regular wrapper's previous host evidence does not cover this controller.
+
 - VST3 discovery is not Live exposure. Unknown native mappings are visibly preview-only and block generation. Only the measured Morph/Motion adapter enables generation from inspection today. Automatic Configure or universal SDK-to-Live mapping has not been implemented.
 - The C++ child has job memory/CPU/process limits and supervised time/output bounds, but not a restricted-token filesystem/network sandbox. Plugin constructors may manage licensing UI or settings. No plugin code loads in the server and no DSP or editor is requested.
 - Invalid native metadata is preserved diagnostically; defaults are not silently clamped. Factory metadata can vary by plugin version/state; the measured adapter requires the exact binary SHA-256, component ID and parameter signature.

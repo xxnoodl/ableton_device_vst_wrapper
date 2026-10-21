@@ -9,6 +9,7 @@ import {deviceFiles,exportFiles,zipFiles,runtimeFiles} from '/packages/export/in
 import {createKnob,createDial,designs} from '/apps/studio/knob.js';
 import {parseProject,serializeProject,validateProject} from '/packages/schema/index.ts';
 import {saveProject,loadProject} from '/packages/project-store/index.ts';
+import {targetFromProject} from '/packages/performance/index.ts';
 const $=id=>document.getElementById(id);
 let graphViews=[],graphFrame=null;
 let selectedIds=new Set(),zoom=1;
@@ -16,6 +17,7 @@ let project,selected=null,values=Object.create(null),past=[],future=[];
 let activeInspection=null;
 const status=message=>{$('status').textContent=message;};
 const run=fn=>{try{fn();}catch(error){status(error.message);}};
+$('send-to-rack').onclick=()=>run(()=>{targetFromProject(project,'check');localStorage.setItem('interface-studio.performance.pending',serializeProject(project));window.location.href='/apps/studio/performance.html';});
 function change(next){next=assertLayoutChange(project,validateProject(next));if(serializeProject(next)===serializeProject(project))return;past.push(serializeProject(project));if(past.length>100)past.shift();future=[];project=next;render();}
 function activate(next){project=validateProject(next);activeInspection=null;selected=null;selectedIds.clear();values=Object.create(null);past=[];future=[];render();}
 function render(){

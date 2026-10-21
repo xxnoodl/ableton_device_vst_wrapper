@@ -1,0 +1,13 @@
+{
+  "rackVersion": 1,
+  "name": "Strings movement",
+  "targets": [
+    {"id":"strings-a","label":"Strings A","pluginName":"Augmented Strings","parameters":[{"id":"morph","name":"Morph","min":0,"max":1,"quantized":false}]},
+    {"id":"strings-b","label":"Strings B","pluginName":"Augmented Strings","parameters":[{"id":"motion","name":"Motion","min":0,"max":1,"quantized":false}]}
+  ],
+  "macros": [{"id":"energy","label":"Energy","value":0.5}],
+  "routes": [
+    {"id":"open-a","macroId":"energy","targetId":"strings-a","parameterId":"morph","inputMin":0,"inputMax":1,"outputMin":0,"outputMax":1,"curve":1,"steps":[],"smoothingMs":66,"enabled":true},
+    {"id":"move-b","macroId":"energy","targetId":"strings-b","parameterId":"motion","inputMin":0.4,"inputMax":1,"outputMin":0,"outputMax":1,"curve":2,"steps":[],"smoothingMs":99,"enabled":true}
+  ]
+}

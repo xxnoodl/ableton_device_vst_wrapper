@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 performance macro prototype
+
+- Implemented a separate versioned rack contract and shared ES5 curve engine, browser performance workbench and multi-target Max controller. Energy controls Morph on one Strings instance and stages Motion on a second. These are exposed-parameter routes, not SDK ID guesses.
+- Routes support independent host ranges, inversion, clamped input intervals, exponent curves, explicit detents, enable switches and nominal 33 ms coalescing/smoothing. Competing or aliased destinations are refused. Binding performs no initial writes and stores no persistent host IDs. Distinct slots cannot bind the same instance.
+- Added checked-control handoff from the normal builder, eligible project import, response previews, local save/backup, rack import/export and an eight-file experimental device bundle. Generated binaries stay ignored. XY/scenes and functional canvas cables remain unimplemented.
+- All 111 tests pass, including mocked multi-plugin control, target lifecycle, no initial writes, automation takeover timing, mixed-state ramp interruption and browser workflow/packaging handlers. Actual Live behavior, browser visuals, clean-machine dependencies and sustained performance remain unverified for this separate runtime.
+
 ## 2026-10-21 canvas and performance direction
 
 - Added absolute grid snapping, nearby alignment guides and collision-aware placement, resizing and duplication. Direct geometry edits and layout preset application reject new overlap unless explicitly enabled. Older projects remain readable.
