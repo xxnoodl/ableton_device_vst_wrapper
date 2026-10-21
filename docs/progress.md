@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-21 hosted automation gesture bridge fix
+
+- User reports automation works but custom knobs do not in the first automation build. Inspection of the actual Max-saved device confirms all four named parameters are registered and the abstraction output is wired to the controller. Recording/playback/override details are not inferred from the brief report.
+- Changed gesture delivery from messages sent to the abstraction box to direct float messages on its named native live.dial objects. Feedback uses direct silent set on those same objects. The initial simulation assumed abstraction messages reached its inlet; it now models no such forwarding and tests actual native-dial dispatch.
+- Preserved the user-Max-saved four-parameter shell unchanged at ignored max/templates/hosting-pro-c3-automation.amxd. Builder now prefers it, so artifacts/pro-c3-internal-host-automation-fix requires no additional native Save As. Verified shell/source/ZIP parity; existing loaded artifacts preserved.
+- All 149 tests pass with no skips, including a new direct-gesture regression. Actual restored knob operation alongside automation remains pending user confirmation.
+
 ## 2026-10-21 hosted automation parameters implemented
 
 - User correctly noted custom JSUI knobs are absent from the automation chooser. Added a static four-parameter abstraction with fixed Threshold, Ratio, Attack and Release names, Float 0-1 ranges, Automated and Stored visibility, stable scripting IDs and no forced initial values. Parameter names/types are not changed in a running Live device.

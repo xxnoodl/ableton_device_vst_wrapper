@@ -9,15 +9,16 @@ function probe({names=['Bypass','Ratio','Attack','Threshold','Release'],availabl
  const events=[],messages=[],objects=[],links=[],tasks=[];let c;
  const defaults={1:[0,'Off'],2:[.3,'4:1'],3:[.2,'20 ms'],4:[.4,'-18 dB'],5:[.6,'300 ms']},values={...defaults,...restoredValues};
  function node(maxclass,varname=''){
-  const o={maxclass,varname,currentplug:restoredPlugin,subpatcher:()=>maxclass==='hosting-automation'?{}:null,getattr:key=>key==='currentplug'?o.currentplug:undefined,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
+  const o={maxclass,varname,currentplug:restoredPlugin,subpatcher:()=>maxclass==='hosting-automation'?bank:null,getattr:key=>key==='currentplug'?o.currentplug:undefined,message(...args){messages.push([o.varname||o.maxclass,...args]);if(maxclass==='vst~'){
    if(args[0]==='plug'){o.currentplug=args[1];Object.assign(values,defaults);}
    if(args[0]==='get'&&args[1]===-4)c.hostvalue(-4,available?names.length:0);
    if(args[0]==='params'&&stream)for(const name of names)c.hostname(name);
    if(args[0]==='get'&&args[1]===-10)c.hostvalue(-10,128);
    if(args[0]==='get'&&args[1]>0)c.hostvalue(args[1],...values[args[1]]);
    if(args[0]==='list')values[args[1]]=[args[2],values[args[1]][1]];
-  }if(maxclass==='hosting-automation'&&args[0]==='gesture')c.automationvalue(args[1],args[2]);}};if(objects.length)objects.at(-1).nextobject=o;objects.push(o);return o;
+  }}};if(objects.length)objects.at(-1).nextobject=o;objects.push(o);return o;
  }
+ const bankDials=hostingControls.map((name,slot)=>({maxclass:'live.dial',varname:'studio_'+name.toLowerCase(),message(...args){messages.push([this.varname,...args]);if(args[0]==='float')c.automationvalue(slot,args[1]);}})),bank={getnamed:name=>bankDials.find(d=>d.varname===name)};
  const input=node('plugin~'),output=node('plugout~'),box=node('js'),ready=node('live.thisdevice');
  links.push([input,0,output,0],[input,1,output,1]);
  const patcher={firstobject:input,newdefault(x,y,type,...args){if(type===createFailure)throw Error('Fixture create failure');const o=node(type);o.args=args;return o;},connect(a,out,b,i){links.push([a,out,b,i]);},disconnect(a,out,b,i){for(let n=links.length-1;n>=0;n--)if(links[n][0]===a&&links[n][1]===out&&links[n][2]===b&&links[n][3]===i)links.splice(n,1);}};
@@ -67,8 +68,11 @@ test('four static named automation parameters use silent sync and stored gesture
 });
 test('automation playback writes the internal host without echoing parameter edits; restored defaults are ignored until ready',()=>{
  const s=probe({restoredPlugin:'Pro-C 3',restoredValues:{4:[.2,'-30 dB']}});s.load();s.c.automationvalue(0,0);s.runAll();assert.equal(s.c.controls[0].value,.2);assert.equal(s.messages.filter(m=>m[1]==='list').length,0);
- const syncs=s.messages.filter(m=>m[1]==='sync').length;s.c.automationvalue(0,.75);s.runAll();assert.equal(s.c.controls[0].value,.75);assert.deepEqual(s.messages.filter(m=>m[1]==='list').map(m=>m.slice(1)),[['list',4,.75]]);assert.equal(s.messages.filter(m=>m[1]==='sync').length,syncs);assert.equal(s.messages.filter(m=>m[1]==='gesture').length,0);
- s.c.hostvalue(4,.35,'-22 dB');assert.deepEqual(s.messages.at(-1),['studio_probe_automation','sync',0,.35]);s.runAll();assert.equal(s.messages.filter(m=>m[1]==='list').length,1);
+ const syncs=s.messages.filter(m=>m[1]==='set').length;s.c.automationvalue(0,.75);s.runAll();assert.equal(s.c.controls[0].value,.75);assert.deepEqual(s.messages.filter(m=>m[1]==='list').map(m=>m.slice(1)),[['list',4,.75]]);assert.equal(s.messages.filter(m=>m[1]==='set').length,syncs);assert.equal(s.messages.filter(m=>m[1]==='float').length,0);
+ s.c.hostvalue(4,.35,'-22 dB');assert.deepEqual(s.messages.at(-1),['studio_threshold','set',.35]);s.runAll();assert.equal(s.messages.filter(m=>m[1]==='list').length,1);
+});
+test('Studio gestures address actual native dials rather than dispatching messages to the abstraction box',()=>{
+ const s=probe();s.load();s.runAll();s.c.setcontrol(1,.65);s.runAll();assert.ok(s.messages.some(m=>m[0]==='studio_ratio'&&m[1]==='float'&&m[2]===.65));assert.ok(s.messages.some(m=>m[0]==='studio_probe_host'&&m[1]==='list'&&m[2]===2&&m[3]===.65));assert.ok(!s.messages.some(m=>m[0]==='studio_probe_automation'&&['gesture','sync'].includes(m[1])));
 });
 test('ambiguous or incomplete metadata refuses controls and keeps stereo dry; absent plugins time out without writes',()=>{
  for(const options of [{names:['Threshold','Ratio','Attack','Release','Ratio']},{stream:false},{available:false}]){
