@@ -1,5 +1,7 @@
 # Current risks and boundaries
 
+- Internal Pro-C 3 hosting: user reports choppy/glitchy playback when its native editor is open. Automation recording/playback passed, but editor-open audio performance is a failed gate. A bounded-UI-work candidate is prepared; actual audio improvement and remaining native-GUI/snapshot/undo/scheduling causes are unverified.
+
 - The read-only session bridge passed user checks for real two-plugin discovery, refresh and generating a two-way Color wrapper. Nested racks, broader plugin coverage, sustained scan load and Color automation remain unverified; captured-registry Color reopen/reconnection passed. It cannot expose native parameters absent from Live Configure. Catalogs include session labels and parameter values, stay in server memory and use a per-server loopback capability; multiple Live processes/bridge arbitration are not implemented. The bridge does not repair or reopen the older crashing Node capture writer.
 
 - Performance racks have a separate experimental Max controller. Multi-instance routing, first-tick automation takeover, mixed-state interruption and packaging pass simulated host tests, not actual Live tests. Slots require explicit rebinding after reopen. Host writes across plugins are sequential, not atomic; a native failure mid-tick can leave partial changes. Macro automation lanes, undo grouping, large-layout usability and sustained timing are unfinished or unmeasured. The regular wrapper's previous host evidence does not cover this controller.

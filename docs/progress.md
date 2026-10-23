@@ -1,5 +1,12 @@
 # Progress
 
+## 2026-10-23 automation recording passed; editor-open playback glitches
+
+- User confirmed recording Studio Threshold gestures and replaying them in both Studio and FabFilter works. Also reported choppy/glitchy playback when opening the internal FabFilter window. Treat editor-open audio performance as a failed host gate; no measured cause established.
+- Found avoidable display overhead: every feedback snapshot called presentation sizing, size and live.thisdevice setwidth. Renderer now sizes once per script initialization. Controller coalesces display publication at 33 ms, skips unchanged feedback/JSON and avoids redundant host writes/queries for unchanged automation. Returning to the current value cancels an older queued write.
+- All 151 tests pass with no skips. New burst regression coalesces 1000 changing feedback events into one latest frame and schedules no work for 1000 unchanged events. Renderer regression proves repeated feedback does not resize the device. These are bounded-work assertions, not audio/GPU benchmarks.
+- Built and verified artifacts/pro-c3-internal-host-performance using the already Max-authored automation shell; no native editing required. Real editor-open audio comparison is pending. Native GUI/graphics, snapshot/undo overhead and audio scheduling remain possible contributors; this change is not evidence that the glitch is fixed.
+
 ## 2026-10-23 hosted knobs work after Set restart
 
 - User reports the Studio knobs work after restarting the Set following the automation bridge fix. This confirms post-reopen manual knob operation on the tested hosting build. Immediate operation on fresh insertion is not established by this report.

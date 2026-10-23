@@ -5,9 +5,10 @@ var work=null,generation=0,writeTask=null,pending={},polls=0,scanPolls=0;
 var audioInput=null,audioOutput=null,audioReady=false;
 var wanted=['Threshold','Ratio','Attack','Release'];
 var automation=null,bankValues=[],bankDials=[];
+var viewTask=null,lastView='';
 function report(text){outlet(0,'status',String(text));outlet(1,String(text));}
-function view(){outlet(0,'hosting',JSON.stringify({phase:phase,controls:controls,latency:latency}));}
-function stopWork(){generation++;if(work){work.cancel();work=null;}if(writeTask){writeTask.cancel();writeTask=null;}pending={};}
+function view(){if(viewTask)return;var token=generation;viewTask=new Task(function(){viewTask=null;if(token!==generation)return;var source=JSON.stringify({phase:phase,controls:controls,latency:latency});if(source!==lastView){lastView=source;outlet(0,'hosting',source);}},this);viewTask.schedule(33);}
+function stopWork(){generation++;if(work){work.cancel();work=null;}if(writeTask){writeTask.cancel();writeTask=null;}if(viewTask){viewTask.cancel();viewTask=null;}pending={};}
 function later(fn,ms){var token=generation;work=new Task(function(){work=null;if(token===generation)fn();},this);work.schedule(ms);}
 function find(name){for(var o=this.patcher.firstobject,n=0;o&&n<1024;o=o.nextobject,n++)if(o.varname===name)return o;return null;}
 function typed(name){var found=null;for(var o=this.patcher.firstobject,n=0;o&&n<1024;o=o.nextobject,n++)if(o.maxclass===name){if(found)throw new Error('Expected one '+name);found=o;}if(!found)throw new Error('Missing '+name);return found;}
@@ -83,7 +84,7 @@ function hostvalue(){
  if(phase!=='ready')return;
  if(index===-10){var samples=Number(a[1]);if(isFinite(samples)&&samples>=0&&Math.floor(samples)===samples){latency=samples;view();report('Hosted plugin reports '+samples+' latency samples. This probe does not forward compensation.');}return;}
  var value=Number(a[1]);if(!isFinite(value)||value<0||value>1)return;
- for(var i=0;i<controls.length;i++)if(controls[i].index===index){controls[i].value=value;controls[i].text=a.length>2?a.slice(2).join(' ').substring(0,256):'Unformatted '+value.toFixed(3);if(bankDials[i]&&(typeof bankValues[i]!=='number'||Math.abs(bankValues[i]-value)>1e-6)){bankValues[i]=value;bankDials[i].message('set',value);}view();return;}
+ for(var i=0;i<controls.length;i++)if(controls[i].index===index){var text=a.length>2?a.slice(2).join(' ').substring(0,256):'Unformatted '+value.toFixed(3),changed=controls[i].value!==value||controls[i].text!==text;controls[i].value=value;controls[i].text=text;if(bankDials[i]&&(typeof bankValues[i]!=='number'||Math.abs(bankValues[i]-value)>1e-6)){bankValues[i]=value;bankDials[i].message('set',value);}if(changed)view();return;}
 }
 function readvalues(){if(phase!=='ready')return;try{for(var i=0;i<controls.length;i++)host.message('get',controls[i].index);host.message('get',-10);}catch(e){fail(e.message);}}
 function openplugin(){if(phase!=='ready'){report('Wait for the internal plugin to load.');return;}try{host.message('floateditorwindow',1);host.message('open');}catch(e){fail(e.message);}}
@@ -94,6 +95,7 @@ function setcontrol(slot,value){
 function automationvalue(slot,value){
  if(phase!=='ready'||typeof slot!=='number'||slot<0||slot>=controls.length||Math.floor(slot)!==slot||typeof value!=='number'||!isFinite(value))return;
  value=Math.max(0,Math.min(1,value));bankValues[slot]=value;
+ if(controls[slot].value!==null&&Math.abs(controls[slot].value-value)<=1e-6){delete pending['$'+slot];return;}
  pending['$'+slot]={index:controls[slot].index,value:Math.max(0,Math.min(1,value))};
  if(!writeTask){var token=generation;writeTask=new Task(function(){writeTask=null;if(token!==generation||phase!=='ready')return;var batch=pending;pending={};try{for(var key in batch)if(Object.prototype.hasOwnProperty.call(batch,key)){host.message('list',batch[key].index,batch[key].value);host.message('get',batch[key].index);}}catch(e){fail(e.message);}},this);writeTask.schedule(33);}
 }

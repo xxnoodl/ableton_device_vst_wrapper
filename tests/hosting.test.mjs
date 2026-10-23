@@ -23,7 +23,7 @@ function probe({names=['Bypass','Ratio','Attack','Threshold','Release'],availabl
  links.push([input,0,output,0],[input,1,output,1]);
  const patcher={firstobject:input,newdefault(x,y,type,...args){if(type===createFailure)throw Error('Fixture create failure');const o=node(type);o.args=args;return o;},connect(a,out,b,i){links.push([a,out,b,i]);},disconnect(a,out,b,i){for(let n=links.length-1;n>=0;n--)if(links[n][0]===a&&links[n][1]===out&&links[n][2]===b&&links[n][3]===i)links.splice(n,1);}};
  function File(){this.isopen=true;this.eof=1;this.position=0;this.readline=()=>{this.position=1;return JSON.stringify(config);};this.close=()=>{};}
- function Task(fn){this.cancelled=false;this.schedule=ms=>{this.delay=ms;tasks.push(this);};this.cancel=()=>{this.cancelled=true;};this.run=()=>{if(!this.cancelled)fn();};}
+ function Task(fn){this.cancelled=false;this.ran=false;this.schedule=ms=>{this.delay=ms;tasks.push(this);};this.cancel=()=>{this.cancelled=true;};this.run=()=>{if(!this.cancelled&&!this.ran){this.ran=true;fn();}};}
  c=vm.createContext({patcher,box,File,Task,arrayfromargs:a=>Array.from(a),outlet:(...a)=>events.push(a)});vm.runInContext(read('controller.js'),c);
  const runAll=()=>{for(let i=0;i<tasks.length;i++){assert.ok(i<100,'bounded tasks');tasks[i].run();}};
  return {c,events,messages,objects,links,tasks,input,output,box,ready,values,runAll,load:()=>c.read('project.runtime.json')};
@@ -74,6 +74,17 @@ test('automation playback writes the internal host without echoing parameter edi
 test('Studio gestures address actual native dials rather than dispatching messages to the abstraction box',()=>{
  const s=probe();s.load();s.runAll();s.c.setcontrol(1,.65);s.runAll();assert.ok(s.messages.some(m=>m[0]==='studio_ratio'&&m[1]==='float'&&m[2]===.65));assert.ok(s.messages.some(m=>m[0]==='studio_probe_host'&&m[1]==='list'&&m[2]===2&&m[3]===.65));assert.ok(!s.messages.some(m=>m[0]==='studio_probe_automation'&&['gesture','sync'].includes(m[1])));
 });
+test('plugin feedback bursts publish only the latest display once per scheduled frame and unchanged values stay idle',()=>{
+ const s=probe();s.load();s.runAll();const before=s.events.filter(e=>e[0]===0&&e[1]==='hosting').length,tasks=s.tasks.length;
+ for(let i=0;i<1000;i++)s.c.hostvalue(4,i/1000,'Threshold '+i);assert.equal(s.tasks.length,tasks+1);assert.equal(s.tasks.at(-1).delay,33);s.runAll();
+ const frames=s.events.filter(e=>e[0]===0&&e[1]==='hosting');assert.equal(frames.length,before+1);assert.equal(JSON.parse(frames.at(-1)[2]).controls[0].text,'Threshold 999');
+ const settled=s.tasks.length;for(let i=0;i<1000;i++)s.c.hostvalue(4,.999,'Threshold 999');assert.equal(s.tasks.length,settled);assert.equal(s.messages.filter(m=>m[1]==='list').length,0);
+ s.c.hostvalue(4,.2,'Changed');s.c.disconnect();s.runAll();assert.equal(JSON.parse(s.events.filter(e=>e[0]===0&&e[1]==='hosting').at(-1)[2]).phase,'idle');
+});
+test('unchanged automation avoids redundant plugin queries and cancels an older pending change',()=>{
+ const s=probe();s.load();s.runAll();const before=s.messages.filter(m=>m[0]==='studio_probe_host').length;s.c.automationvalue(0,.4);s.runAll();assert.equal(s.messages.filter(m=>m[0]==='studio_probe_host').length,before);
+ s.c.automationvalue(0,.8);s.c.automationvalue(0,.4);s.runAll();assert.equal(s.messages.filter(m=>m[1]==='list').length,0);assert.equal(s.c.controls[0].value,.4);
+});
 test('ambiguous or incomplete metadata refuses controls and keeps stereo dry; absent plugins time out without writes',()=>{
  for(const options of [{names:['Threshold','Ratio','Attack','Release','Ratio']},{stream:false},{available:false}]){
   const s=probe(options);s.load();s.runAll();assert.equal(s.c.phase,'error');assert.equal(s.c.controls.length,0);assert.ok(!s.messages.some(m=>m[1]==='list'));for(const name of ['studio_probe_left','studio_probe_right'])assert.equal(s.messages.filter(m=>m[0]===name).at(-1)[1],1);
@@ -94,4 +105,5 @@ test('hosting UI opens the internal editor, reads units verbatim and emits gestu
  c.hosting(JSON.stringify({phase:'ready',controls:['Threshold','Ratio','Attack','Release'].map((name,i)=>({name,index:i+1,value:.5,text:['-18 dB','4:1','20 ms','Auto'][i]})),latency:128}));c.paint();for(const t of ['-18 dB','4:1','20 ms','Auto'])assert.ok(texts.includes(t));assert.ok(widths.some(a=>a[0]==='setwidth'&&a[1]===580));assert.ok(widths.some(a=>a[0]==='presentation'&&a[1]===0));
  c.onclick(355,15);assert.deepEqual(events.at(-1),[0,'openplugin']);c.onclick(76,80);c.ondrag(76,56,1,0,0);assert.deepEqual(events.at(-1),[0,'setcontrol',0,.6]);
  c.hosting(JSON.stringify({phase:'error',controls:[],latency:null}));const n=events.length;c.ondrag(76,50,1,0,0);assert.equal(events.length,n);
+ for(let i=0;i<100;i++)c.hosting(JSON.stringify({phase:'ready',controls:[],latency:i}));assert.equal(widths.filter(a=>a[0]==='setwidth').length,1);assert.equal(widths.filter(a=>a[0]==='size').length,1,'feedback must not resize the device');
 });

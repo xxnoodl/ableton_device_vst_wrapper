@@ -2,14 +2,15 @@
 autowatch=1;inlets=1;outlets=1;
 mgraphics.init();mgraphics.relative_coords=0;mgraphics.autofill=0;
 var state={phase:'idle',controls:[],latency:null},message='Starting internal plugin...',drag=null;
-function status(text){message=String(text);mgraphics.redraw();}
+var panelSized=false;
+function status(text){text=String(text);if(text===message)return;message=text;mgraphics.redraw();}
 function manifest(){}
 function hosting(source){try{state=JSON.parse(source);if(state.phase!=='ready')drag=null;sizePanel();mgraphics.redraw();}catch(e){status('Display error: '+e.message);}}
-function sizePanel(){if(!this.box||!this.patcher)return;this.box.message('presentation_rect',0,0,580,169);this.box.message('size',580,169);for(var o=this.patcher.firstobject,n=0;o&&n<1024;o=o.nextobject,n++){
+function sizePanel(){if(panelSized||!this.box||!this.patcher)return;this.box.message('presentation_rect',0,0,580,169);this.box.message('size',580,169);for(var o=this.patcher.firstobject,n=0;o&&n<1024;o=o.nextobject,n++){
  if(o.maxclass==='live.thisdevice')o.message('setwidth',580);
  // The unchanged development shell carries two legacy message buttons.
  if(o.maxclass==='message')o.message('presentation',0);
-}}
+}panelSized=true;}
 function color(r,g,b){mgraphics.set_source_rgba(r,g,b,1);}
 function label(text,x,y,width){var t=String(text);while(t.length>1&&mgraphics.text_measure(t)[0]>width)t=t.substring(0,t.length-2);mgraphics.move_to(x,y);mgraphics.show_text(t);}
 function center(text,x,y,width){var t=String(text);while(t.length>1&&mgraphics.text_measure(t)[0]>width)t=t.substring(0,t.length-2);mgraphics.move_to(x-mgraphics.text_measure(t)[0]/2,y);mgraphics.show_text(t);}
