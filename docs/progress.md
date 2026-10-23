@@ -1,5 +1,10 @@
 # Progress
 
+## 2026-10-23 hosted knobs work after Set restart
+
+- User reports the Studio knobs work after restarting the Set following the automation bridge fix. This confirms post-reopen manual knob operation on the tested hosting build. Immediate operation on fresh insertion is not established by this report.
+- Earlier user feedback says automation works; recording a gesture from the custom panel, playback/override behavior and independent instance recall on this automation build remain separate checks. No code changed for this result.
+
 ## 2026-10-21 hosted automation gesture bridge fix
 
 - User reports automation works but custom knobs do not in the first automation build. Inspection of the actual Max-saved device confirms all four named parameters are registered and the abstraction output is wired to the controller. Recording/playback/override details are not inferred from the brief report.
